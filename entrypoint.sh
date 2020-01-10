@@ -1,4 +1,6 @@
-#!/bin/bash -l
+#!/usr/bin/env bash
+set -e
+set -l
 
 echo "Starting function deployment process"
 
