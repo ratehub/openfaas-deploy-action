@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-set -el
+#!/bin/bash -l
+set -eux
 
 echo "Starting function deployment process"
 
