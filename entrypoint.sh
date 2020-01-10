@@ -23,7 +23,7 @@ docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_
 
 faas-cli template pull
 
-faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
+faas-cli template pull "https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/${CUSTOM_TEMPLATE_URL}"
 
 faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
 
