@@ -44,7 +44,7 @@ else
 
     echo "$LAST_PUSH_HASH"
 
-    cat differnces.txt
+    cat differences.txt
 
     while IFS= read -r line; do
         #If changes are in root, we can ignore them
