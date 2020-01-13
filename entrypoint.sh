@@ -38,7 +38,9 @@ else
     GROUP_PATH2=""
     FUNCTION_PATH2=""
 
-    git diff @{1}.. --name-only > differences.txt
+    LAST_PUSH_HASH=`git rev-parse origin/master`
+
+    git diff "$LAST_PUSH_HASH" --name-only > differences.txt
 
     while IFS= read -r line; do
         #If changes are in root, we can ignore them
