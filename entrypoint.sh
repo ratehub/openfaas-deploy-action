@@ -38,7 +38,7 @@ else
     GROUP_PATH2=""
     FUNCTION_PATH2=""
 
-    git log origin/master.. --stat --name-only --format="" > differences.txt
+    git diff @{1}.. --name-only > differences.txt
 
     while IFS= read -r line; do
         #If changes are in root, we can ignore them
