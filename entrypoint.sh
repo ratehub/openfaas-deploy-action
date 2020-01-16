@@ -2,9 +2,10 @@
 
 echo "Starting function deployment process"
 
-FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
-FAAS_USER="${GATEWAY_USERNAME_STAGING}"
-FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
+FAAS_GATEWAY="${GATEWAY_URL_DEV}"
+FAAS_USER="${GATEWAY_USERNAME_DEV}"
+FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
+ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
@@ -14,15 +15,22 @@ then
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
-else
+elif [ "$BRANCH_NAME" == "staging" ];
+then
     ENV_FILE="env-staging.yml"
+    FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
+    FAAS_USER="${GATEWAY_USERNAME_STAGING}"
+    FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 fi
 
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"
 
 faas-cli template pull
 
-faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
+#If a custom template registry is specified, pull from it
+if [ -z "$CUSTOM_TEMPLATE_URL" ];
+    faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
+fi
 
 faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
 
@@ -45,8 +53,8 @@ else
         if [[ "$line" =~ "/" ]];
         then
             GROUP_PATH="`echo \"$line\" | cut -d \"/\" -f1`"
-            #Ignore changes in these paths
-            if [ "$GROUP_PATH" != ".github" ] && [ "$GROUP_PATH" != "__mocks__" ];
+            #Ignore changes if the folder is prefixed with a "." or "_"
+            if [[ ! "$GROUP_PATH" ~= "^[\._]" ]];
             then
                 if [ "$GROUP_PATH" != "$GROUP_PATH2" ];
                 then
@@ -68,7 +76,8 @@ else
                         faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
                         FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
-                elif [ "$FUNCTION_PATH" == "stack.yml" ];
+                #If the stack.yml file has changed or any of the environment files have changed, redeploy all functions in the group
+                elif [ "$FUNCTION_PATH" == "stack.yml" ] || [ "$FUNCTION_PATH" == "env-dev.yml" ] || [ "$FUNCTION_PATH" == "env-staging.yml" ] || [ "$FUNCTION_PATH" == "env-prod.yml" ];
                 then
                     faas-cli deploy --gateway="$FAAS_GATEWAY"
                 fi
