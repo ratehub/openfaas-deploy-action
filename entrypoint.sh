@@ -55,7 +55,7 @@ else
         then
             GROUP_PATH="`echo \"$line\" | cut -d \"/\" -f1`"
             #Ignore changes if the folder is prefixed with a "." or "_"
-            if [[ ! "$GROUP_PATH" ~= "^[\._]" ]];
+            if [[ ! "$GROUP_PATH" =~ "^[\._]" ]];
             then
                 if [ "$GROUP_PATH" != "$GROUP_PATH2" ];
                 then
