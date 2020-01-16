@@ -29,6 +29,7 @@ faas-cli template pull
 
 #If a custom template registry is specified, pull from it
 if [ -z "$CUSTOM_TEMPLATE_URL" ];
+then
     faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
 fi
 
