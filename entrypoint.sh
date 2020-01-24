@@ -15,7 +15,7 @@ then
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
-elif [ "$BRANCH_NAME" == "staging" ];
+elif [ "$BRANCH_NAME" == "staging-deploy" ];
 then
     ENV_FILE="env-staging.yml"
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
