@@ -1,4 +1,5 @@
 #!/bin/bash -l
+set -eux
 
 echo "Starting function deployment process"
 
