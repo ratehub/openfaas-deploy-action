@@ -5,20 +5,21 @@ This action is designed to deploy functions or microservices developed with [Ope
 
 ## Requirements
 1. Your repository must be organized in one of the following ways: 
-   1. A single stack.yml file in the root (For a single microservice or a small number of functions)  
+   1. A single stack.yml file and env-dev/prod/staging.yml file in the root (For a single microservice or a small number of functions)  
    ```
       your-repo/
         ├── function 1/
         │   └── handler.js
         ├── function-2/
         │   └── handler.js
+        ├── env-dev.yml
         ├── env-prod.yml
         ├── env-staging.yml
         └── stack.yml
    ```
-      This method will result in every function being rebuilt, pushed, and deployed every time something changes in the repository. The names of the function folders don't matter as long as the handler paths are properly configured in stack.yml.
+      This method will result in every function being built, pushed, and deployed every time something changes in the repository. The names of the function folders don't matter as long as the handler paths are properly configured in stack.yml.
       
-   2. Functions grouped into related folders, each with their own stack.yml file (For repos with a large number of functions)  
+   2. Functions grouped into related folders, each with their own stack.yml file and env-dev/prod/staging.yml files (For repos with a large number of functions)  
    ```
       your-repo/
         ├── group-1/
@@ -26,17 +27,20 @@ This action is designed to deploy functions or microservices developed with [Ope
         │   │   └── handler.js
         │   ├── function-2/
         │   │   └── handler.js
+        │   ├── env-dev.yml
         │   ├── env-prod.yml
         │   ├── env-staging.yml
         │   └── stack.yml
         └── group-2/
             ├── function-1/
             │   └── handler.js
+            ├── env-dev.yml
             ├── env-prod.yml
             ├── env-staging.yml
             └── stack.yml
    ```
       Group and function folders can be named whatever you like, but function folder names must correspond exactly to the name of a function in the stack.yml in its group folder.
+      In addition, this method will only build, push, and deploy based on which files changed in the last commit. So if any files changed in a given function's folder, that function will be deployed. If the stack.yml file, or any of the env.yml files change, all functions will be re-deployed (but won't be rebuilt, and will instead use the existing docker images in your registry).
       
 2. Your GitHub repo must have access to the required secrets specified in the "Secrets" section below
 
@@ -78,10 +82,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v1 # This is a dependency of the action
     - name: Build, push, and deploy functions to OpenFaaS
       uses: ratehub/openfaas-deploy-action@master
-      env: # Or as an environment variable
+      env:
         GATEWAY_URL_DEV: ${{ secrets.GatewayURLDev }}
         GATEWAY_URL_STAGING: ${{ secrets.GatewayURLStaging }}
         GATEWAY_URL_PROD: ${{ secrets.GatewayURLProd }}
@@ -99,6 +103,9 @@ jobs:
         DOCKER_REGISTRY_URL_2: ${{ secrets.DockerRegistryURL2 }}
         CUSTOM_TEMPLATE_URL: ${{ secrets.CustomTemplateURL }}
 ```
-
+- This file will need to be in every branch you want to run the action on.
+- You can add additional branches if you so desire, but keep in mind that branches named anything other than master or staging-deploy will use the OpenFaaS deployment specified in the secrets marked as DEV.
 
 ## Usage
+- To trigger the action, simply push to one of the branches listed in the workflow file.
+- If you used folder structure #2, as described in the "Requirements" section above, the action will only look at the changes since the last commit to decide what files have changed and need re-deploying. So if you push multiple commits at once, the action will ignore all but the last commit. For this reason, squashing commits is recommended.
