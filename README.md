@@ -40,7 +40,7 @@ This action is designed to deploy functions or microservices developed with [Ope
             └── stack.yml
    ```
       Group and function folders can be named whatever you like, but function folder names must correspond exactly to the name of a function in the stack.yml in its group folder.
-      In addition, this method will only build, push, and deploy based on which files changed in the last commit. So if any files changed in a given function's folder, that function will be deployed. If the stack.yml file, or any of the env.yml files change, all functions will be re-deployed (but won't be rebuilt, and will instead use the existing docker images in your registry).
+      In addition, this method will only build, push, and deploy based on which files changed in the last commit. So if any files changed in a given function's folder, that function will be deployed. If the stack.yml file, or any of the env.yml files change, all functions in that group will be re-deployed (but won't be rebuilt, and will instead use the existing docker images in your registry).
       
 2. Your GitHub repo must have access to the required secrets specified in the "Secrets" section below
 
@@ -104,8 +104,9 @@ jobs:
         CUSTOM_TEMPLATE_URL: ${{ secrets.CustomTemplateURL }}
 ```
 - This file will need to be in every branch you want to run the action on.
-- You can add additional branches if you so desire, but keep in mind that branches named anything other than master or staging-deploy will use the OpenFaaS deployment specified in the secrets marked as DEV.
+- You can add additional branches if you so desire, but keep in mind that branches named anything other than `master` or `staging-deploy` will use the OpenFaaS deployment specified in the secrets marked as DEV.
 
 ## Usage
 - To trigger the action, simply push to one of the branches listed in the workflow file.
 - If you used folder structure #2, as described in the "Requirements" section above, the action will only look at the changes since the last commit to decide what files have changed and need re-deploying. So if you push multiple commits at once, the action will ignore all but the last commit. For this reason, squashing commits is recommended.
+- If you add branches other than `master` and `staging-deploy` to the workflow file, the action will deploy changes on the additional branches to the environment based on the environment variables marked DEV.
