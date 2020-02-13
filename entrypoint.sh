@@ -25,11 +25,18 @@ then
 fi
 
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"
-docker login -u "${DOCKER_USERNAME_2}" -p "${DOCKER_PASSWORD_2}" "${DOCKER_REGISTRY_URL_2}"
+
+if [ -n "$DOCKER_USERNAME_2" ] && [ -n "$DOCKER_PASSWORD_2" ];
+then
+    docker login -u "${DOCKER_USERNAME_2}" -p "${DOCKER_PASSWORD_2}" "${DOCKER_REGISTRY_URL_2}"
+fi
 
 faas-cli template pull
 
-faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
+if [ -n "$CUSTOM_TEMPLATE_URL" ];
+then
+    faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
+fi
 
 faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
 
@@ -37,7 +44,13 @@ faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
 then
     cp "$ENV_FILE" env.yml
-    faas-cli build
+    if [ -n "$BUILD_ARG_1" ] && [ -n "$BUILD_ARG_1_NAME" ];
+    then
+        faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+    else
+        faas-cli build
+    fi
+
     faas-cli push
     faas-cli deploy --gateway="$FAAS_GATEWAY"
 else
@@ -70,7 +83,13 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
-                        faas-cli build --filter="$FUNCTION_PATH"
+                        if [ -n "$BUILD_ARG_1" ] && [ -n "$BUILD_ARG_1_NAME" ];
+                        then
+                            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+                        else
+                            faas-cli build --filter="$FUNCTION_PATH"
+                        fi
+
                         faas-cli push --filter="$FUNCTION_PATH"
                         faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
                         FUNCTION_PATH2="$FUNCTION_PATH"
