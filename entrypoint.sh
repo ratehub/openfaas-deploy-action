@@ -26,6 +26,9 @@ fi
 
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"
 
+echo "DOCKER_USERNAME_2: ${DOCKER_USERNAME_2}"
+echo "DOCKER_PASSWORD_2: ${DOCKER_PASSWORD_2}"
+
 if [ -n "${DOCKER_USERNAME_2}" ] && [ -n "${DOCKER_PASSWORD_2}" ];
 then
     docker login -u "${DOCKER_USERNAME_2}" -p "${DOCKER_PASSWORD_2}" "${DOCKER_REGISTRY_URL_2}"
