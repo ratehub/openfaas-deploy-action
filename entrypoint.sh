@@ -105,6 +105,9 @@ else
     done < differences.txt
 fi
 
-curl -H "Authorization: token ${AUTH_TOKEN}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
+if [ -n "${AUTH_TOKEN:-}" ];
+then
+    curl -H "Authorization: token ${AUTH_TOKEN}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
+fi
 
 echo "Finished function deployment process"
