@@ -42,6 +42,7 @@ ENV AUTH_TOKEN=${AUTH_TOKEN}
 
 RUN apk add docker
 RUN apk add bash
+RUN apk add curl
 RUN apk update
 
 # Copies your code file from your action repository to the filesystem path `/` of the container
