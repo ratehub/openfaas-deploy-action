@@ -47,22 +47,23 @@ This action is designed to deploy functions or microservices developed with [Ope
 
 ## Secrets
 All secrets are required unless otherwise specified.
-- **CustomTemplateURL** (Optional): The URL of a repository of custom OpenFaaS templates. If you require basic-auth, include it in the URL string.
-- **DockerUsername**: Username of an account with access to the docker registry where your function images are stored.
-- **DockerPassword**: Password of an account with access to the docker registry where your function images are stored.
-- **DockerRegistryURL** (Optional): The URL of the docker registry where your function images are stored. Leave this blank if you wish to authenticate with Docker Hub.
-- **DockerUsername2** (Optional): Username of a second docker account, if needed.
-- **DockerPassword2** (Optional): Password of a second docker account, if needed.
-- **DockerRegistryURL2** (Optional): URL of a second docker registry, if needed. Leave this blank if you wish to authenticate with Docker Hub.
-- **GatewayUserDev**: The basic-auth username of your development OpenFaaS environment.
-- **GatewayPassDev**: The basic-auth password of your development OpenFaaS environment.
-- **GatewayURLDev**: The URL of your development OpenFaaS environment.
-- **GatewayUserStaging**: The basic-auth username of your staging OpenFaaS environment.
-- **GatewayPassStaging**: The basic-auth password of your staging OpenFaaS environment.
-- **GatewayURLStaging**: The URL of your staging OpenFaaS environment.
-- **GatewayUserProd**: The basic-auth username of your production OpenFaaS environment.
-- **GatewayPassProd**: The basic-auth password of your development OpenFaaS environment.
-- **GatewayURLProd**: The URL of your production OpenFaaS environment.
+- **CUSTOM_TEMPLATE_URL** (Optional): The URL of a repository of custom OpenFaaS templates. If you require basic-auth, include it in the URL string.
+- **DOCKER_USERNAME**: Username of an account with access to the docker registry where your function images are stored.
+- **DOCKER_PASSWORD**: Password of an account with access to the docker registry where your function images are stored.
+- **DOCKER_REGISTRY_URL** (Optional): The URL of the docker registry where your function images are stored. Leave this blank if you wish to authenticate with Docker Hub.
+- **DOCKER_USERNAME_2** (Optional): Username of a second docker account, if needed.
+- **DOCKER_PASSWORD_2** (Optional): Password of a second docker account, if needed.
+- **DOCKER_REGISTRY_URL_2** (Optional): URL of a second docker registry, if needed. Leave this blank if you wish to authenticate with Docker Hub.
+- **GATEWAY_USER_DEV**: The basic-auth username of your development OpenFaaS environment.
+- **GATEWAY_PASS_DEV**: The basic-auth password of your development OpenFaaS environment.
+- **GATEWAY_URL_DEV**: The URL of your development OpenFaaS environment.
+- **GATEWAY_USER_STAGING**: The basic-auth username of your staging OpenFaaS environment.
+- **GATEWAY_PASS_STAGING**: The basic-auth password of your staging OpenFaaS environment.
+- **GATEWAY_URL_STAGING**: The URL of your staging OpenFaaS environment.
+- **GATEWAY_USER_PROD**: The basic-auth username of your production OpenFaaS environment.
+- **GATEWAY_PASS_PROD**: The basic-auth password of your development OpenFaaS environment.
+- **GATEWAY_URL_PROD**: The URL of your production OpenFaaS environment.
+- **BUILD_ARG_1**: The value of a build argument to pass into your function templates' dockerfiles through the faas-cli's `build-arg` option (Note that you will also need to include the environment variable BUILD_ARG_1_NAME in the workflow file to specify the name of the argument)
 
 
 ## Installation
@@ -86,22 +87,24 @@ jobs:
     - name: Build, push, and deploy functions to OpenFaaS
       uses: ratehub/openfaas-deploy-action@master
       env:
-        GATEWAY_URL_DEV: ${{ secrets.GatewayURLDev }}
-        GATEWAY_URL_STAGING: ${{ secrets.GatewayURLStaging }}
-        GATEWAY_URL_PROD: ${{ secrets.GatewayURLProd }}
-        GATEWAY_USERNAME_DEV: ${{ secrets.GatewayUserDev }}
-        GATEWAY_PASSWORD_DEV: ${{ secrets.GatewayPassDev }}
-        GATEWAY_USERNAME_STAGING: ${{ secrets.GatewayUserStaging }}
-        GATEWAY_PASSWORD_STAGING: ${{ secrets.GatewayPassStaging }}
-        GATEWAY_USERNAME_PROD: ${{ secrets.GatewayUserProd }}
-        GATEWAY_PASSWORD_PROD: ${{ secrets.GatewayPassProd }}
-        DOCKER_USERNAME: ${{ secrets.DockerUsername }}
-        DOCKER_PASSWORD: ${{ secrets.DockerPassword }}
-        DOCKER_REGISTRY_URL: ${{ secrets.DockerRegistryURL }}
-        DOCKER_USERNAME_2: ${{ secrets.DockerUsername2 }}
-        DOCKER_PASSWORD_2: ${{ secrets.DockerPassword2 }}
-        DOCKER_REGISTRY_URL_2: ${{ secrets.DockerRegistryURL2 }}
-        CUSTOM_TEMPLATE_URL: ${{ secrets.CustomTemplateURL }}
+        GATEWAY_URL_DEV: ${{ secrets.GATEWAY_URL_DEV }}
+        GATEWAY_URL_STAGING: ${{ secrets.GATEWAY_URL_STAGING }}
+        GATEWAY_URL_PROD: ${{ secrets.GATEWAY_URL_PROD }}
+        GATEWAY_USERNAME_DEV: ${{ secrets.GATEWAY_USERNAME_DEV }}
+        GATEWAY_PASSWORD_DEV: ${{ secrets.GATEWAY_PASSWORD_DEV }}
+        GATEWAY_USERNAME_STAGING: ${{ secrets.GATEWAY_USERNAME_STAGING }}
+        GATEWAY_PASSWORD_STAGING: ${{ secrets.GATEWAY_PASSWORD_STAGING }}
+        GATEWAY_USERNAME_PROD: ${{ secrets.GATEWAY_USERNAME_PROD }}
+        GATEWAY_PASSWORD_PROD: ${{ secrets.GATEWAY_PASSWORD_PROD }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DOCKER_REGISTRY_URL: ${{ secrets.DOCKER_REGISTRY_URL }}
+        DOCKER_USERNAME_2: ${{ secrets.DOCKER_USERNAME_2 }}
+        DOCKER_PASSWORD_2: ${{ secrets.DOCKER_PASSWORD_2 }}
+        DOCKER_REGISTRY_URL_2: ${{ secrets.DOCKER_REGISTRY_URL_2 }}
+        CUSTOM_TEMPLATE_URL: ${{ secrets.CUSTOM_TEMPLATE_URL }}
+        BUILD_ARG_1_NAME: EXAMPLE_ARG_NAME
+        BUILD_ARG_1: ${{ secrets.BUILD_ARG_1 }}
 ```
 - This file will need to be in every branch you want to run the action on.
 - You can add additional branches if you so desire, but keep in mind that branches named anything other than `master` or `staging-deploy` will use the OpenFaaS deployment specified in the secrets marked as DEV.
