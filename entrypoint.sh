@@ -51,8 +51,11 @@ then
         faas-cli build
     fi
 
-    faas-cli push
-    faas-cli deploy --gateway="$FAAS_GATEWAY"
+    if [ "$GITHUB_EVENT_NAME" == "push" ];
+    then
+        faas-cli push
+        faas-cli deploy --gateway="$FAAS_GATEWAY"
+    fi
 else
     GROUP_PATH=""
     GROUP_PATH2=""
@@ -90,14 +93,20 @@ else
                             faas-cli build --filter="$FUNCTION_PATH"
                         fi
 
-                        faas-cli push --filter="$FUNCTION_PATH"
-                        faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
+                        if [ "$GITHUB_EVENT_NAME" == "push" ];
+                        then
+                            faas-cli push --filter="$FUNCTION_PATH"
+                            faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
+                        fi
                         FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
                 #If the stack.yml file has changed or any of the environment files have changed, redeploy all functions in the group
                 elif [ "$FUNCTION_PATH" == "stack.yml" ] || [ "$FUNCTION_PATH" == "env-dev.yml" ] || [ "$FUNCTION_PATH" == "env-staging.yml" ] || [ "$FUNCTION_PATH" == "env-prod.yml" ];
                 then
-                    faas-cli deploy --gateway="$FAAS_GATEWAY"
+                    if [ "$GITHUB_EVENT_NAME" == "push" ];
+                    then
+                        faas-cli deploy --gateway="$FAAS_GATEWAY"
+                    fi
                 fi
             fi
         fi
@@ -105,12 +114,18 @@ else
     done < differences.txt
 fi
 
-if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ];
+if [ "$GITHUB_EVENT_NAME" == "push" ];
 then
-    curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
-elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$BRANCH_NAME" == "staging-deploy" ];
-then
-    curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
-fi
+    # Query gateway action so that functions are added to gateway
+    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ];
+    then
+        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
+    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$BRANCH_NAME" == "staging-deploy" ];
+    then
+        curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
+    fi
 
-echo "Finished function deployment process"
+    echo "Finished function deployment process"
+else
+    echo "Build finished"
+fi
