@@ -1,5 +1,5 @@
 #!/bin/bash -l
-set -eux
+set -eu
 
 echo "Starting function deployment process"
 
@@ -83,6 +83,8 @@ else
 
                 FUNCTION_PATH="`echo \"$line\" | cut -d \"/\" -f2`"
 
+                echo "function path: $FUNCTION_PATH"
+
                 if [ -d "$FUNCTION_PATH" ];
                 then
                     #If we already handled this function based on a prior file, we can ignore it this time around
@@ -90,13 +92,16 @@ else
                     then
                         if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
                         then
+                            echo "build arg yes: $BUILD_ARG_1_NAME $BUILD_ARG_1"
                             faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
                         else
+                            echo "build"
                             faas-cli build --filter="$FUNCTION_PATH"
                         fi
 
                         if [ "$GITHUB_EVENT_NAME" == "push" ];
                         then
+                            echo "push and deploy"
                             faas-cli push --filter="$FUNCTION_PATH"
                             faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
                         fi
