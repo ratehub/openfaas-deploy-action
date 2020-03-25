@@ -56,6 +56,44 @@ then
         faas-cli push
         faas-cli deploy --gateway="$FAAS_GATEWAY"
     fi
+elif [ "$BRANCH_NAME" == "force-build-deploy" ]; # "$GITHUB_EVENT_NAME" == "schedule"
+then
+    declare -a FORCE_DEPLOY_FUNCS=("location/ip-to-location")
+    #ENV_FILE="env-prod.yml"
+    #FAAS_GATEWAY="${GATEWAY_URL_PROD}"
+    #FAAS_USER="${GATEWAY_USERNAME_PROD}"
+    #FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
+
+    for func in "${FORCE_DEPLOY_FUNCS[@]}"
+    do
+        GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
+        FUNCTION_PATH="`echo \"$func\" | cut -d \"/\" -f2`"
+
+        echo "group path: $GROUP_PATH"
+        echo "function path: $FUNCTION_PATH"
+
+        echo "$GITHUB_WORKSPACE/$GROUP_PATH"
+        cd "$GITHUB_WORKSPACE/$GROUP_PATH"
+        cp "$GITHUB_WORKSPACE/template" -r template
+        cp "$ENV_FILE" env.yml
+
+        if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+        then
+            echo "build arg true: $BUILD_ARG_1_NAME"
+            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+        else
+            echo "build arg false"
+            faas-cli build --filter="$FUNCTION_PATH"
+        fi
+
+        echo "faas-cli push"
+        faas-cli push --filter="$FUNCTION_PATH"
+        echo "faas-cli deploy"
+        faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
+
+        # Query gateway action so that functions are added to gateway
+        #curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
+    done
 else
     GROUP_PATH=""
     GROUP_PATH2=""
@@ -74,7 +112,6 @@ else
                 if [ "$GROUP_PATH" != "$GROUP_PATH2" ];
                 then
                     GROUP_PATH2="$GROUP_PATH"
-                    echo "group path: $GITHUB_WORKSPACE/$GROUP_PATH"
                     cd "$GITHUB_WORKSPACE/$GROUP_PATH"
                     cp "$GITHUB_WORKSPACE/template" -r template
                     cp "$ENV_FILE" env.yml
