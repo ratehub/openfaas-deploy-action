@@ -3,8 +3,6 @@ set -eu
 
 echo "Starting function deployment process"
 
-echo "action triggered by $GITHUB_EVENT_NAME"
-
 FAAS_GATEWAY="${GATEWAY_URL_DEV}"
 FAAS_USER="${GATEWAY_USERNAME_DEV}"
 FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
@@ -76,14 +74,13 @@ else
                 if [ "$GROUP_PATH" != "$GROUP_PATH2" ];
                 then
                     GROUP_PATH2="$GROUP_PATH"
+                    echo "group path: $GITHUB_WORKSPACE/$GROUP_PATH"
                     cd "$GITHUB_WORKSPACE/$GROUP_PATH"
                     cp "$GITHUB_WORKSPACE/template" -r template
                     cp "$ENV_FILE" env.yml
                 fi
 
                 FUNCTION_PATH="`echo \"$line\" | cut -d \"/\" -f2`"
-
-                echo "function path: $FUNCTION_PATH"
 
                 if [ -d "$FUNCTION_PATH" ];
                 then
@@ -92,16 +89,13 @@ else
                     then
                         if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
                         then
-                            echo "build arg yes: $BUILD_ARG_1_NAME $BUILD_ARG_1"
                             faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
                         else
-                            echo "build"
                             faas-cli build --filter="$FUNCTION_PATH"
                         fi
 
                         if [ "$GITHUB_EVENT_NAME" == "push" ];
                         then
-                            echo "push and deploy"
                             faas-cli push --filter="$FUNCTION_PATH"
                             faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
                         fi
