@@ -10,7 +10,7 @@ ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
-if [ "$BRANCH_NAME" == "master" ];
+if [ "$BRANCH_NAME" == "master" ]  || [ "$GITHUB_EVENT_NAME" == "schedule" ];
 then
     ENV_FILE="env-prod.yml"
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
@@ -56,6 +56,31 @@ then
         faas-cli push
         faas-cli deploy --gateway="$FAAS_GATEWAY"
     fi
+elif [ "$GITHUB_EVENT_NAME" == "schedule" ];
+then
+    declare -a FORCE_DEPLOY_FUNCS=("location/ip-to-location")
+
+    for func in "${FORCE_DEPLOY_FUNCS[@]}"
+    do
+        GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
+        FUNCTION_PATH="`echo \"$func\" | cut -d \"/\" -f2`"
+
+        cd "$GITHUB_WORKSPACE/$GROUP_PATH"
+        cp "$GITHUB_WORKSPACE/template" -r template
+        cp "$ENV_FILE" env.yml
+
+        if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+        then
+            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+        else
+            faas-cli build --filter="$FUNCTION_PATH"
+        fi
+
+        faas-cli push --filter="$FUNCTION_PATH"
+        faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
+
+        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
+    done
 else
     GROUP_PATH=""
     GROUP_PATH2=""
