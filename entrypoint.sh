@@ -3,6 +3,8 @@ set -eux
 
 echo "Starting function deployment process"
 
+echo "action triggered by $GITHUB_EVENT_NAME"
+
 FAAS_GATEWAY="${GATEWAY_URL_DEV}"
 FAAS_USER="${GATEWAY_USERNAME_DEV}"
 FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
