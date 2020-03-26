@@ -56,32 +56,29 @@ then
         faas-cli push
         faas-cli deploy --gateway="$FAAS_GATEWAY"
     fi
-elif [ "$BRANCH_NAME" == "update-var-usage" ];
+elif [ "$GITHUB_EVENT_NAME" == "schedule" ];
 then
-    echo "input: $SCHEDULED_REDEPLOY_FUNCS"
-
     reDeployFuncs=($SCHEDULED_REDEPLOY_FUNCS)
     for func in "${reDeployFuncs[@]}"
     do
-        echo "foreach $func"
-        #GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
-        #FUNCTION_PATH="`echo \"$func\" | cut -d \"/\" -f2`"
-#
-        #cd "$GITHUB_WORKSPACE/$GROUP_PATH"
-        #cp "$GITHUB_WORKSPACE/template" -r template
-        #cp "$ENV_FILE" env.yml
-#
-        #if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
-        #then
-        #    faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
-        #else
-        #    faas-cli build --filter="$FUNCTION_PATH"
-        #fi
-#
-        #faas-cli push --filter="$FUNCTION_PATH"
-        #faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
-#
-        #curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
+        GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
+        FUNCTION_PATH="`echo \"$func\" | cut -d \"/\" -f2`"
+
+        cd "$GITHUB_WORKSPACE/$GROUP_PATH"
+        cp "$GITHUB_WORKSPACE/template" -r template
+        cp "$ENV_FILE" env.yml
+
+        if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+        then
+            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+        else
+            faas-cli build --filter="$FUNCTION_PATH"
+        fi
+
+        faas-cli push --filter="$FUNCTION_PATH"
+        faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
+
+        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
     done
 else
     GROUP_PATH=""
