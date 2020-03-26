@@ -61,7 +61,7 @@ then
     echo "input: $SCHEDULED_REDEPLOY_FUNCS"
 
     reDeployFuncs=($SCHEDULED_REDEPLOY_FUNCS)
-    for func in "${$reDeployFuncs[@]}"
+    for func in "${reDeployFuncs[@]}"
     do
         echo "foreach $func"
         #GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
