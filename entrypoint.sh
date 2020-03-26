@@ -58,9 +58,10 @@ then
     fi
 elif [ "$BRANCH_NAME" == "update-var-usage" ];
 then
-    echo "input: $FORCE_DEPLOY_FUNCS"
+    echo "input: $SCHEDULED_REDEPLOY_FUNCS"
 
-    for func in "${$(FORCE_DEPLOY_FUNCS)[@]}"
+    reDeployFuncs=($redeployFuncs)
+    for func in "${$reDeployFuncs[@]}"
     do
         echo "foreach $func"
         #GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
