@@ -60,7 +60,7 @@ elif [ "$BRANCH_NAME" == "update-var-usage" ];
 then
     echo "input: $SCHEDULED_REDEPLOY_FUNCS"
 
-    reDeployFuncs=($redeployFuncs)
+    reDeployFuncs=($SCHEDULED_REDEPLOY_FUNCS)
     for func in "${$reDeployFuncs[@]}"
     do
         echo "foreach $func"
