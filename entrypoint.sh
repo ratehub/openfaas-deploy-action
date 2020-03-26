@@ -58,10 +58,11 @@ then
     fi
 elif [ "$BRANCH_NAME" == "update-var-usage" ];
 then
+    echo "input: $FORCE_DEPLOY_FUNCS"
 
     for func in "${$(FORCE_DEPLOY_FUNCS)[@]}"
     do
-        echo $func
+        echo "foreach $func"
         #GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
         #FUNCTION_PATH="`echo \"$func\" | cut -d \"/\" -f2`"
 #
