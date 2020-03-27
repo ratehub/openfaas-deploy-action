@@ -47,13 +47,16 @@ then
     if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
     then
         faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+        faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" --tag=latest
     else
         faas-cli build
+        faas-cli build --tag=latest
     fi
 
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
         faas-cli push
+        faas-cli push --tag=latest
         faas-cli deploy --gateway="$FAAS_GATEWAY"
     fi
 else
@@ -89,13 +92,16 @@ else
                         if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
                         then
                             faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+                            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" --tag=latest
                         else
                             faas-cli build --filter="$FUNCTION_PATH"
+                            faas-cli build --filter="$FUNCTION_PATH" --tag=latest
                         fi
 
                         if [ "$GITHUB_EVENT_NAME" == "push" ];
                         then
                             faas-cli push --filter="$FUNCTION_PATH"
+                            faas-cli push --filter="$FUNCTION_PATH" --tag=latest
                             faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
                         fi
                         FUNCTION_PATH2="$FUNCTION_PATH"
