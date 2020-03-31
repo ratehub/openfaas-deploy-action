@@ -4,10 +4,6 @@ set -eux
 
 echo "Starting function template pull process"
 
-GATEWAY_URL_DEV='127.0.0.1:31112'
-GATEWAY_USERNAME_DEV='admin'
-GATEWAY_PASSWORD_DEV='2f326675e5fa9574c1153f1c8c0a8459fbd950ee'
-
 
 FAAS_GATEWAY="${GATEWAY_URL_DEV}"
 FAAS_USER="${GATEWAY_USERNAME_DEV}"
