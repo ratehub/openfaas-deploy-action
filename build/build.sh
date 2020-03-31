@@ -11,7 +11,7 @@ FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
 ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 
- Depending on which branch we want to choose a different set of environment variables and credentials
+# Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
 then
     ENV_FILE="env-prod.yml"
