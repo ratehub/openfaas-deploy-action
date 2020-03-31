@@ -58,9 +58,8 @@ then
     fi
 elif [ "$GITHUB_EVENT_NAME" == "schedule" ];
 then
-    declare -a FORCE_DEPLOY_FUNCS=("location/ip-to-location")
-
-    for func in "${FORCE_DEPLOY_FUNCS[@]}"
+    reDeployFuncs=($SCHEDULED_REDEPLOY_FUNCS)
+    for func in "${reDeployFuncs[@]}"
     do
         GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
         FUNCTION_PATH="`echo \"$func\" | cut -d \"/\" -f2`"
