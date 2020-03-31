@@ -1,7 +1,13 @@
 #!/bin/bash -l
+
 set -eux
 
-echo "Starting function deployment process"
+echo "Starting function template pull process"
+
+GATEWAY_URL_DEV='127.0.0.1:31112'
+GATEWAY_USERNAME_DEV='admin'
+GATEWAY_PASSWORD_DEV='2f326675e5fa9574c1153f1c8c0a8459fbd950ee'
+
 
 FAAS_GATEWAY="${GATEWAY_URL_DEV}"
 FAAS_USER="${GATEWAY_USERNAME_DEV}"
@@ -9,7 +15,7 @@ FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
 ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 
-# Depending on which branch we want to choose a different set of environment variables and credentials
+ Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
 then
     ENV_FILE="env-prod.yml"
@@ -40,7 +46,12 @@ fi
 
 faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
 
-# If there's a stack file in the root of the repo, assume we want to deploy everything
+echo "Function template pull process is done!"
+
+
+echo "Starting function build process"
+
+
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
 then
     cp "$ENV_FILE" env.yml
@@ -49,12 +60,6 @@ then
         faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
     else
         faas-cli build
-    fi
-
-    if [ "$GITHUB_EVENT_NAME" == "push" ];
-    then
-        faas-cli push
-        faas-cli deploy --gateway="$FAAS_GATEWAY"
     fi
 else
     GROUP_PATH=""
@@ -92,40 +97,13 @@ else
                         else
                             faas-cli build --filter="$FUNCTION_PATH"
                         fi
-
-                        if [ "$GITHUB_EVENT_NAME" == "push" ];
-                        then
-                            faas-cli push --filter="$FUNCTION_PATH"
-                            faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
-                        fi
                         FUNCTION_PATH2="$FUNCTION_PATH"
-                    fi
-                #If the stack.yml file has changed or any of the environment files have changed, redeploy all functions in the group
-                elif [ "$FUNCTION_PATH" == "stack.yml" ] || [ "$FUNCTION_PATH" == "env-dev.yml" ] || [ "$FUNCTION_PATH" == "env-staging.yml" ] || [ "$FUNCTION_PATH" == "env-prod.yml" ];
-                then
-                    if [ "$GITHUB_EVENT_NAME" == "push" ];
-                    then
-                        faas-cli deploy --gateway="$FAAS_GATEWAY"
                     fi
                 fi
             fi
         fi
-        # Else: do nothing since the only modifications would be at the root and not in any function folders
     done < differences.txt
+
 fi
 
-if [ "$GITHUB_EVENT_NAME" == "push" ];
-then
-    # Query gateway action so that functions are added to gateway
-    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ];
-    then
-        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
-    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$BRANCH_NAME" == "staging-deploy" ];
-    then
-        curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
-    fi
-
-    echo "Finished function deployment process"
-else
-    echo "Build finished"
-fi
+echo "Function build process is done!"
