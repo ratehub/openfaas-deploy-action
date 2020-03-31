@@ -6,4 +6,4 @@ outputs:
     description: 'Whether the process succeeded or failed'
 runs:
   using: 'docker'
-  image: 'Dockerfile.build'
+  image: 'Dockerfile'
