@@ -1,8 +1,7 @@
 #!/bin/bash -l
-
 set -eux
 
-echo "Starting function template pull process"
+echo "Starting function deployment process"
 
 FAAS_GATEWAY="${GATEWAY_URL_DEV}"
 FAAS_USER="${GATEWAY_USERNAME_DEV}"
@@ -25,36 +24,14 @@ then
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 fi
 
-docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"
 
-if [ -n "${DOCKER_USERNAME_2:-}" ] && [ -n "${DOCKER_PASSWORD_2:-}" ];
-then
-    docker login -u "${DOCKER_USERNAME_2}" -p "${DOCKER_PASSWORD_2}" "${DOCKER_REGISTRY_URL_2}"
-fi
-
-faas-cli template pull
-
-if [ -n "${CUSTOM_TEMPLATE_URL:-}" ];
-then
-    faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
-fi
-
-faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
-
-echo "Function template pull process is done!"
-
-
-echo "Starting function build process"
-
-
+# If there's a stack file in the root of the repo, assume we want to deploy everything
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
 then
     cp "$ENV_FILE" env.yml
-    if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+    if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
-        faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
-    else
-        faas-cli build
+        faas-cli push
     fi
 else
     GROUP_PATH=""
@@ -86,19 +63,34 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
-                        if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+
+                        if [ "$GITHUB_EVENT_NAME" == "push" ];
                         then
-                            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
-                        else
-                            faas-cli build --filter="$FUNCTION_PATH"
+                            faas-cli push --filter="$FUNCTION_PATH"
                         fi
                         FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
+
+
                 fi
             fi
         fi
+        # Else: do nothing since the only modifications would be at the root and not in any function folders
     done < differences.txt
-
 fi
 
-echo "Function build process is done!"
+if [ "$GITHUB_EVENT_NAME" == "push" ];
+then
+    # Query gateway action so that functions are added to gateway
+    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ];
+    then
+        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
+    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$BRANCH_NAME" == "staging-deploy" ];
+    then
+        curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
+    fi
+
+    echo "Finished function push process"
+else
+    echo "FaaS function push process finished"
+fi
