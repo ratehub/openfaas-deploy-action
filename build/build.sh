@@ -24,7 +24,9 @@ then
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 fi
-
+echo "${DOCKER_USERNAME}"
+echo "${DOCKER_PASSWORD}"
+echo "${DOCKER_REGISTRY_URL}"
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"
 
 if [ -n "${DOCKER_USERNAME_2:-}" ] && [ -n "${DOCKER_PASSWORD_2:-}" ];
@@ -52,9 +54,9 @@ then
     cp "$ENV_FILE" env.yml
     if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
     then
-        faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+        faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" --tag="$VERSION"
     else
-        faas-cli build
+        faas-cli build --tag="$VERSION"
     fi
 else
     GROUP_PATH=""
@@ -88,9 +90,9 @@ else
                     then
                         if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
                         then
-                            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+                            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" --tag="$VERSION"
                         else
-                            faas-cli build --filter="$FUNCTION_PATH"
+                            faas-cli build --filter="$FUNCTION_PATH" --tag="$VERSION"
                         fi
                         FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
