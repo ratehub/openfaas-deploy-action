@@ -54,9 +54,9 @@ then
     cp "$ENV_FILE" env.yml
     if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
     then
-        faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" --tag="$VERSION"
+        faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" --tag=branch
     else
-        faas-cli build --tag="$VERSION"
+        faas-cli build --tag=branch
     fi
 else
     GROUP_PATH=""
@@ -90,9 +90,9 @@ else
                     then
                         if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
                         then
-                            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" --tag="$VERSION"
+                            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" --tag=branch
                         else
-                            faas-cli build --filter="$FUNCTION_PATH" --tag="$VERSION"
+                            faas-cli build --filter="$FUNCTION_PATH" --tag=branch
                         fi
                         FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
