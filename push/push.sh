@@ -47,6 +47,7 @@ then
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
         faas-cli push
+    fi
 else
     GROUP_PATH=""
     GROUP_PATH2=""
