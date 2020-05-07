@@ -20,8 +20,9 @@ echo "$STACK_PATH"
 ls -lah
 cd "$STACK_PATH"
 
-yq w "$STACK_FILE" functions.example.image gcr.io/platform-235214/example:"$VERSION"
 cat "$STACK_FILE"
+yq w "$STACK_FILE" functions.example.image gcr.io/platform-235214/example:"$VERSION"
+
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
