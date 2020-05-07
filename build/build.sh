@@ -11,9 +11,7 @@ ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 VERSION_FILE="version-dev.yml"
 STACK_FILE="stack.yml"
-FUNC_PATH="$PATH"
-echo FUNC_PATH
-STACK_PATH=$(dirname "$FUNC_PATH")
+STACK_PATH=$(dirname "$UP_PATH")
 
 
 yq w "$STACK_PATH"/"$STACK_FILE" functions.example.image gcr.io/platform-235214/example:"$VERSION"
