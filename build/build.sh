@@ -10,9 +10,9 @@ FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
 ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 VERSION_FILE="version-dev.yml"
-FUNCTION_PATH="`echo \"$line\" | cut -d \"/\" -f2`"
 STACK_FILE="stack.yml"
 
+ls -lah
 yq w stack.yml functions."$FUNCTION_PATH".image gcr.io/platform-235214/"$FUNCTION_PATH":"$VERSION"
 cat $STACK_FILE
 
