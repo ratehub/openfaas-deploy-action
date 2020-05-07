@@ -59,6 +59,7 @@ then
         faas-cli build --tag=branch
     fi
 else
+    ls -lah
     GROUP_PATH=""
     GROUP_PATH2=""
     FUNCTION_PATH2=""
