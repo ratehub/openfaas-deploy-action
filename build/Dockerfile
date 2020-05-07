@@ -51,15 +51,6 @@ RUN wget $(curl -s https://api.github.com/repos/mikefarah/yq/releases/latest | g
 RUN chmod +x /usr/bin/yq
 
 
-#ENV PACKAGES="\
-#  py-pip \
-#  jq \
-#"
-
-#RUN apk add --update $PACKAGES \
-#  && pip install yq \
-#  && rm /var/cache/apk/*
-
 # Copies your code file from your action repository to the filesystem path `/` of the container
 COPY build.sh /build.sh
 
