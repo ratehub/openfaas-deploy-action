@@ -64,6 +64,7 @@ echo "Function template pull process is done!"
 
 echo "Starting function build process"
 
+cd ..
 
 if [ -f "$GITHUB_WORKSPACE/$STACK_FILE" ];
 then
