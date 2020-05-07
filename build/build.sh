@@ -23,7 +23,7 @@ cd "$STACK_PATH"
 cat "$STACK_FILE"
 yq w "$STACK_FILE" 'functions.example.image' 'gcr.io/platform-235214/example:$VERSION'
 
-
+cd ..
 # Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
 then
@@ -64,7 +64,7 @@ echo "Function template pull process is done!"
 
 echo "Starting function build process"
 
-cd ..
+
 
 if [ -f "$GITHUB_WORKSPACE/$STACK_FILE" ];
 then
@@ -97,8 +97,6 @@ else
                     cd "$GITHUB_WORKSPACE/$GROUP_PATH"
                     cp "$GITHUB_WORKSPACE/template" -r template
                     cp "$ENV_FILE" env.yml
-
-
                 fi
 
                 FUNCTION_PATH="`echo \"$line\" | cut -d \"/\" -f2`"
