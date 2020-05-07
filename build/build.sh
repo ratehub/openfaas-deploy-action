@@ -11,7 +11,10 @@ ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 VERSION_FILE="version-dev.yml"
 FUNCTION_PATH="`echo \"$line\" | cut -d \"/\" -f2`"
+STACK_FILE="stack.yml"
 
+yq w stack.yml functions."$FUNCTION_PATH".image gcr.io/platform-235214/"$FUNCTION_PATH":"$VERSION"
+cat $STACK_FILE
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
@@ -54,10 +57,9 @@ echo "Function template pull process is done!"
 echo "Starting function build process"
 
 
-if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
+if [ -f "$GITHUB_WORKSPACE/$STACK_FILE" ];
 then
     cp "$ENV_FILE" env.yml
-    yq w stack.yml functions."$FUNCTION_PATH".image gcr.io/platform-235214/"$FUNCTION_PATH":"$VERSION"
     if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
     then
         faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" --tag=branch
@@ -86,7 +88,6 @@ else
                     cd "$GITHUB_WORKSPACE/$GROUP_PATH"
                     cp "$GITHUB_WORKSPACE/template" -r template
                     cp "$ENV_FILE" env.yml
-                    yq w stack.yml functions."$FUNCTION_PATH".image gcr.io/platform-235214/"$FUNCTION_PATH":"$VERSION"
 
 
                 fi
