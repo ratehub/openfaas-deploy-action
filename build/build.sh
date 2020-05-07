@@ -19,8 +19,8 @@ ls -lah
 cd "$STACK_PATH"
 
 
-yq w "$STACK_FILE" 'functions.example.image' gcr.io/platform-235214/example:"$VERSION"
-cat "$STACK_FILE"
+UPDATED_STACK_FILE=$(yq w "$STACK_FILE" 'functions.example.image' gcr.io/platform-235214/example:"$VERSION")
+echo "$UPDATED_STACK_FILE" > $STACK_FILE
 cd ..
 # Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
@@ -93,6 +93,7 @@ else
                 then
                     GROUP_PATH2="$GROUP_PATH"
                     cd "$GITHUB_WORKSPACE/$GROUP_PATH"
+                    cat
                     cp "$GITHUB_WORKSPACE/template" -r template
                     cp "$ENV_FILE" env.yml
                 fi
