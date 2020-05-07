@@ -31,7 +31,7 @@ then
     cp "$ENV_FILE" env.yml
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
-        faas-cli push
+        faas-cli push --tag=branch
     fi
 else
     GROUP_PATH=""
@@ -66,7 +66,7 @@ else
 
                         if [ "$GITHUB_EVENT_NAME" == "push" ];
                         then
-                            faas-cli push --filter="$FUNCTION_PATH"
+                            faas-cli push --filter="$FUNCTION_PATH" --tag=branch
                         fi
                         FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
