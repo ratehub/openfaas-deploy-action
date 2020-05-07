@@ -18,8 +18,9 @@ pwd
 STACK_PATH=$(dirname "$UP_PATH")
 echo "$STACK_PATH"
 ls -lah
+cd "$STACK_PATH"
 
-yq w "$STACK_PATH"/"$STACK_FILE" functions.example.image gcr.io/platform-235214/example:"$VERSION"
+yq w "$STACK_FILE" functions.example.image gcr.io/platform-235214/example:"$VERSION"
 cat "$STACK_FILE"
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
