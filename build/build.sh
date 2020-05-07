@@ -13,7 +13,7 @@ VERSION_FILE="version-dev.yml"
 STACK_FILE="stack.yml"
 
 ls -lah
-yq w stack.yml functions."$FUNCTION_PATH".image gcr.io/platform-235214/"$FUNCTION_PATH":"$VERSION"
+yq w stack.yml functions.example.image gcr.io/platform-235214/example:"$VERSION"
 cat $STACK_FILE
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
