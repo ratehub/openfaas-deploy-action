@@ -14,9 +14,10 @@ STACK_FILE="stack.yml"
 echo "$VERSION"
 echo "$UP_PATH"
 #UP_PATH="${{ steps.file_path.outputs.path_dir }}"
+pwd
 STACK_PATH=$(dirname "$UP_PATH")
 echo "$STACK_PATH"
-
+ls -lah
 
 yq w "$STACK_PATH"/"$STACK_FILE" functions.example.image gcr.io/platform-235214/example:"$VERSION"
 cat "$STACK_FILE"
