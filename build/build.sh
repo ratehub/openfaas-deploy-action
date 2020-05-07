@@ -12,11 +12,12 @@ BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 VERSION_FILE="version-dev.yml"
 STACK_FILE="stack.yml"
 STACK_PATH=$(dirname "$UP_PATH")
-
-cd "$STACK_PATH" && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" 'functions.example.image' gcr.io/platform-235214/example:"$VERSION")
-echo "$UPDATED_STACK_FILE" > $STACK_FILE && cd ..
+cd "$STACK_PATH"
 
 
+UPDATED_STACK_FILE=$(yq w "$STACK_FILE" 'functions.example.image' gcr.io/platform-235214/example:"$VERSION")
+echo "$UPDATED_STACK_FILE" > $STACK_FILE
+cd ..
 # Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
 then
