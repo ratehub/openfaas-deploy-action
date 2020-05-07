@@ -20,7 +20,7 @@ ls -lah
 cd "$STACK_PATH"
 
 cat "$STACK_FILE"
-yq w "$STACK_FILE" 'functions.example.image' 'gcr.io/platform-235214/example:$VERSION'
+yq w "$STACK_FILE" 'functions.example.image' gcr.io/platform-235214/example:"$VERSION"
 
 cd ..
 
