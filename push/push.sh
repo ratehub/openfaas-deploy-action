@@ -8,8 +8,7 @@ FAAS_USER="${GATEWAY_USERNAME_DEV}"
 FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
 ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
-VERSION_FILE="version-dev.yml"
-STACK_FILE="stack.yml"
+
 
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
