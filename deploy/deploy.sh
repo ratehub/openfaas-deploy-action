@@ -27,6 +27,22 @@ then
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 fi
 
+if [ -n "${DOCKER_USERNAME_2:-}" ] && [ -n "${DOCKER_PASSWORD_2:-}" ];
+then
+    docker login -u "${DOCKER_USERNAME_2}" -p "${DOCKER_PASSWORD_2}" "${DOCKER_REGISTRY_URL_2}"
+fi
+
+
+faas-cli template pull
+
+if [ -n "${CUSTOM_TEMPLATE_URL:-}" ];
+then
+    faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
+fi
+
+faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
+
+echo "Function template pull process is done!"
 
 # If there's a stack file in the root of the repo, assume we want to deploy everything
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
