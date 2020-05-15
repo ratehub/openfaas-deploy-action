@@ -1,7 +1,7 @@
 #!/bin/bash -l
 set -eux
 
-echo "Starting function deployment process"
+echo "Starting function push process"
 
 FAAS_GATEWAY="${GATEWAY_URL_DEV}"
 FAAS_USER="${GATEWAY_USERNAME_DEV}"

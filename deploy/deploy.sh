@@ -8,17 +8,18 @@ FAAS_USER="${GATEWAY_USERNAME_DEV}"
 FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
 ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
+VER_FILE="${VERSION_FILE}"
 
 
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
-if [ "$BRANCH_NAME" == "master" ];
+if [ "$VER_FILE" == "version-prod.yml" ];
 then
     ENV_FILE="env-prod.yml"
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
-elif [ "$BRANCH_NAME" == "staging-deploy" ];
+elif [ "$VER_FILE" == "version-staging.yml" ];
 then
     ENV_FILE="env-staging.yml"
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
