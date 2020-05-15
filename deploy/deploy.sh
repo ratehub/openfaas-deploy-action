@@ -9,7 +9,15 @@ FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
 ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 VER_FILE="${VERSION_FILE}"
+STACK_FILE="stack.yml"
+STACK_PATH=$(dirname "$UP_PATH")
+FUNCTION_NAME="${FUNCTION}"
+cd "$STACK_PATH"
 
+
+UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$VERSION")
+echo "$UPDATED_STACK_FILE" > $STACK_FILE
+cd ..
 
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
