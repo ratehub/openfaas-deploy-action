@@ -58,7 +58,7 @@ then
     cp "$ENV_FILE" env.yml
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
-        faas-cli deploy --gateway="$FAAS_GATEWAY"
+        faas-cli deploy --gateway="$FAAS_GATEWAY" --replace=true --update=false
     fi
 else
     GROUP_PATH=""
@@ -94,7 +94,7 @@ else
 
                         if [ "$GITHUB_EVENT_NAME" == "push" ];
                         then
-                            faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
+                            faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH" --replace=true --update=false
                         fi
                         FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
@@ -103,7 +103,7 @@ else
                 then
                     if [ "$GITHUB_EVENT_NAME" == "push" ];
                     then
-                        faas-cli deploy --gateway="$FAAS_GATEWAY"
+                        faas-cli deploy --gateway="$FAAS_GATEWAY" --replace=true --update=false
                     fi
                 fi
             fi

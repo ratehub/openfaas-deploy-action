@@ -18,8 +18,9 @@ cd "$STACK_PATH"
 UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$VERSION")
 echo "$UPDATED_STACK_FILE" > $STACK_FILE
 cd ..
+
 # Depending on which branch we want to choose a different set of environment variables and credentials
-if [ "$BRANCH_NAME" == "master" ];
+if [ "$BRANCH_NAME" == "master" ]
 then
     ENV_FILE="env-prod.yml"
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
@@ -32,9 +33,8 @@ then
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 fi
-echo "${DOCKER_USERNAME}"
-echo "${DOCKER_PASSWORD}"
-echo "${DOCKER_REGISTRY_URL}"
+
+
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"
 
 if [ -n "${DOCKER_USERNAME_2:-}" ] && [ -n "${DOCKER_PASSWORD_2:-}" ];
@@ -87,7 +87,6 @@ else
                 then
                     GROUP_PATH2="$GROUP_PATH"
                     cd "$GITHUB_WORKSPACE/$GROUP_PATH"
-                    cat
                     cp "$GITHUB_WORKSPACE/template" -r template
                     cp "$ENV_FILE" env.yml
                 fi
