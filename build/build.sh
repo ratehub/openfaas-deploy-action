@@ -20,7 +20,7 @@ echo "$UPDATED_STACK_FILE" > $STACK_FILE
 cd ..
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
-if [ "$BRANCH_NAME" == "master" ]
+if [ "$BRANCH_NAME" == "master" ]  || [ "$GITHUB_EVENT_NAME" == "schedule" ];
 then
     ENV_FILE="env-prod.yml"
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
@@ -56,8 +56,6 @@ echo "Function template pull process is done!"
 
 echo "Starting function build process"
 
-
-
 if [ -f "$GITHUB_WORKSPACE/$STACK_FILE" ];
 then
     cp "$ENV_FILE" env.yml
@@ -67,6 +65,26 @@ then
     else
         faas-cli build
     fi
+elif [ "$GITHUB_EVENT_NAME" == "schedule" ];
+then
+    reDeployFuncs=($SCHEDULED_REDEPLOY_FUNCS)
+    for func in "${reDeployFuncs[@]}"
+    do
+        GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
+        FUNCTION_PATH="`echo \"$func\" | cut -d \"/\" -f2`"
+
+        cd "$GITHUB_WORKSPACE/$GROUP_PATH"
+        cp "$GITHUB_WORKSPACE/template" -r template
+        cp "$ENV_FILE" env.yml
+
+        if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+        then
+            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+        else
+            faas-cli build --filter="$FUNCTION_PATH"
+        fi
+
+    done
 else
     ls -lah
     GROUP_PATH=""

@@ -40,17 +40,8 @@ then
     docker login -u "${DOCKER_USERNAME_2}" -p "${DOCKER_PASSWORD_2}" "${DOCKER_REGISTRY_URL_2}"
 fi
 
-
-faas-cli template pull
-
-if [ -n "${CUSTOM_TEMPLATE_URL:-}" ];
-then
-    faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
-fi
-
 faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
 
-echo "Function template pull process is done!"
 
 # If there's a stack file in the root of the repo, assume we want to deploy everything
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
@@ -60,6 +51,21 @@ then
     then
         faas-cli deploy --gateway="$FAAS_GATEWAY"
     fi
+elif [ "$GITHUB_EVENT_NAME" == "schedule" ];
+then
+    reDeployFuncs=($SCHEDULED_REDEPLOY_FUNCS)
+    for func in "${reDeployFuncs[@]}"
+    do
+        GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
+        FUNCTION_PATH="`echo \"$func\" | cut -d \"/\" -f2`"
+
+        cd "$GITHUB_WORKSPACE/$GROUP_PATH"
+        cp "$ENV_FILE" env.yml
+
+        faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
+
+        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
+    done
 else
     GROUP_PATH=""
     GROUP_PATH2=""
@@ -79,7 +85,6 @@ else
                 then
                     GROUP_PATH2="$GROUP_PATH"
                     cd "$GITHUB_WORKSPACE/$GROUP_PATH"
-                    cp "$GITHUB_WORKSPACE/template" -r template
                     cp "$ENV_FILE" env.yml
 
                 fi
@@ -99,12 +104,7 @@ else
                         FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
                 #If the stack.yml file has changed or any of the environment files have changed, redeploy all functions in the group
-                elif [ "$FUNCTION_PATH" == "stack.yml" ] || [ "$FUNCTION_PATH" == "env-dev.yml" ] || [ "$FUNCTION_PATH" == "env-staging.yml" ] || [ "$FUNCTION_PATH" == "env-prod.yml" ];
-                then
-                    if [ "$GITHUB_EVENT_NAME" == "push" ];
-                    then
-                        faas-cli deploy --gateway="$FAAS_GATEWAY"
-                    fi
+
                 fi
             fi
         fi
