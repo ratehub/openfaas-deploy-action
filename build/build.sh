@@ -16,7 +16,7 @@ echo "$PATH_I"
 PATH_II="${PATH_2}"
 echo "$PATH_II"
 
-if [ -n "$PATH_I" ];
+if [ -z "$PATH_I" ];
 then
   STACK_PATH="$PATH_II"
 else
