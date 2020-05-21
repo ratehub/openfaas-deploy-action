@@ -12,7 +12,9 @@ BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="stack.yml"
 FUNCTION_NAME="${FUNCTION}"
 PATH_I="${PATH_1}"
+echo "$PATH_I"
 PATH_II="${PATH_2}"
+echo "$PATH_II"
 
 if [ -n "$PATH_I" ];
 then
