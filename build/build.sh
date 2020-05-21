@@ -10,8 +10,15 @@ FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
 ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="stack.yml"
-STACK_PATH=$(dirname "$UP_PATH")
 FUNCTION_NAME="${FUNCTION}"
+
+if [ -n "$PATH_1" ];
+then
+  STACK_PATH="$PATH_2"
+else
+  STACK_PATH="$PATH_1"
+fi
+
 cd "$STACK_PATH"
 
 
