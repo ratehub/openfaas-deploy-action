@@ -11,12 +11,14 @@ ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="stack.yml"
 FUNCTION_NAME="${FUNCTION}"
+PATH_I="${PATH_1}"
+PATH_II="${PATH_2}"
 
-if [ -n "$PATH_1" ];
+if [ -n "$PATH_I" ];
 then
-  STACK_PATH="$PATH_2"
+  STACK_PATH="$PATH_II"
 else
-  STACK_PATH="$PATH_1"
+  STACK_PATH="$PATH_I"
 fi
 
 cd "$STACK_PATH"
