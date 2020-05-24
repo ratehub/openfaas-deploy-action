@@ -1,4 +1,5 @@
 #!/bin/bash -l
+
 set -eux
 
 echo "Starting function deployment process"
@@ -10,24 +11,52 @@ ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 VER_FILE="${VERSION_FILE}"
 STACK_FILE="stack.yml"
-STACK_PATH=$(dirname "$UP_PATH")
 FUNCTION_NAME="${FUNCTION}"
-cd "$STACK_PATH"
+PATH_III="$(dirname "${UP_PATH}")"
+PATH_I="${PATH_1}"
+PATH_II="${PATH_2}"
+NEW_VERSION=${VERSION}
+TARGET_ENV_FILE=${CHANGED_FILE}
+
+if [ -z "$NEW_VERSION" ];
+then
+  NEW_VERSION="latest"
+else
+  NEW_VERSION=${VERSION}
+fi
 
 
-UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$VERSION")
-echo "$UPDATED_STACK_FILE" > $STACK_FILE
-cd ..
+
+
+if [ -z "$PATH_I" ];
+then
+  if [ -z "$PATH_II" ];
+  then
+    STACK_PATH="$PATH_III"
+    cd "$STACK_PATH" && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$NEW_VERSION")
+    echo "$UPDATED_STACK_FILE" > $STACK_FILE & cd ..
+  elif [ -z "$PATH_III" ];
+  then
+    STACK_PATH="$PATH_II"
+    cd "$STACK_PATH" && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$NEW_VERSION")
+    echo "$UPDATED_STACK_FILE" > $STACK_FILE & cd ..
+  fi
+else
+  STACK_PATH="$PATH_I"
+  cd "$STACK_PATH" && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$NEW_VERSION")
+  echo "$UPDATED_STACK_FILE" > $STACK_FILE & cd ..
+fi
+
 
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
-if [ "$VER_FILE" == "version-prod.yml" ];
+if [ "$VER_FILE" == "version-prod.yml" ] || [ "$TARGET_ENV_FILE" == "env-prod.yml" ];
 then
     ENV_FILE="env-prod.yml"
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
-elif [ "$VER_FILE" == "version-staging.yml" ];
+elif [ "$VER_FILE" == "version-staging.yml" ] || [ "$TARGET_ENV_FILE" == "env-staging.yml" ];
 then
     ENV_FILE="env-staging.yml"
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
@@ -104,7 +133,13 @@ else
                         FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
                 #If the stack.yml file has changed or any of the environment files have changed, redeploy all functions in the group
-
+                elif [ "$FUNCTION_PATH" == "env-dev.yml" ] || [ "$FUNCTION_PATH" == "env-staging.yml" ] || [ "$FUNCTION_PATH" == "env-prod.yml" ];
+                then
+                    echo "$ENV_FILE"
+                    if [ "$GITHUB_EVENT_NAME" == "push" ];
+                    then
+                        faas-cli deploy --gateway="$FAAS_GATEWAY"
+                    fi
                 fi
             fi
         fi
