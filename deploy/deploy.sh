@@ -19,14 +19,14 @@ then
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
-elif [ "$BRANCH_NAME" == "staging-deploy" ] && [ "$DEPLOY_FILE" == 'staging-deploy.yml' ];
+elif [ "$BRANCH_NAME" == "staging-deploy" ] && [ "$STACK_FILE" == 'staging-deploy.yml' ];
 then
     ENV_FILE="env-staging.yml"
     STACK_FILE="staging-deploy.yml"
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
-elif [ "$BRANCH_NAME" == "dev-branch" ] && [ "$DEPLOY_FILE" == 'dev-deploy.yml' ];
+elif [ "$BRANCH_NAME" == "dev-branch" ] && [ "$STACK_FILE" == 'dev-deploy.yml' ];
 then
     ENV_FILE="env-dev.yml"
     STACK_FILE="dev-deploy.yml"
