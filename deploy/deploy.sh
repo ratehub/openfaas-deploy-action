@@ -26,7 +26,7 @@ then
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
-elif [ "$BRANCH_NAME" == "dev-deploy" ] && [ "$DEPLOY_FILE" == 'dev-deploy.yml' ];
+elif [ "$BRANCH_NAME" == "dev-branch" ] && [ "$DEPLOY_FILE" == 'dev-deploy.yml' ];
 then
     ENV_FILE="env-dev.yml"
     STACK_FILE="dev-deploy.yml"
