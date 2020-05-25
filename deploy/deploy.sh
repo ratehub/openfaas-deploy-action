@@ -95,6 +95,8 @@ else
                     cp "$GITHUB_WORKSPACE/template" -r template
                     cp "$ENV_FILE" env.yml
                     FUNCTION_PATH="`echo \"$line\" | cut -d \"/\" -f2`"
+                    ls -lah
+                    echo "$FUNCTION_PATH/$STACK_FILE"
                     UPDATED_STACK_FILE=$(yq merge "$FUNCTION_PATH/$STACK_FILE" stack.yml)
                     echo "$UPDATED_STACK_FILE" > stack.yml
                     cat stack.yml
