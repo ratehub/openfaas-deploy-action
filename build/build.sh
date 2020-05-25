@@ -12,8 +12,8 @@ BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="stack.yml"
 FUNCTION_NAME="${FUNCTION}"
 NEW_VERSION="${VERSION}"
-STACK_PATH=${PATH}
-echo $STACK_PATH
+STACK_PATH="${PATH}"
+echo "$STACK_PATH"
 
 
 cd "$STACK_PATH"
