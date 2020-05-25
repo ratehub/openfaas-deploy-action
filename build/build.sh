@@ -11,23 +11,12 @@ ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="stack.yml"
 FUNCTION_NAME="${FUNCTION}"
-PATH_I="${PATH_1}"
-echo "$PATH_I"
-PATH_II="${PATH_2}"
-echo "$PATH_II"
 NEW_VERSION="${VERSION}"
+STACK_PATH=${PATH}
 
-if [ -z "$PATH_I" ];
-then
-  STACK_PATH="$PATH_II"
-  cd "$STACK_PATH" && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$NEW_VERSION")
-  echo "$UPDATED_STACK_FILE" > $STACK_FILE && cd ..
-else
-  STACK_PATH="$PATH_I"
-  cd "$STACK_PATH" && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$NEW_VERSION")
-  echo "$UPDATED_STACK_FILE" > $STACK_FILE && cd ..
-fi
 
+cd "$STACK_PATH" && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$NEW_VERSION")
+echo "$UPDATED_STACK_FILE" > $STACK_FILE && cd ..
 
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
@@ -135,17 +124,8 @@ else
                         fi
                         FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
-                elif [ "$FUNCTION_PATH" == "stack.yml" ];
-                then
-                    if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
-                    then
-                        faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
-                    else
-                        faas-cli build --filter="$FUNCTION_PATH"
-                    fi
 
-                fi
-
+                  fi
             fi
         fi
     done < differences.txt
