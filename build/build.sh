@@ -13,13 +13,11 @@ STACK_FILE="stack.yml"
 FUNCTION_NAME="${FUNCTION}"
 NEW_VERSION="${VERSION}"
 echo "$NEW_VERSION"
-ls -lah
-STACK_PATH="testing"
+STACK_PATH="${PATH}"
 
 
 
 cd "$STACK_PATH"
-ls -lah
 UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$NEW_VERSION")"
 echo "$UPDATED_STACK_FILE" > $STACK_FILE
 cd ..

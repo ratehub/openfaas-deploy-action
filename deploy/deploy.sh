@@ -10,26 +10,32 @@ echo "Starting function deployment process"
 # ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="${DEPLOY_FILE}"
+FUNCTION_NAME="${FUNCTION}"
+STACK_PATH="$(dirname "${PATH}")"
 
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
 then
-    ENV_FILE="env-prod.yml"
+    cd "$STACK_PATH"
+    UPDATED_STACK_FILE=$(yq merge "$FUNCTION_NAME/$STACK_FILE" stack.yml)
+    echo "$UPDATED_STACK_FILE" > stack.yml
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
 elif [ "$BRANCH_NAME" == "staging-deploy" ] && [ "$STACK_FILE" == 'staging-deploy.yml' ];
 then
-    ENV_FILE="env-staging.yml"
-    STACK_FILE="staging-deploy.yml"
+    cd "$STACK_PATH"
+    UPDATED_STACK_FILE=$(yq merge "$FUNCTION_NAME/$STACK_FILE" stack.yml)
+    echo "$UPDATED_STACK_FILE" > stack.yml
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 elif [ "$BRANCH_NAME" == "dev-deploy" ] && [ "$STACK_FILE" == 'dev-deploy.yml' ];
 then
-    ENV_FILE="env-dev.yml"
-    STACK_FILE="dev-deploy.yml"
+    cd "$STACK_PATH"
+    UPDATED_STACK_FILE=$(yq merge "$FUNCTION_NAME/$STACK_FILE" stack.yml)
+    echo "$UPDATED_STACK_FILE" > stack.yml
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
@@ -93,13 +99,6 @@ else
                     GROUP_PATH2="$GROUP_PATH"
                     cd "$GITHUB_WORKSPACE/$GROUP_PATH"
                     cp "$GITHUB_WORKSPACE/template" -r template
-                    cp "$ENV_FILE" env.yml
-                    FUNCTION_PATH="`echo \"$line\" | cut -d \"/\" -f2`"
-                    ls -lah
-                    echo "$FUNCTION_PATH/$STACK_FILE"
-                    UPDATED_STACK_FILE=$(yq merge "$FUNCTION_PATH/$STACK_FILE" stack.yml)
-                    echo "$UPDATED_STACK_FILE" > stack.yml
-                    cat stack.yml
 
                 fi
 
