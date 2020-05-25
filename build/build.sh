@@ -14,7 +14,7 @@ FUNCTION_NAME="${FUNCTION}"
 NEW_VERSION="${VERSION}"
 echo "$NEW_VERSION"
 ls -lah
-STACK_PATH="${PATH}"
+STACK_PATH="testing"
 
 
 
