@@ -40,6 +40,13 @@ then
     docker login -u "${DOCKER_USERNAME_2}" -p "${DOCKER_PASSWORD_2}" "${DOCKER_REGISTRY_URL_2}"
 fi
 
+faas-cli template pull
+
+if [ -n "${CUSTOM_TEMPLATE_URL:-}" ];
+then
+    faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
+fi
+
 faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
 
 
@@ -85,9 +92,11 @@ else
                 then
                     GROUP_PATH2="$GROUP_PATH"
                     cd "$GITHUB_WORKSPACE/$GROUP_PATH"
+                    cp "$GITHUB_WORKSPACE/template" -r template
                     cp "$ENV_FILE" env.yml
                     FUNCTION_PATH="`echo \"$line\" | cut -d \"/\" -f2`"
-                    yq merge "$FUNCTION_PATH/$STACK_FILE" stack.yml
+                    UPDATED_STACK_FILE=$(yq merge "$FUNCTION_PATH/$STACK_FILE" stack.yml)
+                    echo "$UPDATED_STACK_FILE" > stack.yml
                     cat stack.yml
 
                 fi
