@@ -16,8 +16,9 @@ STACK_PATH=${PATH}
 
 
 cd "$STACK_PATH"
-UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$NEW_VERSION")
-echo "$UPDATED_STACK_FILE" > $STACK_FILE && cd ..
+UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$NEW_VERSION")"
+echo "$UPDATED_STACK_FILE" > $STACK_FILE
+cd ..
 
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
