@@ -11,6 +11,7 @@ echo "Starting function deployment process"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="${DEPLOY_FILE}"
 FUNCTION_NAME="${FUNCTION}"
+echo "${PATH}"
 STACK_PATH="$(dirname "${PATH}")"
 
 
