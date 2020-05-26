@@ -24,13 +24,11 @@ echo "$UPDATED_STACK_FILE" > $STACK_FILE && cd ..
 # Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ]  || [ "$GITHUB_EVENT_NAME" == "schedule" ];
 then
-    ENV_FILE="env-prod.yml"
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
 elif [ "$BRANCH_NAME" == "staging-deploy" ];
 then
-    ENV_FILE="env-staging.yml"
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
