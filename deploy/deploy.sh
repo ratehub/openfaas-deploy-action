@@ -8,6 +8,7 @@ BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="${DEPLOY_FILE}"
 FUNCTION_NAME="${FUNCTION}"
 STACK_DIR="${STACK_PATH}"
+GCR_URL="gcr.io/platform-235214/"
 
 
 
@@ -15,30 +16,33 @@ STACK_DIR="${STACK_PATH}"
 # Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
 then
-    cd "$STACK_DIR" && PREFIX_FILE=$(yq p "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME")
-    echo "$PREFIX_FILE" > "temp.yml"
-    UPDATED_STACK_FILE=$(yq merge "temp.yml" stack.yml)
-    echo "$UPDATED_STACK_FILE" > stack.yml && cd ..
+    cd "$STACK_DIR" && yq p -i "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME"
+    IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
+    yq w -i "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
+    yq merge -i -x "$FUNCTION_NAME/$STACK_FILE" stack.yml
+    cp -f "$FUNCTION_NAME/$STACK_FILE"  stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
 
 elif [ "$BRANCH_NAME" == "staging-deploy" ] && [ "$STACK_FILE" == 'staging-deploy.yml' ];
 then
-    cd "$STACK_DIR" && PREFIX_FILE=$(yq p "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME")
-    echo "$PREFIX_FILE" > "temp.yml"
-    UPDATED_STACK_FILE=$(yq merge "temp.yml" stack.yml)
-    echo "$UPDATED_STACK_FILE" > stack.yml && cd ..
+    cd "$STACK_DIR" && yq p -i "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME"
+    IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
+    yq w -i "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
+    yq merge -i -x "$FUNCTION_NAME/$STACK_FILE" stack.yml
+    cp -f "$FUNCTION_NAME/$STACK_FILE"  stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 
 elif [ "$BRANCH_NAME" == "dev-deploy" ] && [ "$STACK_FILE" == 'dev-deploy.yml' ];
 then
-    cd "$STACK_DIR" && PREFIX_FILE=$(yq p "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME")
-    echo "$PREFIX_FILE" > "temp.yml"
-    UPDATED_STACK_FILE=$(yq merge "temp.yml" stack.yml)
-    echo "$UPDATED_STACK_FILE" > stack.yml && cd ..
+    cd "$STACK_DIR" && yq p -i "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME"
+    IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
+    yq w -i "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
+    yq merge -i -x "$FUNCTION_NAME/$STACK_FILE" stack.yml
+    cp -f "$FUNCTION_NAME/$STACK_FILE"  stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
