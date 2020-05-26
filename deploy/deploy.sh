@@ -11,7 +11,7 @@ STACK_DIR="${STACK_PATH}"
 
 
 cd "$STACK_DIR" && PREFIX_FILE=$(yq p "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME")
-echo "$PREFIX_FILE" > "$STACK_FILE" && cd ..
+echo "$PREFIX_FILE" > "$FUNCTION_NAME/$STACK_FILE" && cd ..
 
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
