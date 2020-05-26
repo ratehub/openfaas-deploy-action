@@ -19,29 +19,29 @@ if [ "$BRANCH_NAME" == "master" ];
 then
     cd "$STACK_DIR"
     UPDATED_STACK_FILE=$(yq merge "$FUNCTION_NAME/$STACK_FILE" stack.yml)
-    echo "$UPDATED_STACK_FILE" > stack.yml
+    echo "$UPDATED_STACK_FILE" > stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
-    cd ..
+
 elif [ "$BRANCH_NAME" == "staging-deploy" ] && [ "$STACK_FILE" == 'staging-deploy.yml' ];
 then
     cd "$STACK_DIR"
     UPDATED_STACK_FILE=$(yq merge "$FUNCTION_NAME/$STACK_FILE" stack.yml)
-    echo "$UPDATED_STACK_FILE" > stack.yml
+    echo "$UPDATED_STACK_FILE" > stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
-    cd ..
+
 elif [ "$BRANCH_NAME" == "dev-deploy" ] && [ "$STACK_FILE" == 'dev-deploy.yml' ];
 then
     cd "$STACK_DIR"
     UPDATED_STACK_FILE=$(yq merge "$FUNCTION_NAME/$STACK_FILE" stack.yml)
-    echo "$UPDATED_STACK_FILE" > stack.yml
+    echo "$UPDATED_STACK_FILE" > stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
-    cd ..
+    
 fi
 
 if [ -n "${DOCKER_USERNAME_2:-}" ] && [ -n "${DOCKER_PASSWORD_2:-}" ];
