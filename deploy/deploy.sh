@@ -12,9 +12,8 @@ GCR_URL="gcr.io/platform-235214/"
 
 
 
-
-# Depending on which branch we want to choose a different set of environment variables and credentials
-if [ "$BRANCH_NAME" == "master" ];
+# Depending on which deploy file is updated
+if [ "$BRANCH_NAME" == "master" ] && [ "$STACK_FILE" == 'prod-deploy.yml' ];
 then
     cd "$STACK_DIR" && yq p -i "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME"
     IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
@@ -25,7 +24,7 @@ then
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
 
-elif [ "$BRANCH_NAME" == "staging-deploy" ] && [ "$STACK_FILE" == 'staging-deploy.yml' ];
+elif [ "$STACK_FILE" == 'staging-deploy.yml' ];
 then
     cd "$STACK_DIR" && yq p -i "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME"
     IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
@@ -36,7 +35,7 @@ then
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 
-elif [ "$BRANCH_NAME" == "dev-deploy" ] && [ "$STACK_FILE" == 'dev-deploy.yml' ];
+elif [ "$STACK_FILE" == 'dev-deploy.yml' ];
 then
     cd "$STACK_DIR" && yq p -i "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME"
     IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
@@ -81,7 +80,6 @@ then
         FUNCTION_PATH="`echo \"$func\" | cut -d \"/\" -f2`"
 
         cd "$GITHUB_WORKSPACE/$GROUP_PATH"
-        cp "$ENV_FILE" env.yml
 
         faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
 
@@ -124,17 +122,10 @@ else
                         fi
                         FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
-                #If the stack.yml file has changed or any of the environment files have changed, redeploy all functions in the group
-                elif [ "$FUNCTION_PATH" == "env-dev.yml" ] || [ "$FUNCTION_PATH" == "env-staging.yml" ] || [ "$FUNCTION_PATH" == "env-prod.yml" ];
-                then
-                    if [ "$GITHUB_EVENT_NAME" == "push" ];
-                    then
-                        faas-cli deploy --gateway="$FAAS_GATEWAY"
-                    fi
+
                 fi
             fi
         fi
-        # Else: do nothing since the only modifications would be at the root and not in any function folders
     done < differences.txt
 fi
 
@@ -144,12 +135,12 @@ then
     if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ];
     then
         curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
-    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$BRANCH_NAME" == "staging-deploy" ];
+    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$STACK_FILE" == 'staging-deploy.yml' ];
     then
         curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
     fi
 
-    echo "Finished function deployment process"
+    echo "##### Finished function deployment process #####"
 else
-    echo "Deployment finished"
+    echo "##### Deployment finished #####"
 fi

@@ -7,7 +7,7 @@ echo "Starting function push process"
 # If there's a stack file in the root of the repo, assume we want to deploy everything
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
 then
-    cp "$ENV_FILE" env.yml
+
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
         faas-cli push
@@ -22,7 +22,6 @@ then
 
         cd "$GITHUB_WORKSPACE/$GROUP_PATH"
         cp "$GITHUB_WORKSPACE/template" -r template
-        cp "$ENV_FILE" env.yml
 
 
         faas-cli push --filter="$FUNCTION_PATH"
