@@ -33,7 +33,6 @@ then
     faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
 fi
 
-faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
 
 echo "##### Function template pull process is done #####"
 
