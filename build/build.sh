@@ -108,7 +108,6 @@ else
                     GROUP_PATH2="$GROUP_PATH"
                     cd "$GITHUB_WORKSPACE/$GROUP_PATH"
                     cp "$GITHUB_WORKSPACE/template" -r template
-                    cp "$ENV_FILE" env.yml
                 fi
 
                 FUNCTION_PATH="`echo \"$line\" | cut -d \"/\" -f2`"
