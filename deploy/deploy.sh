@@ -11,13 +11,13 @@ echo "Starting function deployment process"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="${DEPLOY_FILE}"
 FUNCTION_NAME="${FUNCTION}"
-STACK_PATH="${PATH}"
+STACK_PATH="${STACK_DIR}"
 
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
 then
-    cd "$STACK_PATH"
+    cd "$NEW_PATH"
     UPDATED_STACK_FILE=$(yq merge "$FUNCTION_NAME/$STACK_FILE" stack.yml)
     echo "$UPDATED_STACK_FILE" > stack.yml
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
