@@ -7,20 +7,18 @@ echo "Starting function template pull process"
 FAAS_GATEWAY="${GATEWAY_URL_DEV}"
 FAAS_USER="${GATEWAY_USERNAME_DEV}"
 FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
-ENV_FILE="env-dev.yml"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="stack.yml"
 FUNCTION_NAME="${FUNCTION}"
 NEW_VERSION="${VERSION}"
 echo "$NEW_VERSION"
-STACK_PATH="${PATH}"
+STACK_PATH="${STACK_DIR}"
+GCR_URL="gcr.io/platform-235214/"
 
 
 
-cd "$STACK_PATH"
-UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image gcr.io/platform-235214/"$FUNCTION_NAME":"$NEW_VERSION")"
-echo "$UPDATED_STACK_FILE" > $STACK_FILE
-cd ..
+cd "$STACK_PATH" && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$FUNCTION_NAME":"$NEW_VERSION")"
+echo "$UPDATED_STACK_FILE" > $STACK_FILE && cd ..
 
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
