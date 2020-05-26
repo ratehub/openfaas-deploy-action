@@ -11,13 +11,13 @@ echo "Starting function deployment process"
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="${DEPLOY_FILE}"
 FUNCTION_NAME="${FUNCTION}"
-STACK_PATH="${STACK_DIR}"
+STACK_DIR="${STACK_PATH}"
 
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
 then
-    cd "$NEW_PATH"
+    cd "$STACK_DIR"
     UPDATED_STACK_FILE=$(yq merge "$FUNCTION_NAME/$STACK_FILE" stack.yml)
     echo "$UPDATED_STACK_FILE" > stack.yml
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
@@ -25,7 +25,7 @@ then
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
 elif [ "$BRANCH_NAME" == "staging-deploy" ] && [ "$STACK_FILE" == 'staging-deploy.yml' ];
 then
-    cd "$STACK_PATH"
+    cd "$STACK_DIR"
     UPDATED_STACK_FILE=$(yq merge "$FUNCTION_NAME/$STACK_FILE" stack.yml)
     echo "$UPDATED_STACK_FILE" > stack.yml
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
@@ -33,7 +33,7 @@ then
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 elif [ "$BRANCH_NAME" == "dev-deploy" ] && [ "$STACK_FILE" == 'dev-deploy.yml' ];
 then
-    cd "$STACK_PATH"
+    cd "$STACK_DIR"
     UPDATED_STACK_FILE=$(yq merge "$FUNCTION_NAME/$STACK_FILE" stack.yml)
     echo "$UPDATED_STACK_FILE" > stack.yml
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
