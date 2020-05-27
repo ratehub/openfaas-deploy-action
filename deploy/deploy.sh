@@ -19,7 +19,7 @@ then
     IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
     yq w -i "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
     cat "$FUNCTION_NAME/$STACK_FILE"
-    yq merge -i -x "$FUNCTION_NAME/$STACK_FILE" stack.yml
+    yq merge -i "$FUNCTION_NAME/$STACK_FILE" stack.yml
     cat "$FUNCTION_NAME/$STACK_FILE"
     cp -f "$FUNCTION_NAME/$STACK_FILE" stack.yml
     cat "$FUNCTION_NAME/$STACK_FILE"
@@ -34,7 +34,7 @@ then
     cd "$STACK_DIR" && yq p -i "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME"
     IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
     yq w -i "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
-    yq merge -i -x "$FUNCTION_NAME/$STACK_FILE" stack.yml
+    yq merge -i "$FUNCTION_NAME/$STACK_FILE" stack.yml
     cp -f "$FUNCTION_NAME/$STACK_FILE" stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
@@ -45,7 +45,7 @@ then
     cd "$STACK_DIR" && yq p -i "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME"
     IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
     yq w -i "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
-    yq merge -i -x "$FUNCTION_NAME/$STACK_FILE" stack.yml
+    yq merge -i "$FUNCTION_NAME/$STACK_FILE" stack.yml
     cp -f "$FUNCTION_NAME/$STACK_FILE" stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
