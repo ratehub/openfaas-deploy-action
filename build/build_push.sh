@@ -14,8 +14,9 @@ GCR_URL="gcr.io/platform-235214/"
 
 
 
-cd "$STACK_PATH" && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$FUNCTION_NAME":"$NEW_VERSION")"
-echo "$UPDATED_STACK_FILE" > $STACK_FILE && cd ..
+
+# cd "$STACK_PATH" && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$FUNCTION_NAME":"$NEW_VERSION")"
+# echo "$UPDATED_STACK_FILE" > $STACK_FILE && cd ..
 
 
 
@@ -101,8 +102,14 @@ else
                     then
                         if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
                         then
+                            cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
+                            cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_URL""$FUNCTION_PATH":"$PACKAGE_VERSION")"
+                            echo "$UPDATED_STACK_FILE" > $STACK_FILE
                             faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
                         else
+                            cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
+                            cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$FUNCTION_NAME":"$PACKAGE_VERSION")"
+                            echo "$UPDATED_STACK_FILE" > $STACK_FILE 
                             faas-cli build --filter="$FUNCTION_PATH"
                         fi
                         if [ "$GITHUB_EVENT_NAME" == "push" ];
