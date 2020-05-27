@@ -19,7 +19,7 @@ then
     IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
     yq w -i "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
     yq merge -i -x "$FUNCTION_NAME/$STACK_FILE" stack.yml
-    cp -f "$FUNCTION_NAME/$STACK_FILE"  stack.yml && cd ..
+    cp -f "$FUNCTION_NAME/$STACK_FILE" stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
@@ -30,7 +30,7 @@ then
     IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
     yq w -i "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
     yq merge -i -x "$FUNCTION_NAME/$STACK_FILE" stack.yml
-    cp -f "$FUNCTION_NAME/$STACK_FILE"  stack.yml && cd ..
+    cp -f "$FUNCTION_NAME/$STACK_FILE" stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
@@ -41,7 +41,7 @@ then
     IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
     yq w -i "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
     yq merge -i -x "$FUNCTION_NAME/$STACK_FILE" stack.yml
-    cp -f "$FUNCTION_NAME/$STACK_FILE"  stack.yml && cd ..
+    cp -f "$FUNCTION_NAME/$STACK_FILE" stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
