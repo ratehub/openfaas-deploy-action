@@ -6,10 +6,6 @@ echo "##### Starting function template pull process #####"
 
 
 STACK_FILE="stack.yml"
-FUNCTION_NAME="${FUNCTION}"
-NEW_VERSION="${VERSION}"
-echo "$NEW_VERSION"
-STACK_PATH="${STACK_DIR}"
 GCR_URL="gcr.io/platform-235214/"
 
 
@@ -109,7 +105,7 @@ else
                         else
                             cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
                             cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$FUNCTION_NAME":"$PACKAGE_VERSION")"
-                            echo "$UPDATED_STACK_FILE" > $STACK_FILE 
+                            echo "$UPDATED_STACK_FILE" > $STACK_FILE
                             faas-cli build --filter="$FUNCTION_PATH"
                         fi
                         if [ "$GITHUB_EVENT_NAME" == "push" ];
