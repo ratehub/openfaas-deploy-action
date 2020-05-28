@@ -1,6 +1,6 @@
-# push.yml
-name: 'Function push'
-description: 'Push FaaS functions to the container registry'
+# build.yml
+name: 'Function build and push'
+description: 'Build and Push FaaS functions'
 outputs:
   status:
     description: 'Whether the process succeeded or failed'

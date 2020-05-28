@@ -2,19 +2,11 @@
 
 set -eux
 
-echo "##### Starting function template pull process #####"
-
+echo "--------- Starting function template pull process ---------"
 
 STACK_FILE="stack.yml"
-GCR_URL="gcr.io/platform-235214/"
-
-
-
-
-# cd "$STACK_PATH" && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$FUNCTION_NAME":"$NEW_VERSION")"
-# echo "$UPDATED_STACK_FILE" > $STACK_FILE && cd ..
-
-
+# Default GCR url/project ID
+GCR_ID="gcr.io/platform-235214/"
 
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"
 
@@ -31,9 +23,11 @@ then
 fi
 
 
-echo "##### Function template pull process is done #####"
+echo "--------- Function template pull process is done ---------"
 
-echo "##### Starting function build and push process #####"
+echo "***********************************************************"
+
+echo "--------- Starting function build and push process ---------"
 
 if [ -f "$GITHUB_WORKSPACE/$STACK_FILE" ];
 then
@@ -50,6 +44,7 @@ then
 
 elif [ "$GITHUB_EVENT_NAME" == "schedule" ];
 then
+    echo "--------- FaaS Build triggered by schedule ---------"
     reDeployFuncs=($SCHEDULED_REDEPLOY_FUNCS)
     for func in "${reDeployFuncs[@]}"
     do
@@ -98,13 +93,17 @@ else
                     then
                         if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
                         then
+                            # Get the update version from the package.json file
                             cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-                            cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_URL""$FUNCTION_PATH":"$PACKAGE_VERSION")"
+                            # Write the updated version into stack file image properties tag
+                            cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")"
                             echo "$UPDATED_STACK_FILE" > $STACK_FILE
                             faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
                         else
+                            # Get the update version from the package.json file
                             cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-                            cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$FUNCTION_NAME":"$PACKAGE_VERSION")"
+                            # Write the updated version into stack file image properties tag
+                            cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_ID""$FUNCTION_NAME":"$PACKAGE_VERSION")"
                             echo "$UPDATED_STACK_FILE" > $STACK_FILE
                             faas-cli build --filter="$FUNCTION_PATH"
                         fi
@@ -121,4 +120,4 @@ else
 
 fi
 
-echo "##### Function build and Push process is done #####"
+echo "--------- Function build and Push process is done ---------"
