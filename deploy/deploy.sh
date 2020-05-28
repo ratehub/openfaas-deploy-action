@@ -5,48 +5,47 @@ set -eux
 echo "Starting function deployment process"
 
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
-STACK_FILE="${DEPLOY_FILE}"
-FUNCTION_NAME="${FUNCTION}"
-STACK_DIR="${STACK_PATH}"
 GCR_URL="gcr.io/platform-235214/"
 
+COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
+# shellcheck disable=SC2006
+DEPLOY_FILE="`echo "$COMMIT_PATH" | awk -F"/" '{print $3}'`"
+# shellcheck disable=SC2006
+FUNCTION_NAME="`echo "$COMMIT_PATH" | awk -F"/" '{print $2}'`"
+# shellcheck disable=SC2006
+STACK_PATH="`echo "$COMMIT_PATH" | awk -F"/" '{print $1}'`"
 
 
 # Depending on which deploy file is updated
-if [ "$BRANCH_NAME" == "master" ] && [ "$STACK_FILE" == 'prod-deploy.yml' ];
+if [ "$BRANCH_NAME" == "master" ] && [ "$DEPLOY_FILE" == "prod-deploy.yml" ];
 then
-    cd "$STACK_DIR" && yq p -i "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME"
-    IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
-    yq w -i "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
-    cat "$FUNCTION_NAME/$STACK_FILE"
-    yq merge -i "$FUNCTION_NAME/$STACK_FILE" stack.yml
-    cat "$FUNCTION_NAME/$STACK_FILE"
-    cp -f "$FUNCTION_NAME/$STACK_FILE" stack.yml
-    cat "$FUNCTION_NAME/$STACK_FILE"
-    cat stack.yml && cd ..
-
+    cd "$STACK_PATH" && yq p -i "$FUNCTION_NAME/$DEPLOY_FILE" "functions"."$FUNCTION_NAME"
+    IMAGE_TAG=$(yq r "$FUNCTION_NAME/$DEPLOY_FILE" functions."$FUNCTION_NAME".image)
+    yq w -i "$FUNCTION_NAME/$DEPLOY_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
+    yq merge -i "$FUNCTION_NAME/$DEPLOY_FILE" stack.yml
+    cp -f "$FUNCTION_NAME/$DEPLOY_FILE" stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
 
-elif [ "$STACK_FILE" == 'staging-deploy.yml' ];
+elif [ "$DEPLOY_FILE" == 'staging-deploy.yml' ];
 then
-    cd "$STACK_DIR" && yq p -i "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME"
-    IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
-    yq w -i "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
-    yq merge -i "$FUNCTION_NAME/$STACK_FILE" stack.yml
-    cp -f "$FUNCTION_NAME/$STACK_FILE" stack.yml && cd ..
+    cd "$STACK_PATH" && yq p -i "$FUNCTION_NAME/$DEPLOY_FILE" "functions"."$FUNCTION_NAME"
+    IMAGE_TAG=$(yq r "$FUNCTION_NAME/$DEPLOY_FILE" functions."$FUNCTION_NAME".image)
+    yq w -i "$FUNCTION_NAME/$DEPLOY_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
+    yq merge -i "$FUNCTION_NAME/$DEPLOY_FILE" stack.yml
+    cp -f "$FUNCTION_NAME/$DEPLOY_FILE" stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 
-elif [ "$STACK_FILE" == 'dev-deploy.yml' ];
+elif [ "$DEPLOY_FILE" == 'dev-deploy.yml' ];
 then
-    cd "$STACK_DIR" && yq p -i "$FUNCTION_NAME/$STACK_FILE" "functions"."$FUNCTION_NAME"
-    IMAGE_TAG=$(yq r "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image)
-    yq w -i "$FUNCTION_NAME/$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
-    yq merge -i "$FUNCTION_NAME/$STACK_FILE" stack.yml
-    cp -f "$FUNCTION_NAME/$STACK_FILE" stack.yml && cd ..
+    cd "$STACK_PATH" && yq p -i "$FUNCTION_NAME/$DEPLOY_FILE" "functions"."$FUNCTION_NAME"
+    IMAGE_TAG=$(yq r "$FUNCTION_NAME/$DEPLOY_FILE" functions."$FUNCTION_NAME".image)
+    yq w -i "$FUNCTION_NAME/$DEPLOY_FILE" functions."$FUNCTION_NAME".image "$GCR_URL""$IMAGE_TAG"
+    yq merge -i "$FUNCTION_NAME/$DEPLOY_FILE" stack.yml
+    cp -f "$FUNCTION_NAME/$DEPLOY_FILE" stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
@@ -140,7 +139,7 @@ then
     if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ];
     then
         curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
-    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$STACK_FILE" == 'staging-deploy.yml' ];
+    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$DEPLOY_FILE" == 'staging-deploy.yml' ];
     then
         curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
     fi
