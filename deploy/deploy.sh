@@ -6,7 +6,7 @@ echo "--------- Starting function deployment process ---------"
 
 # Get the branch name, commit touch, deploy file, stack file path, function name
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
-GCR_URL="gcr.io/platform-235214/"
+GCR_ID="gcr.io/platform-235214/"
 COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
 DEPLOY_FILE="`echo "$COMMIT_PATH" | awk -F"/" '{print $3}'`"
 FUNCTION_NAME="`echo "$COMMIT_PATH" | awk -F"/" '{print $2}'`"
