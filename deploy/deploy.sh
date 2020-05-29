@@ -46,6 +46,7 @@ then
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
+    echo "$FAAS_USER"
 
 fi
 
@@ -61,6 +62,7 @@ then
     faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
 fi
 
+echo "$FAAS_USER"
 faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
 
 
@@ -87,6 +89,7 @@ then
         curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
     done
 else
+
     GROUP_PATH=""
     GROUP_PATH2=""
     FUNCTION_PATH2=""
