@@ -9,46 +9,39 @@ BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 GCR_ID="gcr.io/platform-235214/"
 COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
 DEPLOY_FILE="`echo "$COMMIT_PATH" | awk -F"/" '{print $3}'`"
-FUNCTION_NAME="`echo "$COMMIT_PATH" | awk -F"/" '{print $2}'`"
-STACK_PATH="`echo "$COMMIT_PATH" | awk -F"/" '{print $1}'`"
+FUNCTION="`echo "$COMMIT_PATH" | awk -F"/" '{print $2}'`"
+#STACK_PATH="`echo "$COMMIT_PATH" | awk -F"/" '{print $1}'`"
+
+echo "$DEPLOY_FILE" > changed_files.txt
+echo "$FUNCTION" > functions.txt
+COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 
 
 # Depending on which deploy file is updated assign respective environment variables
-if [ "$BRANCH_NAME" == "master" ] && [ "$DEPLOY_FILE" == "prod-deploy.yml" ];
+if [ "$BRANCH_NAME" == "master" ] && [ "$COMMITTED_FILES" == "prod-deploy.yml" ];
 then
-    cd "$STACK_PATH" && yq p -i "$FUNCTION_NAME/$DEPLOY_FILE" "functions"."$FUNCTION_NAME"
-    IMAGE_TAG=$(yq r "$FUNCTION_NAME/$DEPLOY_FILE" functions."$FUNCTION_NAME".image)
-    yq w -i "$FUNCTION_NAME/$DEPLOY_FILE" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
-    yq merge -i "$FUNCTION_NAME/$DEPLOY_FILE" stack.yml
-    cp -f "$FUNCTION_NAME/$DEPLOY_FILE" stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
 
-elif [ "$DEPLOY_FILE" == 'staging-deploy.yml' ];
+elif [ "$COMMITTED_FILES" == 'staging-deploy.yml' ];
 then
-    cd "$STACK_PATH" && yq p -i "$FUNCTION_NAME/$DEPLOY_FILE" "functions"."$FUNCTION_NAME"
-    IMAGE_TAG=$(yq r "$FUNCTION_NAME/$DEPLOY_FILE" functions."$FUNCTION_NAME".image)
-    yq w -i "$FUNCTION_NAME/$DEPLOY_FILE" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
-    yq merge -i "$FUNCTION_NAME/$DEPLOY_FILE" stack.yml
-    cp -f "$FUNCTION_NAME/$DEPLOY_FILE" stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 
-elif [ "$DEPLOY_FILE" == 'dev-deploy.yml' ];
+elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ];
 then
-    cd "$STACK_PATH" && yq p -i "$FUNCTION_NAME/$DEPLOY_FILE" "functions"."$FUNCTION_NAME"
-    IMAGE_TAG=$(yq r "$FUNCTION_NAME/$DEPLOY_FILE" functions."$FUNCTION_NAME".image)
-    yq w -i "$FUNCTION_NAME/$DEPLOY_FILE" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
-    yq merge -i "$FUNCTION_NAME/$DEPLOY_FILE" stack.yml
-    cp -f "$FUNCTION_NAME/$DEPLOY_FILE" stack.yml && cd ..
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
-    echo "$FAAS_USER"
+
+else
+  echo "$COMMITTED_FILES"
+  exit
 
 fi
+
 
 if [ -n "${DOCKER_USERNAME_2:-}" ] && [ -n "${DOCKER_PASSWORD_2:-}" ];
 then
@@ -57,14 +50,14 @@ fi
 
 faas-cli template pull
 
+
 if [ -n "${CUSTOM_TEMPLATE_URL:-}" ];
 then
     faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
 fi
 
-echo "$FAAS_USER"
-faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
 
+faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
 
 # If there's a stack file in the root of the repo, assume we want to deploy everything
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
@@ -109,6 +102,7 @@ else
                     GROUP_PATH2="$GROUP_PATH"
                     cd "$GITHUB_WORKSPACE/$GROUP_PATH"
                     cp "$GITHUB_WORKSPACE/template" -r template
+                    cp "$GITHUB_WORKSPACE/functions.txt" -r functions.txt
 
                 fi
 
@@ -119,32 +113,38 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
-
-                        if [ "$GITHUB_EVENT_NAME" == "push" ];
-                        then
-                            faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
-                        fi
-                        FUNCTION_PATH2="$FUNCTION_PATH"
+                      yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
+                      IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
+                      yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
                     fi
+                    yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
+                    cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
+
+                    while IFS= read -r LINE; do
+                        faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$LINE"
+                    done < functions.txt
+                    FUNCTION_PATH2="$FUNCTION_PATH"
 
                 fi
+
             fi
         fi
+
     done < differences.txt
 fi
 
-if [ "$GITHUB_EVENT_NAME" == "push" ];
-then
-    # Query gateway action so that functions are added to gateway
-    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ];
-    then
-        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
-    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$DEPLOY_FILE" == 'staging-deploy.yml' ];
-    then
-        curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
-    fi
+#if [ "$GITHUB_EVENT_NAME" == "push" ];
+#then
+#    # Query gateway action so that functions are added to gateway
+#    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ];
+#    then
+#        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
+#    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$DEPLOY_FILE" == 'staging-deploy.yml' ];
+#    then
+#       curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
+#    fi
 
-    echo "--------- Finished function deployment process ---------"
-else
-    echo "--------- Deployment finished ---------"
-fi
+#    echo "--------- Finished function deployment process ---------"
+#else
+#     echo "--------- Deployment finished ---------"
+#fi
