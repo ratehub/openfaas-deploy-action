@@ -61,6 +61,7 @@ then
             faas-cli build --filter="$FUNCTION_PATH"
         fi
         faas-cli push --filter="$FUNCTION_PATH"
+        faas-cli deploy --gateway="$FAAS_GATEWAY"
     done
 else
     GROUP_PATH=""
