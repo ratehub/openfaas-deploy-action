@@ -115,12 +115,7 @@ else
                     then
                       yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
                       IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
-                      if [[ -z "$IMAGE_TAG" ]];
-                      then
-                        yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""latest"
-                      else
-                        yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
-                      fi
+                      yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
                     fi
                     yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
                     cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
@@ -138,18 +133,18 @@ else
     done < differences.txt
 fi
 
-#if [ "$GITHUB_EVENT_NAME" == "push" ];
-#then
-#    # Query gateway action so that functions are added to gateway
-#    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ];
-#    then
-#        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
-#    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$DEPLOY_FILE" == 'staging-deploy.yml' ];
-#    then
-#       curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
-#    fi
+if [ "$GITHUB_EVENT_NAME" == "push" ];
+then
+    # Query gateway action so that functions are added to gateway
+    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ];
+    then
+        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
+    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$DEPLOY_FILE" == 'staging-deploy.yml' ];
+    then
+       curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
+    fi
 
-#    echo "--------- Finished function deployment process ---------"
-#else
-#     echo "--------- Deployment finished ---------"
-#fi
+
+else
+     echo "--------- Deployment finished ---------"
+fi
