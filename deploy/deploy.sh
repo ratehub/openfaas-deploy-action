@@ -115,7 +115,12 @@ else
                     then
                       yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
                       IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
-                      yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
+                      if [[ -z "$IMAGE_TAG" ]];
+                      then
+                        yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""latest"
+                      else
+                        yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
+                      fi
                     fi
                     yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
                     cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
