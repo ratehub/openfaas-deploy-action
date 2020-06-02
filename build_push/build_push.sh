@@ -4,6 +4,7 @@ set -eux
 
 echo "--------- Starting function template pull process ---------"
 
+BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="stack.yml"
 # Default GCR url/project ID
 GCR_ID="gcr.io/platform-235214/"
