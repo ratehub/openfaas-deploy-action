@@ -18,39 +18,25 @@ COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : 
 
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
-if [ "$BRANCH_NAME" == "master" ]  && [ "$COMMITTED_FILES" == 'prod-deploy.yml' ];
+if [ "$BRANCH_NAME" == "master" ];
 then
-    FAAS_GATEWAY="${GATEWAY_URL_PROD}"
-    FAAS_USER="${GATEWAY_USERNAME_PROD}"
-    FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
-
-elif [ "$COMMITTED_FILES" == 'staging-deploy.yml' ];
-then
-    FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
-    FAAS_USER="${GATEWAY_USERNAME_STAGING}"
-    FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
-
-elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ];
-then
-    FAAS_GATEWAY="${GATEWAY_URL_DEV}"
-    FAAS_USER="${GATEWAY_USERNAME_DEV}"
-    FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
-elif [ "$COMMIT_PATH" == 'dev-deploy.yml' ];
-then
-    FAAS_GATEWAY="${GATEWAY_URL_DEV}"
-    FAAS_USER="${GATEWAY_USERNAME_DEV}"
-    FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
-
-elif [ "$COMMIT_PATH" == 'staging-deploy.yml' ];
+    if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ];
+    then
+        FAAS_GATEWAY="${GATEWAY_URL_PROD}"
+        FAAS_USER="${GATEWAY_USERNAME_PROD}"
+        FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
+    fi
+elif [ "$COMMITTED_FILES" == 'staging-deploy.yml' ] ||[ "$COMMIT_PATH" == 'staging-deploy.yml' ];
 then
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
-elif [ "$COMMIT_PATH" == 'prod-deploy.yml' ];
+
+elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ];
 then
-    FAAS_GATEWAY="${GATEWAY_URL_PROD}"
-    FAAS_USER="${GATEWAY_USERNAME_PROD}"
-    FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
+    FAAS_GATEWAY="${GATEWAY_URL_DEV}"
+    FAAS_USER="${GATEWAY_USERNAME_DEV}"
+    FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
 fi
 
 

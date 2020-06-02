@@ -51,7 +51,7 @@ then
     fi
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
-        faas-cli push
+        faas-cli push --filter="$FUNCTION_PATH"
     fi
 
 elif [ "$GITHUB_EVENT_NAME" == "schedule" ];
