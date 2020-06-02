@@ -16,8 +16,9 @@ echo "$DEPLOY_FILE" > changed_files.txt
 echo "$FUNCTION" > functions.txt
 COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 
-# Depending on which deploy file is updated assign respective environment variables
-if [ "$BRANCH_NAME" == "master" ] && [ "$COMMITTED_FILES" == "prod-deploy.yml" ];
+
+# Depending on which branch we want to choose a different set of environment variables and credentials
+if [ "$BRANCH_NAME" == "master" ]  && [ "$COMMITTED_FILES" == 'prod-deploy.yml' ];
 then
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
@@ -34,7 +35,6 @@ then
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
-
 else
   echo "$COMMITTED_FILES"
   exit
@@ -61,6 +61,13 @@ faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_
 # If there's a stack file in the root of the repo, assume we want to deploy everything
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
 then
+    DEPLOY_FILE="`echo "$COMMIT_PATH" | awk -F"/" '{print $3}'`"
+    FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
+    yq p -i "$DEPLOY_FILE" "functions"."$FUNCTION_NAME"
+    IMAGE_TAG=$(yq r "$DEPLOY_FILE" functions."$FUNCTION_NAME".image)
+    yq w -i "$DEPLOY_FILE" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
+    yq merge -i "$DEPLOY_FILE" stack.yml
+    cp -f "$DEPLOY_FILE" stack.yml
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
         faas-cli deploy --gateway="$FAAS_GATEWAY"

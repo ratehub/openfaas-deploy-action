@@ -8,6 +8,13 @@ STACK_FILE="stack.yml"
 # Default GCR url/project ID
 GCR_ID="gcr.io/platform-235214/"
 
+if [ "$BRANCH_NAME" == "master" ]  || [ "$GITHUB_EVENT_NAME" == "schedule" ];
+then
+    FAAS_GATEWAY="${GATEWAY_URL_PROD}"
+    FAAS_USER="${GATEWAY_USERNAME_PROD}"
+    FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
+fi
+
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"
 
 if [ -n "${DOCKER_USERNAME_2:-}" ] && [ -n "${DOCKER_PASSWORD_2:-}" ];
