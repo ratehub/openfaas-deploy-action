@@ -16,7 +16,6 @@ echo "$DEPLOY_FILE" > changed_files.txt
 echo "$FUNCTION" > functions.txt
 COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 
-
 # Depending on which deploy file is updated assign respective environment variables
 if [ "$BRANCH_NAME" == "master" ] && [ "$COMMITTED_FILES" == "prod-deploy.yml" ];
 then
@@ -67,20 +66,6 @@ then
     then
         faas-cli deploy --gateway="$FAAS_GATEWAY"
     fi
-elif [ "$GITHUB_EVENT_NAME" == "schedule" ];
-then
-    reDeployFuncs=($SCHEDULED_REDEPLOY_FUNCS)
-    for func in "${reDeployFuncs[@]}"
-    do
-        GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
-        FUNCTION_PATH="`echo \"$func\" | cut -d \"/\" -f2`"
-
-        cd "$GITHUB_WORKSPACE/$GROUP_PATH"
-
-        faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
-
-        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
-    done
 else
 
     GROUP_PATH=""
