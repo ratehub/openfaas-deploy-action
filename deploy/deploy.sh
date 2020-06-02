@@ -37,7 +37,7 @@ then
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
 else
   echo "$COMMITTED_FILES"
-  exit
+  
 
 fi
 
