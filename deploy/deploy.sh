@@ -37,7 +37,7 @@ then
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
 else
   echo "$COMMITTED_FILES"
-  
+
 
 fi
 
@@ -61,13 +61,13 @@ faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_
 # If there's a stack file in the root of the repo, assume we want to deploy everything
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
 then
-    DEPLOY_FILE="`echo "$COMMIT_PATH" | awk -F"/" '{print $3}'`"
+
     FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-    yq p -i "$DEPLOY_FILE" "functions"."$FUNCTION_NAME"
-    IMAGE_TAG=$(yq r "$DEPLOY_FILE" functions."$FUNCTION_NAME".image)
-    yq w -i "$DEPLOY_FILE" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
-    yq merge -i "$DEPLOY_FILE" stack.yml
-    cp -f "$DEPLOY_FILE" stack.yml
+    yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
+    IMAGE_TAG=$(yq r "$COMMIT_PATH" functions."$FUNCTION_NAME".image)
+    yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
+    yq merge -i "$COMMIT_PATH" stack.yml
+    cp -f "$COMMIT_PATH" stack.yml
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
         faas-cli deploy --gateway="$FAAS_GATEWAY"
