@@ -144,7 +144,7 @@ then
        curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
     fi
 
-
+    echo "---------- Deployment finished-----------"
 else
-     echo "--------- Deployment finished ---------"
+     echo "--------- Deployment finished for dev environment---------"
 fi
