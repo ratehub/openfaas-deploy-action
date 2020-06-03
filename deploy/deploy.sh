@@ -16,6 +16,13 @@ echo "$DEPLOY_FILE" > changed_files.txt
 echo "$FUNCTION" > functions.txt
 COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 
+if [ -z "${TAG_OVERRIDE}" ];
+then
+   TAG="invalid"
+else
+   TAG="${TAG_OVERRIDE}"
+fi
+
 
 # Depending on which branch we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
@@ -32,10 +39,13 @@ then
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 
-else
+elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$TAG" == 'latest' ];
+then
+    COMMITTED_FILES="dev-deploy.yml"
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
+
 fi
 
 
@@ -101,15 +111,14 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
-                      if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMITTED_FILES" == 'staging-deploy.yml' ];
+                      if [ -z "${TAG_OVERRIDE}" ];
                       then
                           yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
                           IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
                           yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
                       else
-                          COMMITTED_FILES="dev-deploy.yml"
                           yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
-                          yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"latest"
+                          yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"${TAG_OVERRIDE}"
                       fi
                       yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
                       cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
@@ -120,6 +129,7 @@ else
                       FUNCTION_PATH2="$FUNCTION_PATH"
 
                     fi
+
                 fi
 
             fi
