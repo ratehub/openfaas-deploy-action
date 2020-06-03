@@ -9,9 +9,9 @@ STACK_FILE="stack.yml"
 # Default GCR url/project ID
 GCR_ID="gcr.io/platform-235214/"
 
-if [ -z "${TAG_OVERRIDE}" ];
+if [ -z "${TAG_OVERRIDE+x}" ];
 then
-   TAG="invalid"
+   echo "TAG_OVERRIDE is unset"
 else
    TAG="${TAG_OVERRIDE}"
 fi
@@ -117,7 +117,7 @@ else
                         if [ "$TAG" == "latest" ];
                         then
                             UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG")"
-                            echo "$UPDATED_STACK_FILE" > $STACK_FILE             
+                            echo "$UPDATED_STACK_FILE" > $STACK_FILE
                         else
                             # Get the update version from the package.json file
                             cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
