@@ -16,9 +16,9 @@ echo "$DEPLOY_FILE" > changed_files.txt
 echo "$FUNCTION" > functions.txt
 COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 
-if [ -z "${TAG_OVERRIDE}" ];
+if [ -z "${TAG_OVERRIDE:=not-set}" ];
 then
-   TAG="invalid"
+   TAG="${TAG_OVERRIDE}"
 else
    TAG="${TAG_OVERRIDE}"
 fi
@@ -39,9 +39,10 @@ then
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 
-elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$TAG" == 'latest' ];
+elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ "$TAG" == 'latest' ];
 then
     COMMITTED_FILES="dev-deploy.yml"
+    COMMIT_PATH='dev-deploy.yml'
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
@@ -68,11 +69,17 @@ faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_
 # If there's a stack file in the root of the repo, assume we want to deploy everything
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
 then
-
-    FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-    yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
-    IMAGE_TAG=$(yq r "$COMMIT_PATH" functions."$FUNCTION_NAME".image)
-    yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
+    if [ "$TAG" == "latest" ];
+    then
+        FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
+        yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
+        yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$FUNCTION_NAME":"$TAG"
+    else
+        FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
+        yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
+        IMAGE_TAG=$(yq r "$COMMIT_PATH" functions."$FUNCTION_NAME".image)
+        yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
+    fi
     yq merge -i "$COMMIT_PATH" stack.yml
     cp -f "$COMMIT_PATH" stack.yml
     if [ "$GITHUB_EVENT_NAME" == "push" ];
@@ -111,14 +118,15 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
-                      if [ -z "${TAG_OVERRIDE}" ];
+                      if [ "$TAG" == 'latest' ];
                       then
+                          yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
+                          yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG"
+                      else
                           yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
                           IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
                           yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
-                      else
-                          yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
-                          yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"${TAG_OVERRIDE}"
+
                       fi
                       yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
                       cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
