@@ -9,6 +9,14 @@ STACK_FILE="stack.yml"
 # Default GCR url/project ID
 GCR_ID="gcr.io/platform-235214/"
 
+if [ -z "${TAG_OVERRIDE}" ];
+then
+   TAG="invalid"
+else
+   TAG="${TAG_OVERRIDE}"
+fi
+
+
 if [ "$GITHUB_EVENT_NAME" == "schedule" ] || [ "$BRANCH_NAME" == "master" ];
 then
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
@@ -106,16 +114,17 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
-                        if [ -z "${TAG_OVERRIDE}" ];
+                        if [ "$TAG" == "latest" ];
                         then
+                            UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG")"
+                            echo "$UPDATED_STACK_FILE" > $STACK_FILE             
+                        else
                             # Get the update version from the package.json file
                             cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
                             # Write the updated version into stack file image properties tag
                             cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")"
                             echo "$UPDATED_STACK_FILE" > $STACK_FILE
-                        else
-                            UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"${TAG_OVERRIDE}")"
-                            echo "$UPDATED_STACK_FILE" > $STACK_FILE
+
                         fi
                         if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
                         then
