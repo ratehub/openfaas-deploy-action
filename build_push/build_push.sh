@@ -51,6 +51,7 @@ if [ -f "$GITHUB_WORKSPACE/$STACK_FILE" ];
 then
     if [ "$TAG" == "latest" ];
     then
+        FUNCTION_PATH="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
         UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG")"
         echo "$UPDATED_STACK_FILE" > $STACK_FILE
     else
