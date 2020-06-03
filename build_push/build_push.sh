@@ -106,7 +106,7 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
-                        if [ -z "$TAG" ];
+                        if [ -z "${TAG_OVERRIDE}" ];
                         then
                             # Get the update version from the package.json file
                             cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
