@@ -8,6 +8,7 @@ BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="stack.yml"
 # Default GCR url/project ID
 GCR_ID="gcr.io/platform-235214/"
+FILE="${PACKAGE_FILE}"
 
 if [ "$GITHUB_EVENT_NAME" == "schedule" ] || [ "$BRANCH_NAME" == "master" ];
 then
@@ -107,9 +108,22 @@ else
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
 
-                        if [ "$BRANCH_NAME" == "auto-deploy" ] && [ "${PACKAGE_FILE}" == 'package.json' ];
+                        if [ -z "$FILE" ];
                         then
-                            # Get the update version from the package.json file
+                            UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"latest")"
+                            echo "$UPDATED_STACK_FILE" > $STACK_FILE
+                            if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+                            then
+                                faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+                            else
+                                faas-cli build --filter="$FUNCTION_PATH"
+                            fi
+                            if [ "$GITHUB_EVENT_NAME" == "push" ];
+                            then
+                                faas-cli push --filter="$FUNCTION_PATH"
+                            fi
+                        else
+                          # Get the update version from the package.json file
                             cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
                             # Write the updated version into stack file image properties tag
                             cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")"
@@ -123,22 +137,10 @@ else
                             if [ "$GITHUB_EVENT_NAME" == "push" ];
                             then
                                 faas-cli push --filter="$FUNCTION_PATH"
-                            fi
-                        else
-                            UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"latest")"
-                            echo "$UPDATED_STACK_FILE" > $STACK_FILE
-                            if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
-                            then
-                                faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
-                            else
-                                faas-cli build --filter="$FUNCTION_PATH"
-                            fi
-                            if [ "$GITHUB_EVENT_NAME" == "push" ];
-                            then
-                                faas-cli push --filter="$FUNCTION_PATH"
+
                             fi
                         fi
-                            FUNCTION_PATH2="$FUNCTION_PATH"
+                        FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
                 fi
             fi
