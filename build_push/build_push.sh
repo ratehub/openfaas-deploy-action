@@ -9,9 +9,10 @@ STACK_FILE="stack.yml"
 # Default GCR url/project ID
 GCR_ID="gcr.io/platform-235214/"
 
-if [ -z "${TAG_OVERRIDE+x}" ];
+
+if [ -z "${TAG_OVERRIDE:=not-set}" ];
 then
-   echo "TAG_OVERRIDE is unset"
+   TAG="${TAG_OVERRIDE}"
 else
    TAG="${TAG_OVERRIDE}"
 fi
