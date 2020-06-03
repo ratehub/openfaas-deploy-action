@@ -107,7 +107,7 @@ else
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
 
-                        if [ "$BRANCH_NAME" == "master" ] && [ "${PACKAGE_FILE}" == 'package.json' ];
+                        if [ "$BRANCH_NAME" == "auto-deploy" ] && [ "${PACKAGE_FILE}" == 'package.json' ];
                         then
                             # Get the update version from the package.json file
                             cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
