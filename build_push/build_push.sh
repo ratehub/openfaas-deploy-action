@@ -9,12 +9,13 @@ STACK_FILE="stack.yml"
 # Default GCR url/project ID
 GCR_ID="gcr.io/platform-235214/"
 
-if [ "$BRANCH_NAME" == "master" ]  || [ "$GITHUB_EVENT_NAME" == "schedule" ];
+if [ "$GITHUB_EVENT_NAME" == "schedule" ] || [ "$BRANCH_NAME" == "master" ];
 then
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
 fi
+
 
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"
 
@@ -45,9 +46,9 @@ then
     echo "$UPDATED_STACK_FILE" > $STACK_FILE
     if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
     then
-        faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+        faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" --filter="$FUNCTION_PATH"
     else
-        faas-cli build
+        faas-cli build --filter="$FUNCTION_PATH"
     fi
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
@@ -105,22 +106,39 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
-                        # Get the update version from the package.json file
-                        cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-                        # Write the updated version into stack file image properties tag
-                        cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")"
-                        echo "$UPDATED_STACK_FILE" > $STACK_FILE
-                        if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+
+                        if [ "$BRANCH_NAME" == "master" ] && [ "${PACKAGE_FILE}" == 'package.json' ];
                         then
-                            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+                            # Get the update version from the package.json file
+                            cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
+                            # Write the updated version into stack file image properties tag
+                            cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")"
+                            echo "$UPDATED_STACK_FILE" > $STACK_FILE
+                            if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+                            then
+                                faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+                            else
+                                faas-cli build --filter="$FUNCTION_PATH"
+                            fi
+                            if [ "$GITHUB_EVENT_NAME" == "push" ];
+                            then
+                                faas-cli push --filter="$FUNCTION_PATH"
+                            fi
                         else
-                            faas-cli build --filter="$FUNCTION_PATH"
+                            UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"latest")"
+                            echo "$UPDATED_STACK_FILE" > $STACK_FILE
+                            if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+                            then
+                                faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+                            else
+                                faas-cli build --filter="$FUNCTION_PATH"
+                            fi
+                            if [ "$GITHUB_EVENT_NAME" == "push" ];
+                            then
+                                faas-cli push --filter="$FUNCTION_PATH"
+                            fi
                         fi
-                        if [ "$GITHUB_EVENT_NAME" == "push" ];
-                        then
-                            faas-cli push --filter="$FUNCTION_PATH"
-                        fi
-                        FUNCTION_PATH2="$FUNCTION_PATH"
+                            FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
                 fi
             fi

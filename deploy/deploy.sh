@@ -32,8 +32,7 @@ then
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 
-elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ];
-then
+else
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
@@ -102,18 +101,24 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
-                      yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
-                      IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
-                      yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
+                      if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMITTED_FILES" == 'staging-deploy.yml' ];
+                      then
+                          yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
+                          IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
+                          yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
+                      else
+                          yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
+                          yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"latest"
+                      fi
+                      yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
+                      cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
+
+                      while IFS= read -r LINE; do
+                          faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$LINE"
+                      done < functions.txt
+                      FUNCTION_PATH2="$FUNCTION_PATH"
+
                     fi
-                    yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
-                    cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
-
-                    while IFS= read -r LINE; do
-                        faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$LINE"
-                    done < functions.txt
-                    FUNCTION_PATH2="$FUNCTION_PATH"
-
                 fi
 
             fi
