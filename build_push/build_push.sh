@@ -3,19 +3,10 @@
 set -eux
 
 echo "--------- Starting function template pull process ---------"
-
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="stack.yml"
 # Default GCR url/project ID
 GCR_ID="gcr.io/platform-235214/"
-
-#Check if TAG_OVERRIDE flag is set
-if [ -z "${TAG_OVERRIDE:=not-set}" ];
-then
-   TAG="${TAG_OVERRIDE}"
-else
-   TAG="${TAG_OVERRIDE}"
-fi
 
 #Assign environment variables for the schedule job
 if [ "$GITHUB_EVENT_NAME" == "schedule" ] || [ "$BRANCH_NAME" == "master" ];
@@ -49,19 +40,21 @@ echo "--------- Starting function build and push process ---------"
 
 if [ -f "$GITHUB_WORKSPACE/$STACK_FILE" ];
 then
+    set +u
     #if the TAG_OVERRIDE flag is set to latest, update image properties in stack file
-    if [ "$TAG" == "latest" ];
+    if [ -z "${TAG_OVERRIDE}" ];
     then
-        FUNCTION_PATH="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-        UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG")"
-        echo "$UPDATED_STACK_FILE" > $STACK_FILE
-    else
-    #If build action is triggered after the release, get the updated version from package file and set it as the image tag in stack file
+        #If build action is triggered after the release, get the updated version from package file and set it as the image tag in stack file
         PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
         FUNCTION_PATH="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
         UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")"
         echo "$UPDATED_STACK_FILE" > $STACK_FILE
+    else
+        FUNCTION_PATH="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
+        UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG")"
+        echo "$UPDATED_STACK_FILE" > $STACK_FILE
     fi
+    set -eux
     if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
     then
         faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
@@ -124,18 +117,18 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
+                        set +u
                         #if the TAG_OVERRIDE flag is set to latest, update image properties in stack file
-                        if [ "$TAG" == "latest" ];
+                        if [ -z "${TAG_OVERRIDE}" ];
                         then
-                            UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG")"
-                            echo "$UPDATED_STACK_FILE" > $STACK_FILE
-                        else
                             # Get the updated version from the package.json file
                             cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
                             # Write the updated version into stack file image properties tag
                             cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")"
                             echo "$UPDATED_STACK_FILE" > $STACK_FILE
-
+                        else
+                            UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG")"
+                            echo "$UPDATED_STACK_FILE" > $STACK_FILE
                         fi
                         if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
                         then
@@ -148,6 +141,7 @@ else
                             faas-cli push --filter="$FUNCTION_PATH"
                         fi
                         FUNCTION_PATH2="$FUNCTION_PATH"
+                        set -eux
                     fi
                 fi
             fi
