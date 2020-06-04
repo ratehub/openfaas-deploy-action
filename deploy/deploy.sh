@@ -24,14 +24,13 @@ echo "$FUNCTION" > functions.txt
 COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 
 # Depending on the deploy file we want to choose a different set of environment variables and credentials
-if [ "$BRANCH_NAME" == "master" ];
+
+if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ];
 then
-    if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ];
-    then
-        FAAS_GATEWAY="${GATEWAY_URL_PROD}"
-        FAAS_USER="${GATEWAY_USERNAME_PROD}"
-        FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
-    fi
+    FAAS_GATEWAY="${GATEWAY_URL_PROD}"
+    FAAS_USER="${GATEWAY_USERNAME_PROD}"
+    FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
+    
 elif [ "$COMMITTED_FILES" == 'staging-deploy.yml' ] ||[ "$COMMIT_PATH" == 'staging-deploy.yml' ];
 then
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
