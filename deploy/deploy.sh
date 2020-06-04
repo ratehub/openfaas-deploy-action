@@ -23,14 +23,6 @@ echo "$FUNCTION" > functions.txt
 # For group deploy to the target environment(staging/prod) set the deploy files as a variable
 COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 
-#Check if the TAG_OVERRIDE is set
-if [ -z "${TAG_OVERRIDE:=not-set}" ];
-then
-   TAG="${TAG_OVERRIDE}"
-else
-   TAG="${TAG_OVERRIDE}"
-fi
-
 
 # Depending on the deploy file we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
@@ -77,19 +69,20 @@ faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_
 # If there's a stack file in the root of the repo, assume we want to deploy everything
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
 then
-    if [ "$TAG" == "latest" ];
+    set +u
+    if [ -z "${TAG_OVERRIDE}" ];
     then
+        FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
+        yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
+        IMAGE_TAG=$(yq r "$COMMIT_PATH" functions."$FUNCTION_NAME".image)
+        yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
+    else
         #Get the function name from the package file
         FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
         #Add prefix to the deploy file
         yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
         #Update the image properties in the deploy file
-        yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$FUNCTION_NAME":"$TAG"
-    else
-        FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-        yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
-        IMAGE_TAG=$(yq r "$COMMIT_PATH" functions."$FUNCTION_NAME".image)
-        yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
+        yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$FUNCTION_NAME":"${TAG_OVERRIDE}"
     fi
     # Merge the deploy file into stack file
     yq merge -i "$COMMIT_PATH" stack.yml
@@ -98,6 +91,7 @@ then
     then
         faas-cli deploy --gateway="$FAAS_GATEWAY"
     fi
+    set -uex
 else
 
     GROUP_PATH=""
@@ -130,17 +124,18 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
-                      if [ "$TAG" == 'latest' ];
+                      set +u
+                      if [ -z "${TAG_OVERRIDE}" ];
                       then
-                          #Add prefix to the deploy file
-                          yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
-                          #Update the image properties in the deploy file
-                          yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG"
-                      else
                           yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
                           # Get the updated image tag if the tag is not latest
                           IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
                           yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
+                      else
+                          #Add prefix to the deploy file
+                          yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
+                          #Update the image properties in the deploy file
+                          yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"${TAG_OVERRIDE}"
 
                       fi
                       yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
@@ -150,6 +145,7 @@ else
                           faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$LINE"
                       done < functions.txt
                       FUNCTION_PATH2="$FUNCTION_PATH"
+                      set -eux
 
                     fi
 
