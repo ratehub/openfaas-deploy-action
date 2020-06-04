@@ -4,18 +4,26 @@ set -eux
 
 echo "--------- Starting function deployment process ---------"
 
-# Get the branch name, commit touch, deploy file, stack file path, function name
+# Get the branch name
 BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 GCR_ID="gcr.io/platform-235214/"
+#Get the deploy files updated
 COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
+#Get the deploy file filename only from the diff
 DEPLOY_FILE="`echo "$COMMIT_PATH" | awk -F"/" '{print $3}'`"
+#Get the function name only from the diff
 FUNCTION="`echo "$COMMIT_PATH" | awk -F"/" '{print $2}'`"
 #STACK_PATH="`echo "$COMMIT_PATH" | awk -F"/" '{print $1}'`"
 
+# Add all the files changed in a file
 echo "$DEPLOY_FILE" > changed_files.txt
+# Add all the functions updated in another file
 echo "$FUNCTION" > functions.txt
+
+# For group deploy to the target environment(staging/prod) set the deploy files as a variable
 COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 
+#Check if the TAG_OVERRIDE is set
 if [ -z "${TAG_OVERRIDE:=not-set}" ];
 then
    TAG="${TAG_OVERRIDE}"
@@ -24,7 +32,7 @@ else
 fi
 
 
-# Depending on which branch we want to choose a different set of environment variables and credentials
+# Depending on the deploy file we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
 then
     if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ];
@@ -38,7 +46,7 @@ then
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
-
+#$COMMIT_PATH is a deploy file updated when the deploy action is triggered by the external FaaS repo
 elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ "$TAG" == 'latest' ];
 then
     COMMITTED_FILES="dev-deploy.yml"
@@ -71,8 +79,11 @@ if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
 then
     if [ "$TAG" == "latest" ];
     then
+        #Get the function name from the package file
         FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
+        #Add prefix to the deploy file
         yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
+        #Update the image properties in the deploy file
         yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$FUNCTION_NAME":"$TAG"
     else
         FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
@@ -80,6 +91,7 @@ then
         IMAGE_TAG=$(yq r "$COMMIT_PATH" functions."$FUNCTION_NAME".image)
         yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
     fi
+    # Merge the deploy file into stack file
     yq merge -i "$COMMIT_PATH" stack.yml
     cp -f "$COMMIT_PATH" stack.yml
     if [ "$GITHUB_EVENT_NAME" == "push" ];
@@ -120,17 +132,20 @@ else
                     then
                       if [ "$TAG" == 'latest' ];
                       then
+                          #Add prefix to the deploy file
                           yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
+                          #Update the image properties in the deploy file
                           yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG"
                       else
                           yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
+                          # Get the updated image tag if the tag is not latest
                           IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
                           yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
 
                       fi
                       yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
                       cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
-
+                      # Deploy all the functions whose deploy files are updated
                       while IFS= read -r LINE; do
                           faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$LINE"
                       done < functions.txt
