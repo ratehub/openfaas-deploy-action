@@ -23,7 +23,6 @@ echo "$FUNCTION" > functions.txt
 # For group deploy to the target environment(staging/prod) set the deploy files as a variable
 COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 
-
 # Depending on the deploy file we want to choose a different set of environment variables and credentials
 if [ "$BRANCH_NAME" == "master" ];
 then
@@ -38,16 +37,19 @@ then
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
+    set +u
 #$COMMIT_PATH is a deploy file updated when the deploy action is triggered by the external FaaS repo
-elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ "$TAG" == 'latest' ];
+elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ ! -z "$TAG_OVERRIDE" ];
 then
     COMMITTED_FILES="dev-deploy.yml"
     COMMIT_PATH='dev-deploy.yml'
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
+    set -eux
 
 fi
+
 
 
 if [ -n "${DOCKER_USERNAME_2:-}" ] && [ -n "${DOCKER_PASSWORD_2:-}" ];
