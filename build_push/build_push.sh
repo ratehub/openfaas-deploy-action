@@ -3,19 +3,9 @@
 set -eux
 
 echo "--------- Starting function template pull process ---------"
-BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
 STACK_FILE="stack.yml"
 # Default GCR url/project ID
 GCR_ID="gcr.io/platform-235214/"
-
-#Assign environment variables for the schedule job
-if [ "$GITHUB_EVENT_NAME" == "schedule" ] || [ "$BRANCH_NAME" == "master" ];
-then
-    FAAS_GATEWAY="${GATEWAY_URL_PROD}"
-    FAAS_USER="${GATEWAY_USERNAME_PROD}"
-    FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
-fi
-
 
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"
 
@@ -45,13 +35,13 @@ then
     if [ -z "${TAG_OVERRIDE}" ];
     then
         #If build action is triggered after the release, get the updated version from package file and set it as the image tag in stack file
-        PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-        FUNCTION_PATH="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-        UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")"
+        PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
+        FUNCTION_PATH=$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
+        UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")
         echo "$UPDATED_STACK_FILE" > $STACK_FILE
     else
-        FUNCTION_PATH="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-        UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG_OVERRIDE")"
+        FUNCTION_PATH=$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
+        UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG_OVERRIDE")
         echo "$UPDATED_STACK_FILE" > $STACK_FILE
     fi
     set -eux
@@ -65,30 +55,6 @@ then
     then
         faas-cli push --filter="$FUNCTION_PATH"
     fi
-
-elif [ "$GITHUB_EVENT_NAME" == "schedule" ];
-then
-    echo "--------- FaaS Build triggered by schedule ---------"
-    reDeployFuncs=($SCHEDULED_REDEPLOY_FUNCS)
-    for func in "${reDeployFuncs[@]}"
-    do
-        GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
-        FUNCTION_PATH="`echo \"$func\" | cut -d \"/\" -f2`"
-
-        cd "$GITHUB_WORKSPACE/$GROUP_PATH"
-        cp "$GITHUB_WORKSPACE/template" -r template
-
-        if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
-        then
-
-            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
-        else
-            faas-cli build --filter="$FUNCTION_PATH"
-        fi
-        faas-cli push --filter="$FUNCTION_PATH"
-        faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
-        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
-    done
 else
     GROUP_PATH=""
     GROUP_PATH2=""
@@ -123,12 +89,12 @@ else
                         if [ -z "${TAG_OVERRIDE}" ];
                         then
                             # Get the updated version from the package.json file
-                            cd "$FUNCTION_PATH" && PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
+                            cd "$FUNCTION_PATH" && PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
                             # Write the updated version into stack file image properties tag
-                            cd .. && UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")"
+                            cd .. && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")
                             echo "$UPDATED_STACK_FILE" > $STACK_FILE
                         else
-                            UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG_OVERRIDE")"
+                            UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG_OVERRIDE")
                             echo "$UPDATED_STACK_FILE" > $STACK_FILE
                         fi
                         if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];

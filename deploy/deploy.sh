@@ -5,15 +5,15 @@ set -eux
 echo "--------- Starting function deployment process ---------"
 
 # Get the branch name
-BRANCH_NAME="`echo \"$GITHUB_REF\" | cut -d \"/\" -f3`"
+BRANCH_NAME=${GITHUB_REF##*/}
 GCR_ID="gcr.io/platform-235214/"
 #Get the deploy files updated
-COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
+COMMIT_PATH=$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")
 #Get the deploy file filename only from the diff
 DEPLOY_FILE="`echo "$COMMIT_PATH" | awk -F"/" '{print $3}'`"
 #Get the function name only from the diff
 FUNCTION="`echo "$COMMIT_PATH" | awk -F"/" '{print $2}'`"
-#STACK_PATH="`echo "$COMMIT_PATH" | awk -F"/" '{print $1}'`"
+
 
 # Add all the files changed in a file
 echo "$DEPLOY_FILE" > changed_files.txt
@@ -48,7 +48,6 @@ then
     set -eux
 
 fi
-
 
 
 if [ -n "${DOCKER_USERNAME_2:-}" ] && [ -n "${DOCKER_PASSWORD_2:-}" ];
@@ -92,7 +91,7 @@ then
     then
         faas-cli deploy --gateway="$FAAS_GATEWAY"
     fi
-    set -uex
+    set -eux
 else
 
     GROUP_PATH=""
@@ -161,7 +160,7 @@ fi
 if [ "$GITHUB_EVENT_NAME" == "push" ];
 then
     # Query gateway action so that functions are added to gateway
-    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ];
+    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ] && [ "$DEPLOY_FILE" == 'prod-deploy.yml' ];
     then
         curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
     elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$DEPLOY_FILE" == 'staging-deploy.yml' ];
@@ -169,7 +168,6 @@ then
        curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
     fi
 
-    echo "---------- Deployment finished-----------"
-else
-     echo "--------- Deployment finished for dev environment---------"
 fi
+
+echo "---------- Deployment finished-----------"
