@@ -59,4 +59,4 @@ done
 
 
 
-echo "--------- Scheduled function Rd-deployed ---------"
+echo "--------- Scheduled function Re-deployed ---------"
