@@ -34,33 +34,29 @@ echo "--------- Function template pull process is done ---------"
 
 echo "***********************************************************"
 
-echo "--------- Starting function build and push process ---------"
 
-if [ "$GITHUB_EVENT_NAME" == "schedule" ];
-then
-    echo "--------- FaaS Build triggered by schedule ---------"
+echo "--------- FaaS Build triggered by schedule ----------------"
 
-    reDeployFuncs=($SCHEDULED_REDEPLOY_FUNCS)
-    for func in "${reDeployFuncs[@]}"
-    do
-        GROUP_PATH="`echo \"$func\" | cut -d \"/\" -f1`"
-        FUNCTION_PATH="`echo \"$func\" | cut -d \"/\" -f2`"
+reDeployFuncs=($SCHEDULED_REDEPLOY_FUNCS)
+for func in "${reDeployFuncs[@]}"
+do
+  GROUP_PATH="$(dirname $func)"
+  FUNCTION_PATH="$(basename $func)"
+  cd "$GITHUB_WORKSPACE/$GROUP_PATH"
+  cp "$GITHUB_WORKSPACE/template" -r template
 
-        cd "$GITHUB_WORKSPACE/$GROUP_PATH"
-        cp "$GITHUB_WORKSPACE/template" -r template
+  if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+  then
 
-        if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
-        then
-
-            faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
-        else
-            faas-cli build --filter="$FUNCTION_PATH"
-        fi
-        faas-cli push --filter="$FUNCTION_PATH"
-        faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
-        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
-    done
-fi
+      faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+  else
+      faas-cli build --filter="$FUNCTION_PATH"
+  fi
+  faas-cli push --filter="$FUNCTION_PATH"
+  faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
+  curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
+done
 
 
-echo "--------- Function build and Push process is done ---------"
+
+echo "--------- Scheduled function Rd-deployed ---------"
