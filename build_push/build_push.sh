@@ -86,7 +86,8 @@ then
             faas-cli build --filter="$FUNCTION_PATH"
         fi
         faas-cli push --filter="$FUNCTION_PATH"
-        faas-cli deploy --gateway="$FAAS_GATEWAY"
+        faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
+        curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
     done
 else
     GROUP_PATH=""
