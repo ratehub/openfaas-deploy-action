@@ -5,14 +5,14 @@ set -eux
 echo "--------- Starting function deployment process ---------"
 
 # Get the branch name
-BRANCH_NAME=${GITHUB_REF##*/}
+BRANCH_NAME="${GITHUB_REF##*/}"
 GCR_ID="gcr.io/platform-235214/"
 #Get the deploy files updated
-COMMIT_PATH=$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")
+COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
 #Get the deploy file filename only from the diff
-DEPLOY_FILE="`echo "$COMMIT_PATH" | awk -F"/" '{print $3}'`"
+DEPLOY_FILE="${COMMIT_PATH##*/}"
 #Get the function name only from the diff
-FUNCTION="`echo "$COMMIT_PATH" | awk -F"/" '{print $2}'`"
+FUNCTION="$(basename "$(dirname $COMMIT_PATH)")"
 
 
 # Add all the files changed in a file
