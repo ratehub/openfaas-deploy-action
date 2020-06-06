@@ -10,9 +10,9 @@ GCR_ID="gcr.io/platform-235214/"
 #Get the deploy files updated
 COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
 #Get the deploy file filename only from the diff
-DEPLOY_FILE="${COMMIT_PATH##*/}"
+DEPLOY_FILE="$(echo "$COMMIT_PATH" | awk -F"/" '{print $3}')"
 #Get the function name only from the diff
-FUNCTION="$(basename "$(dirname $COMMIT_PATH)")"
+FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
 
 
 # Add all the files changed in a file
