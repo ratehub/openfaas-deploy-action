@@ -5,7 +5,7 @@ set -eux
 echo "--------- Starting function deployment process ---------"
 
 # Get the branch name
-BRANCH_NAME="${GITHUB_REF##*/}"
+BRANCH_NAME="$(echo \"$GITHUB_REF\" | cut -d \"/\" -f3)"
 GCR_ID="gcr.io/platform-235214/"
 #Get the deploy files updated
 COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
@@ -104,7 +104,7 @@ else
         #If changes are in root, we can ignore them
         if [[ "$line" =~ "/" ]];
         then
-            GROUP_PATH="`echo \"$line\" | cut -d \"/\" -f1`"
+            GROUP_PATH="$(echo \"$line\" | cut -d \"/\" -f1)"
             #Ignore changes if the folder is prefixed with a "." or "_"
             if [[ ! "$GROUP_PATH" =~ ^[\._] ]];
             then
@@ -117,7 +117,7 @@ else
 
                 fi
 
-                FUNCTION_PATH="`echo \"$line\" | cut -d \"/\" -f2`"
+                FUNCTION_PATH="$(echo \"$line\" | cut -d \"/\" -f2)"
 
                 if [ -d "$FUNCTION_PATH" ];
                 then

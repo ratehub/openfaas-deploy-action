@@ -66,7 +66,7 @@ else
         #If changes are in root, we can ignore them
         if [[ "$line" =~ "/" ]];
         then
-            GROUP_PATH="`echo \"$line\" | cut -d \"/\" -f1`"
+            GROUP_PATH="$(echo \"$line\" | cut -d \"/\" -f1)"
             #Ignore changes if the folder is prefixed with a "." or "_"
             if [[ ! "$GROUP_PATH" =~ ^[\._] ]];
             then
@@ -77,7 +77,7 @@ else
                     cp "$GITHUB_WORKSPACE/template" -r template
                 fi
 
-                FUNCTION_PATH="`echo \"$line\" | cut -d \"/\" -f2`"
+                FUNCTION_PATH="$(echo \"$line\" | cut -d \"/\" -f2)"
 
                 if [ -d "$FUNCTION_PATH" ];
                 then
