@@ -30,9 +30,8 @@ echo "--------- Starting function build and push process ---------"
 
 if [ -f "$GITHUB_WORKSPACE/$STACK_FILE" ];
 then
-    set +u
     #if the TAG_OVERRIDE flag is set to latest, update image properties in stack file
-    if [ -z "${TAG_OVERRIDE}" ];
+    if [ -n "${TAG_OVERRIDE:-}" ];
     then
         #If build action is triggered after the release, get the updated version from package file and set it as the image tag in stack file
         PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
@@ -44,7 +43,6 @@ then
         UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG_OVERRIDE")"
         echo "$UPDATED_STACK_FILE" > $STACK_FILE
     fi
-    set -eux
     if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
     then
         faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
@@ -84,9 +82,8 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
-                        set +u
                         #if the TAG_OVERRIDE flag is set to latest, update image properties in stack file
-                        if [ -z "${TAG_OVERRIDE}" ];
+                        if [ -n "${TAG_OVERRIDE:-}" ];
                         then
                             # Get the updated version from the package.json file
                             cd "$FUNCTION_PATH" && PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
@@ -108,7 +105,6 @@ else
                             faas-cli push --filter="$FUNCTION_PATH"
                         fi
                         FUNCTION_PATH2="$FUNCTION_PATH"
-                        set -eux
                     fi
                 fi
             fi

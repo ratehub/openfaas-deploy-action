@@ -36,16 +36,14 @@ then
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
-    set +u
 #$COMMIT_PATH is a deploy file updated when the deploy action is triggered by the external FaaS repo
-elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ ! -z "$TAG_OVERRIDE" ];
+elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ ! -n "${TAG_OVERRIDE:-}" ];
 then
     COMMITTED_FILES="dev-deploy.yml"
     COMMIT_PATH='dev-deploy.yml'
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
-    set -eux
 
 fi
 
@@ -69,8 +67,7 @@ faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_
 # If there's a stack file in the root of the repo, assume we want to deploy everything
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
 then
-    set +u
-    if [ -z "${TAG_OVERRIDE}" ];
+    if [ -n "${TAG_OVERRIDE:-}" ];
     then
         FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
         yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
@@ -91,7 +88,6 @@ then
     then
         faas-cli deploy --gateway="$FAAS_GATEWAY"
     fi
-    set -eux
 else
 
     GROUP_PATH=""
@@ -124,8 +120,7 @@ else
                     #If we already handled this function based on a prior file, we can ignore it this time around
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
-                      set +u
-                      if [ -z "${TAG_OVERRIDE}" ];
+                      if [ -n "${TAG_OVERRIDE:-}" ];
                       then
                           yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
                           # Get the updated image tag if the tag is not latest
@@ -145,12 +140,8 @@ else
                           faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$LINE"
                       done < functions.txt
                       FUNCTION_PATH2="$FUNCTION_PATH"
-                      set -eux
-
                     fi
-
                 fi
-
             fi
         fi
 
