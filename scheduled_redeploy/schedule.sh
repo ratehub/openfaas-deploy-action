@@ -10,10 +10,11 @@ FAAS_GATEWAY="${GATEWAY_URL_PROD}"
 FAAS_USER="${GATEWAY_USERNAME_PROD}"
 FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
 
+FUNCTION_NAME="$(basename "${SCHEDULED_REDEPLOY_FUNCS}")"
 
 cd "${SCHEDULED_REDEPLOY_FUNCS}" && PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
 # Write the updated version into stack file image properties tag
-cd .. && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."${SCHEDULED_REDEPLOY_FUNCS}".image "$GCR_ID""${SCHEDULED_REDEPLOY_FUNCS}":"$PACKAGE_VERSION")
+cd .. && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_NAME".image "$GCR_ID""$FUNCTION_NAME":"$PACKAGE_VERSION")
 echo "$UPDATED_STACK_FILE" > $STACK_FILE
 
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"

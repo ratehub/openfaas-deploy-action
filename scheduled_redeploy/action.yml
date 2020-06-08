@@ -1,6 +1,6 @@
-# build.yml
-name: 'Function build and push'
-description: 'Build and Push FaaS functions'
+# schedule.yml
+name: 'Function Scheduled Re-deploy'
+description: 'Re-deploy scheduled FaaS functions'
 outputs:
   status:
     description: 'Whether the process succeeded or failed'
