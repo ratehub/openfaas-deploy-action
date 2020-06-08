@@ -43,7 +43,6 @@ do
   GROUP_PATH="$(dirname $func)"
   FUNCTION_PATH="$(basename $func)"
   cd "$GITHUB_WORKSPACE/$GROUP_PATH"
-  cp "$GITHUB_WORKSPACE/template" -r template
 
   if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
   then
