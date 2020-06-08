@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="869e6de3-51a0-468f-a5de-c991f38a3d57" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../credit-card-service/.github/workflows/status.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../credit-card-service/.github/workflows/status.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build_push/build_push.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build_push/build_push.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/deploy/deploy.sh" beforeDir="false" afterPath="$PROJECT_DIR$/deploy/deploy.sh" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1cuV2D1w04ZVHxqyA1NoKP6Aqzi" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../credit-card-service/.github/workflows/status.yml" />
+    <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/../credit-card-service/.github/workflows/status.yml" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/scheduled_redeploy" />
+    </key>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="869e6de3-51a0-468f-a5de-c991f38a3d57" name="Default Changelist" comment="" />
+      <created>1591378255723</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1591378255723</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1805" y="131" width="1653" height="855" key="DiffContextDialog" timestamp="1591627811107">
+      <screen x="1920" y="0" width="1920" height="1080" />
+    </state>
+    <state x="1805" y="131" width="1653" height="855" key="DiffContextDialog/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1591627811107" />
+    <state x="2696" y="310" width="424" height="484" key="FileChooserDialogImpl" timestamp="1591626962114">
+      <screen x="1920" y="0" width="1920" height="1080" />
+    </state>
+    <state x="2696" y="310" width="424" height="484" key="FileChooserDialogImpl/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1591626962114" />
+  </component>
+</project>

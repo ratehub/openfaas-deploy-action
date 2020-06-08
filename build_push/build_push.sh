@@ -31,7 +31,7 @@ echo "--------- Starting function build and push process ---------"
 if [ -f "$GITHUB_WORKSPACE/$STACK_FILE" ];
 then
     #if the TAG_OVERRIDE flag is set to latest, update image properties in stack file
-    if [ -n "${TAG_OVERRIDE:-}" ];
+    if [ -z "${TAG_OVERRIDE:-}" ];
     then
         #If build action is triggered after the release, get the updated version from package file and set it as the image tag in stack file
         PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
@@ -83,7 +83,7 @@ else
                     if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                     then
                         #if the TAG_OVERRIDE flag is set to latest, update image properties in stack file
-                        if [ -n "${TAG_OVERRIDE:-}" ];
+                        if [ -z "${TAG_OVERRIDE:-}" ];
                         then
                             # Get the updated version from the package.json file
                             cd "$FUNCTION_PATH" && PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
