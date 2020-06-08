@@ -44,6 +44,10 @@ do
   GROUP_PATH="$(dirname $func)"
   FUNCTION_PATH="$(basename $func)"
   cd "$GITHUB_WORKSPACE/$GROUP_PATH"
+  cd "$FUNCTION_PATH" && PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
+  # Write the updated version into stack file image properties tag
+  cd .. && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")
+  echo "$UPDATED_STACK_FILE" > $STACK_FILE
 
   if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
   then
