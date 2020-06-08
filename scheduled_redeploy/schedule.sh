@@ -4,7 +4,7 @@ set -eux
 
 echo "--------- Starting function template pull process ---------"
 GCR_ID="gcr.io/platform-235214/"
-
+STACK_FILE="stack.yml"
 
 FAAS_GATEWAY="${GATEWAY_URL_PROD}"
 FAAS_USER="${GATEWAY_USERNAME_PROD}"
