@@ -37,14 +37,23 @@ then
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
 #$COMMIT_PATH is a deploy file updated when the deploy action is triggered by the external FaaS repo
-elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ ! -n "${TAG_OVERRIDE:-}" ];
+elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ];
 then
     COMMITTED_FILES="dev-deploy.yml"
     COMMIT_PATH='dev-deploy.yml'
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
-
+else
+  if [ -n "${TAG_OVERRIDE:-}" ];
+  then
+      exit
+  else
+      COMMITTED_FILES="dev-deploy.yml"
+      COMMIT_PATH='dev-deploy.yml'
+      FAAS_GATEWAY="${GATEWAY_URL_DEV}"
+      FAAS_USER="${GATEWAY_USERNAME_DEV}"
+      FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
 fi
 
 
