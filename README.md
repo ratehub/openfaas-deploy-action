@@ -94,9 +94,9 @@ This action is designed to deploy functions or microservices developed with [Ope
           
 ## Scheduled Re-deploy function
 ##### If the cron schedule is triggered for the functions to re-deploy
-         1. Triggers schedule.yml action which builds, pushes and deploys the functions(selected re-deploy functions) to PROD
+         Triggers schedule.yml action which builds, pushes and deploys the functions(selected re-deploy functions) to PROD
          
 ## On Pull request to master branch
-    1. Triggers status.yml action to run function build for all the updated functions for status check.
+     Triggers status.yml action to run function build for all the updated functions for status check.
     
     
