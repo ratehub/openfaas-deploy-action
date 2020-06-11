@@ -73,30 +73,30 @@ This action is designed to deploy functions or microservices developed with [Ope
       
 ## Commit to master branch
 ##### If changes are made to one function specifically and are included in the PR, when merged
-         1. Triggers release.yml action checks the function updated based on the path of the files changed
-               └── if the commits merged includes(fix/feat/perf(BREAKING CHANGE)) prefixes a new release and tag is created
-                      └── for "fix" prefix - `p` is updated in M.n.p
-                      └── for "feat" prefix - `n` is updated in M.n.p
-                      └── for "perf"(included with BREAKING CHANGE) prefix - `M` is updated in M.n.p
-         2. Updates to a function when pushed to master
-               └── Triggers auto-dev-deploy.yml action which auto-deploys updated function to DEV environment
-         3. If package.json is updated
-               └── build_push.yml action is triggered, builds and pushes the function image with updated tag.
-         4. If the staging-deploy.yml/prod-deploy.yml is updated
-              >> deploy.yml workflow is triggered. 
-                   1. if staging-deploy/prod-deploy.yml is updated with the new image tag.
-                       └── The function with updated version is deployed to the STAGING/PROD environment respectively. 
-                   2. if staging-deploy/prod-deploy.yml is updated with only new env variables(image tag remains same)
-                       └── Re-deploys the function with same tag but with updated env variables to DEV environment. 
-         5. Update to dev-deploy.yml(environment variables/secrets/labels/constraints etc.)
-              └── Triggers auto-dev-deploy.yml action, builds, pushes and automatically deploys to the DEV environment
-         6. Updates to stack.yml does not trigger any actions, although updated configurations will be used the next time deploy action runs. 
+     1. Triggers release.yml action checks the function updated based on the path of the files changed
+           └── if the commits merged includes(fix/feat/perf(BREAKING CHANGE)) prefixes a new release and tag is created
+                  └── for "fix" prefix - `p` is updated in M.n.p
+                  └── for "feat" prefix - `n` is updated in M.n.p
+                  └── for "perf"(included with BREAKING CHANGE) prefix - `M` is updated in M.n.p
+     2. Updates to a function when pushed to master
+           └── Triggers auto-dev-deploy.yml action which auto-deploys updated function to DEV environment
+     3. If package.json is updated
+           └── build_push.yml action is triggered, builds and pushes the function image with updated tag.
+     4. If the staging-deploy.yml/prod-deploy.yml is updated
+           >> deploy.yml workflow is triggered. 
+                1. if staging-deploy/prod-deploy.yml is updated with the new image tag.
+                    └── The function with updated version is deployed to the STAGING/PROD environment respectively. 
+                2. if staging-deploy/prod-deploy.yml is updated with only new env variables(image tag remains same)
+                    └── Re-deploys the function with same tag but with updated env variables to DEV environment. 
+     5. Update to dev-deploy.yml(environment variables/secrets/labels/constraints etc.)
+          └── Triggers auto-dev-deploy.yml action, builds, pushes and automatically deploys to the DEV environment
+     6. Updates to stack.yml does not trigger any actions, although updated configurations will be used the next time deploy action runs. 
           
 ## Scheduled Re-deploy function
 ##### If the cron schedule is triggered for the functions to re-deploy
-         Triggers schedule.yml action which builds, pushes and deploys the functions(selected re-deploy functions) to PROD
+    Triggers schedule.yml action which builds, pushes and deploys the functions(selected re-deploy functions) to PROD
          
 ## On Pull request to master branch
-     Triggers status.yml action to run function build for all the updated functions for status check.
+    Triggers status.yml action to run function build for all the updated functions for status check.
     
     
