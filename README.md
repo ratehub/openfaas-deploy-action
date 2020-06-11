@@ -5,111 +5,98 @@ This action is designed to deploy functions or microservices developed with [Ope
 
 ## Requirements
 1. Your repository must be organized in one of the following ways: 
-   1. A single stack.yml file and env-dev/prod/staging.yml file in the root (For a single microservice or a small number of functions)  
+   1. A single stack.yml file and dev-deploy/prod-deploy/staging-deploy.yml file in the function path for each function.
    ```
       your-repo/
         ├── function 1/
         │   └── handler.js
-        ├── function-2/
+        │   └── dev-deploy.yml
+        │   └── staging-deploy.yml
+        │   └── prod-deploy.yml  
+        ├── function 2/
         │   └── handler.js
-        ├── env-dev.yml
-        ├── env-prod.yml
-        ├── env-staging.yml
+        │   └── dev-deploy.yml
+        │   └── staging-deploy.yml
+        │   └── prod-deploy.yml        
         └── stack.yml
    ```
-      This method will result in every function being built, pushed, and deployed every time something changes in the repository. The names of the function folders don't matter as long as the handler paths are properly configured in stack.yml.
+      This method will result in function being built, pushed, and deployed every time something changes in the function path. 
       
-   2. Functions grouped into related folders, each with their own stack.yml file and env-dev/prod/staging.yml files (For repos with a large number of functions)  
+   2. Functions grouped into related folders, each with their own stack.yml file and dev-deploy/prod-deploy/staging-deploy.yml files (For repos with a large number of functions)  
    ```
       your-repo/
         ├── group-1/
-        │   ├── function-1/
+        │   ├── function 1/
         │   │   └── handler.js
-        │   ├── function-2/
+        │   │   └── dev-deploy.yml
+        │   │   └── staging-deploy.yml
+        │   │   └── prod-deploy.yml  
+        │   ├── function 2/
         │   │   └── handler.js
-        │   ├── env-dev.yml
-        │   ├── env-prod.yml
-        │   ├── env-staging.yml
-        │   └── stack.yml
+        │   │   └── dev-deploy.yml
+        │   │   └── staging-deploy.yml
+        │   └── └── prod-deploy.yml        
+        └── stack.yml
         └── group-2/
-            ├── function-1/
-            │   └── handler.js
-            ├── env-dev.yml
-            ├── env-prod.yml
-            ├── env-staging.yml
-            └── stack.yml
+        │   ├── function 1/
+        │   │   └── handler.js
+        │   │   └── dev-deploy.yml
+        │   │   └── staging-deploy.yml
+        │   │   └── prod-deploy.yml  
+        │   ├── function 2/
+        │   │   └── handler.js
+        │   │   └── dev-deploy.yml
+        │   │   └── staging-deploy.yml
+        │   └── └── prod-deploy.yml        
+        └── stack.yml
+            
    ```
-      Group and function folders can be named whatever you like, but function folder names must correspond exactly to the name of a function in the stack.yml in its group folder.
-      In addition, this method will only build, push, and deploy based on which files changed in the last commit. So if any files changed in a given function's folder, that function will be deployed. If the stack.yml file, or any of the env.yml files change, all functions in that group will be re-deployed (but won't be rebuilt, and will instead use the existing docker images in your registry).
+      Function folder names must correspond exactly to the name of a function in the stack.yml in its group folder.
+      In addition, this method will only build, push, and deploy based on which files changed in the last commit. So if any files changed in a given function's folder, that function will be deployed. 
       
-2. Your GitHub repo must have access to the required secrets specified in the "Secrets" section below
-
-
-## Secrets
-All secrets are required unless otherwise specified.
-- **CUSTOM_TEMPLATE_URL** (Optional): The URL of a repository of custom OpenFaaS templates. If you require basic-auth, include it in the URL string.
-- **DOCKER_USERNAME**: Username of an account with access to the docker registry where your function images are stored.
-- **DOCKER_PASSWORD**: Password of an account with access to the docker registry where your function images are stored.
-- **DOCKER_REGISTRY_URL** (Optional): The URL of the docker registry where your function images are stored. Leave this blank if you wish to authenticate with Docker Hub.
-- **DOCKER_USERNAME_2** (Optional): Username of a second docker account, if needed.
-- **DOCKER_PASSWORD_2** (Optional): Password of a second docker account, if needed.
-- **DOCKER_REGISTRY_URL_2** (Optional): URL of a second docker registry, if needed. Leave this blank if you wish to authenticate with Docker Hub.
-- **GATEWAY_USER_DEV**: The basic-auth username of your development OpenFaaS environment.
-- **GATEWAY_PASS_DEV**: The basic-auth password of your development OpenFaaS environment.
-- **GATEWAY_URL_DEV**: The URL of your development OpenFaaS environment.
-- **GATEWAY_USER_STAGING**: The basic-auth username of your staging OpenFaaS environment.
-- **GATEWAY_PASS_STAGING**: The basic-auth password of your staging OpenFaaS environment.
-- **GATEWAY_URL_STAGING**: The URL of your staging OpenFaaS environment.
-- **GATEWAY_USER_PROD**: The basic-auth username of your production OpenFaaS environment.
-- **GATEWAY_PASS_PROD**: The basic-auth password of your development OpenFaaS environment.
-- **GATEWAY_URL_PROD**: The URL of your production OpenFaaS environment.
-- **BUILD_ARG_1**: The value of a build argument to pass into your function templates' dockerfiles through the faas-cli's `build-arg` option (Note that you will also need to include the environment variable BUILD_ARG_1_NAME in the workflow file to specify the name of the argument)
-
-
-## Installation
-Using this action is simple. Create a workflow file including the action, like the following, and put it in a folder at ".github/workflows" in the root of the repo:
-
-```
-name: OpenFaaS CICD
-on:
-  push:
-    branches:
-    - master
-    - staging-deploy
-    - dev-deploy
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v1 # This is a dependency of the action
-    - name: Build, push, and deploy functions to OpenFaaS
-      uses: ratehub/openfaas-deploy-action@master
-      env:
-        GATEWAY_URL_DEV: ${{ secrets.GATEWAY_URL_DEV }}
-        GATEWAY_URL_STAGING: ${{ secrets.GATEWAY_URL_STAGING }}
-        GATEWAY_URL_PROD: ${{ secrets.GATEWAY_URL_PROD }}
-        GATEWAY_USERNAME_DEV: ${{ secrets.GATEWAY_USERNAME_DEV }}
-        GATEWAY_PASSWORD_DEV: ${{ secrets.GATEWAY_PASSWORD_DEV }}
-        GATEWAY_USERNAME_STAGING: ${{ secrets.GATEWAY_USERNAME_STAGING }}
-        GATEWAY_PASSWORD_STAGING: ${{ secrets.GATEWAY_PASSWORD_STAGING }}
-        GATEWAY_USERNAME_PROD: ${{ secrets.GATEWAY_USERNAME_PROD }}
-        GATEWAY_PASSWORD_PROD: ${{ secrets.GATEWAY_PASSWORD_PROD }}
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        DOCKER_REGISTRY_URL: ${{ secrets.DOCKER_REGISTRY_URL }}
-        DOCKER_USERNAME_2: ${{ secrets.DOCKER_USERNAME_2 }}
-        DOCKER_PASSWORD_2: ${{ secrets.DOCKER_PASSWORD_2 }}
-        DOCKER_REGISTRY_URL_2: ${{ secrets.DOCKER_REGISTRY_URL_2 }}
-        CUSTOM_TEMPLATE_URL: ${{ secrets.CUSTOM_TEMPLATE_URL }}
-        BUILD_ARG_1_NAME: EXAMPLE_ARG_NAME
-        BUILD_ARG_1: ${{ secrets.BUILD_ARG_1 }}
-```
-- This file will need to be in every branch you want to run the action on.
-- You can add additional branches if you so desire, but keep in mind that branches named anything other than `master` or `staging-deploy` will use the OpenFaaS deployment specified in the secrets marked as DEV.
-
-## Usage
-- To trigger the action, simply push to one of the branches listed in the workflow file.
-- If you used folder structure #2, as described in the "Requirements" section above, the action will only look at the changes since the last commit to decide what files have changed and need re-deploying. So if you push multiple commits at once, the action will ignore all but the last commit. For this reason, squashing commits is recommended.
-- If you add branches other than `master` and `staging-deploy` to the workflow file, the action will deploy changes on the additional branches to the environment based on the environment variables marked DEV.
+      
+# Usage
+## Commit to any branch(dev) other than master
+     1. If handler.js file is updated. 
+           └── Triggers release.yml workflow, however doesn't create a release(as it is configured only for the master(default-channel) branch).
+           └── FaaS build and push completes(overwrites the image in GCR if the tag(same as the version in package.json) already exists(basically image is pushed with the same tag)).
+     2. If package.json is updated
+          └── build_push.yml action is triggered, builds and pushes the function image with updated tag(version from package.json) 
+     3. If the staging-deploy.yml/prod-deploy.yml is updated
+          >> deploy.yml workflow is triggered. 
+               1. if staging-deploy/prod-deploy.yml is updated with the new image tag.
+                   └── The function with updated version is deployed to the STAGING/PROD environment respectively. 
+               2. if staging-deploy/prod-deploy.yml is updated with only new env variables(image tag remains same)
+                   └── Re-deploys the function with same tag but with updated env variables to DEV environment.
+     4. dev-deploy.yml does not contain image properties, provision to update environment variables/secrets/labels/constraints.
+     5. Updates to stack.yml does not trigger any actions, although updated configurations will be used the next time deploy action runs.
+      
+## Commit to master branch
+##### If changes are made to one function specifically and are included in the PR, when merged
+         1. Triggers release.yml action checks the function updated based on the path of the files changed
+               └── if the commits merged includes(fix/feat/perf(BREAKING CHANGE)) prefixes a new release and tag is created
+                      └── for "fix" prefix - `p` is updated in M.n.p
+                      └── for "feat" prefix - `n` is updated in M.n.p
+                      └── for "perf"(included with BREAKING CHANGE) prefix - `M` is updated in M.n.p
+         2. Updates to a function when pushed to master
+               └── Triggers auto-dev-deploy.yml action which auto-deploys updated function to DEV environment
+         3. If package.json is updated
+               └── build_push.yml action is triggered, builds and pushes the function image with updated tag.
+         4. If the staging-deploy.yml/prod-deploy.yml is updated
+              >> deploy.yml workflow is triggered. 
+                   1. if staging-deploy/prod-deploy.yml is updated with the new image tag.
+                       └── The function with updated version is deployed to the STAGING/PROD environment respectively. 
+                   2. if staging-deploy/prod-deploy.yml is updated with only new env variables(image tag remains same)
+                       └── Re-deploys the function with same tag but with updated env variables to DEV environment. 
+         5. Update to dev-deploy.yml(environment variables/secrets/labels/constraints etc.)
+              └── Triggers auto-dev-deploy.yml action, builds, pushes and automatically deploys to the DEV environment
+         6. Updates to stack.yml does not trigger any actions, although updated configurations will be used the next time deploy action runs. 
+          
+## Scheduled Re-deploy function
+##### If the cron schedule is triggered for the functions to re-deploy
+         1. Triggers schedule.yml action which builds, pushes and deploys the functions(selected re-deploy functions) to PROD
+         
+## On Pull request to master branch
+    1. Triggers status.yml action to run function build for all the updated functions for status check.
+    
+    
