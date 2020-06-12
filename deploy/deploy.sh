@@ -14,6 +14,7 @@ DEPLOY_FILE="$(echo "$COMMIT_PATH" | awk -F"/" '{print $3}')"
 #Get the function name only from the diff
 FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
 GROUP_FUNCS="${SUB_FUNCS}"
+echo "$GROUP_FUNCS"
 
 
 # Add all the files changed in a file
@@ -166,7 +167,6 @@ then
     elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$DEPLOY_FILE" == 'staging-deploy.yml' ];
     then
        curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
-    fi
     elif [ -n "${AUTH_TOKEN_DEV:-}" ] && [ -n "${TAG_OVERRIDE:-}" ] || [ "$DEPLOY_FILE" == 'dev-deploy.yml' ];
     then
        curl -H "Authorization: token ${AUTH_TOKEN_DEV}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-dev/dispatches
