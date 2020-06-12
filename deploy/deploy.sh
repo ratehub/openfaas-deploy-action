@@ -157,7 +157,7 @@ then
     then
        curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
     fi
-    elif [ -n "${AUTH_TOKEN_DEV}:-}" ] && [ "$DEPLOY_FILE" == 'dev-deploy.yml' ];
+    elif [ -n "${AUTH_TOKEN_DEV:-}" ] && [ -n "${TAG_OVERRIDE:-}" ] || [ "$DEPLOY_FILE" == 'dev-deploy.yml' ];
     then
        curl -H "Authorization: token ${AUTH_TOKEN_DEV}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-dev/dispatches
     fi
