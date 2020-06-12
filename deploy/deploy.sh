@@ -13,6 +13,7 @@ COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
 DEPLOY_FILE="$(echo "$COMMIT_PATH" | awk -F"/" '{print $3}')"
 #Get the function name only from the diff
 FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
+GROUP_FUNCS="${SUB_FUNCS}"
 
 
 # Add all the files changed in a file
