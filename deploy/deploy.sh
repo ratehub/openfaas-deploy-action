@@ -68,21 +68,30 @@ if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
 then
     if [ -z "${TAG_OVERRIDE:-}" ];
     then
-        FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-        yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
-        IMAGE_TAG=$(yq r "$COMMIT_PATH" functions."$FUNCTION_NAME".image)
-        yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
+        groupFuncs=($GROUP_FUNCS)
+        for func in "${groupFuncs[@]}"
+        do
+          FUNCTION_NAME="$func"
+          IMAGE_TAG="$(yq r "$COMMIT_PATH" functions.$FUNCTION_NAME.image)"
+          yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
+          yq merge -i "$COMMIT_PATH" stack.yml
+          cp -f "$COMMIT_PATH" stack.yml
+        done
     else
-        #Get the function name from the package file
-        FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-        #Add prefix to the deploy file
-        yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
-        #Update the image properties in the deploy file
-        yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$FUNCTION_NAME":"${TAG_OVERRIDE}"
+        groupFuncs=($GROUP_FUNCS)
+        for func in "${groupFuncs[@]}"
+        do
+          #Get the function name from the package file
+          FUNCTION_NAME="$func"
+          #Add prefix to the deploy file
+          IMAGE_TAG="$(yq r "$COMMIT_PATH" functions.$FUNCTION_NAME.image)"
+          #Update the image properties in the deploy file
+          yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$FUNCTION_NAME":"${TAG_OVERRIDE}"
+          # Merge the deploy file into stack file
+          yq merge -i "$COMMIT_PATH" stack.yml
+          cp -f "$COMMIT_PATH" stack.yml
+       done
     fi
-    # Merge the deploy file into stack file
-    yq merge -i "$COMMIT_PATH" stack.yml
-    cp -f "$COMMIT_PATH" stack.yml
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
         faas-cli deploy --gateway="$FAAS_GATEWAY"
