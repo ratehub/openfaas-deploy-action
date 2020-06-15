@@ -6,6 +6,8 @@ echo "--------- Starting function template pull process ---------"
 STACK_FILE="stack.yml"
 # Default GCR url/project ID
 GCR_ID="gcr.io/platform-235214/"
+GROUP_FUNCS="${SUB_FUNCS}"
+echo "$GROUP_FUNCS"
 
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"
 
@@ -33,15 +35,29 @@ then
     #if the TAG_OVERRIDE flag is set to latest, update image properties in stack file
     if [ -z "${TAG_OVERRIDE:-}" ];
     then
-        #If build action is triggered after the release, get the updated version from package file and set it as the image tag in stack file
-        PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-        FUNCTION_PATH="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-        UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")"
-        echo "$UPDATED_STACK_FILE" > $STACK_FILE
+        groupFuncs=($GROUP_FUNCS)
+        for func in "${groupFuncs[@]}"
+        do
+          FUNCTION_NAME="$func"
+          IMAGE_TAG="$(yq r "$COMMIT_PATH" functions.$FUNCTION_NAME.image)"
+          yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
+          yq merge -i "$COMMIT_PATH" stack.yml
+          cp -f "$COMMIT_PATH" stack.yml
+        done
     else
-        FUNCTION_PATH="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-        UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG_OVERRIDE")"
-        echo "$UPDATED_STACK_FILE" > $STACK_FILE
+        groupFuncs=($GROUP_FUNCS)
+        for func in "${groupFuncs[@]}"
+        do
+          #Get the function name from the package file
+          FUNCTION_NAME="$func"
+          #Add prefix to the deploy file
+          IMAGE_TAG="$(yq r "$COMMIT_PATH" functions.$FUNCTION_NAME.image)"
+          #Update the image properties in the deploy file
+          yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$FUNCTION_NAME":"${TAG_OVERRIDE}"
+          # Merge the deploy file into stack file
+          yq merge -i "$COMMIT_PATH" stack.yml
+          cp -f "$COMMIT_PATH" stack.yml
+       done
     fi
     if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
     then
@@ -51,7 +67,7 @@ then
     fi
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
-        faas-cli push --filter="$FUNCTION_PATH"
+        faas-cli push
     fi
 else
     GROUP_PATH=""
