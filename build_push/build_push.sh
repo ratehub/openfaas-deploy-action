@@ -6,8 +6,7 @@ echo "--------- Starting function template pull process ---------"
 STACK_FILE="stack.yml"
 # Default GCR url/project ID
 GCR_ID="gcr.io/platform-235214/"
-GROUP_FUNCS="${SUB_FUNCS}"
-echo "$GROUP_FUNCS"
+
 
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" "${DOCKER_REGISTRY_URL}"
 
