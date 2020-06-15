@@ -81,6 +81,9 @@ then
         #Update the image properties in the deploy file
         yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$FUNCTION_NAME":"${TAG_OVERRIDE}"
     fi
+    # Merge the deploy file into stack file	    
+    yq merge -i "$COMMIT_PATH" stack.yml	    
+    cp -f "$COMMIT_PATH" stack.yml
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
         faas-cli deploy --gateway="$FAAS_GATEWAY"
