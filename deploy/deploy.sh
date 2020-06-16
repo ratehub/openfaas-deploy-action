@@ -30,13 +30,16 @@ then
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
+    ENV_FILE="env-prod.yml"
     
 elif [ "$COMMITTED_FILES" == 'staging-deploy.yml' ] ||[ "$COMMIT_PATH" == 'staging-deploy.yml' ];
 then
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
-#$COMMIT_PATH is a deploy file updated when the deploy action is triggered by the external FaaS repo
+    ENV_FILE="env-staging.yml"
+
+#$COMMIT_PATH is a deploy file updated when the deploy action is triggered by the functions from a repo different than faas
 elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ -n "${TAG_OVERRIDE:-}" ];
 then
     COMMITTED_FILES="dev-deploy.yml"
@@ -44,6 +47,7 @@ then
     FAAS_GATEWAY="${GATEWAY_URL_DEV}"
     FAAS_USER="${GATEWAY_USERNAME_DEV}"
     FAAS_PASS="${GATEWAY_PASSWORD_DEV}"
+    ENV_FILE="env-dev.yml"
 fi
 
 
@@ -109,6 +113,7 @@ else
                     GROUP_PATH2="$GROUP_PATH"
                     cd "$GITHUB_WORKSPACE/$GROUP_PATH"
                     cp "$GITHUB_WORKSPACE/template" -r template
+                    cp "$ENV_FILE" env.yml
                     cp "$GITHUB_WORKSPACE/functions.txt" -r functions.txt
 
                 fi
