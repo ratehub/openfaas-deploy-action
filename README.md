@@ -17,7 +17,11 @@ This action is designed to deploy functions or microservices developed with [Ope
         │   └── handler.js
         │   └── dev-deploy.yml
         │   └── staging-deploy.yml
-        │   └── prod-deploy.yml        
+        │   └── prod-deploy.yml
+        │
+        └── env-dev.yml
+        └── env-prod.yml
+        └── env-staging.yml     
         └── stack.yml
    ```
       This method will result in function being built, pushed, and deployed every time something changes in the function path. 
@@ -35,8 +39,12 @@ This action is designed to deploy functions or microservices developed with [Ope
         │   │   └── handler.js
         │   │   └── dev-deploy.yml
         │   │   └── staging-deploy.yml
-        │   └── └── prod-deploy.yml        
-        └── stack.yml
+        │   └── └── prod-deploy.yml
+        │   └── env-dev.yml
+        │   └── env-prod.yml
+        │   └── env-staging.yml         
+        │   └── stack.yml
+        │
         └── group-2/
         │   ├── function 1/
         │   │   └── handler.js
@@ -47,8 +55,13 @@ This action is designed to deploy functions or microservices developed with [Ope
         │   │   └── handler.js
         │   │   └── dev-deploy.yml
         │   │   └── staging-deploy.yml
-        │   └── └── prod-deploy.yml        
-        └── stack.yml
+        │   └── └── prod-deploy.yml
+        │   └── env-dev.yml
+        │   └── env-prod.yml
+        │   └── env-staging.yml
+        │   └── stack.yml          
+        │        
+        └── group-3/   
             
    ```
       Function folder names must correspond exactly to the name of a function in the stack.yml in its group folder.
@@ -56,31 +69,16 @@ This action is designed to deploy functions or microservices developed with [Ope
       
       
 # Usage
-## Commit to any branch(dev) other than master
-     1. If handler.js file is updated. 
-           └── Triggers release.yml workflow, however doesn't create a release(as it is configured only for the master(default-channel) branch).
-           └── FaaS build and push completes(overwrites the image in GCR if the tag(same as the version in package.json) already exists(basically image is pushed with the same tag)).
-     2. If package.json is updated
-          └── build_push.yml action is triggered, builds and pushes the function image with updated tag(version from package.json) 
-     3. If the staging-deploy.yml/prod-deploy.yml is updated
-          >> deploy.yml workflow is triggered. 
-               1. if staging-deploy/prod-deploy.yml is updated with the new image tag.
-                   └── The function with updated version is deployed to the STAGING/PROD environment respectively. 
-               2. if staging-deploy/prod-deploy.yml is updated with only new env variables(image tag remains same)
-                   └── Re-deploys the function with same tag but with updated env variables to DEV environment.
-     4. dev-deploy.yml does not contain image properties, provision to update environment variables/secrets/labels/constraints.
-     5. Updates to stack.yml does not trigger any actions, although updated configurations will be used the next time deploy action runs.
-      
-## Commit to master branch
+## Commits to master branch
 ##### If changes are made to one function specifically and are included in the PR, when merged
      1. Triggers release.yml action checks the function updated based on the path of the files changed
-           └── if the commits merged includes(fix/feat/perf(BREAKING CHANGE)) prefixes a new release and tag is created
+           └── if the PR title merged includes(fix/feat/perf(BREAKING CHANGE)) prefixes, a new release and tag is created
                   └── for "fix" prefix - `p` is updated in M.n.p
                   └── for "feat" prefix - `n` is updated in M.n.p
                   └── for "perf"(included with BREAKING CHANGE) prefix - `M` is updated in M.n.p
-     2. Updates to a function when pushed to master
+     2. Updates to a handler.js of the function when pushed to master
            └── Triggers auto-dev-deploy.yml action which auto-deploys updated function to DEV environment
-     3. If package.json is updated
+     3. If package.json is updated(or when the release is created which updates the version in package.json)
            └── build_push.yml action is triggered, builds and pushes the function image with updated tag.
      4. If the staging-deploy.yml/prod-deploy.yml is updated
            >> deploy.yml workflow is triggered. 
