@@ -80,6 +80,8 @@ This action is designed to deploy functions or microservices developed with [Ope
            └── Triggers auto-dev-deploy.yml action which auto-deploys updated function to DEV environment
      3. If package.json is updated(or when the release is created which updates the version in package.json)
            └── build_push.yml action is triggered, builds and pushes the function image with updated tag.
+           
+##### If deploy files are updated with image tag AND/OR function specific env variables, constraints, labels, secrets
      4. If the staging-deploy.yml/prod-deploy.yml is updated
            >> deploy.yml workflow is triggered. 
                 1. if staging-deploy/prod-deploy.yml is updated with the new image tag.
