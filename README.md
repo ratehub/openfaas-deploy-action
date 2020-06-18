@@ -81,17 +81,26 @@ This action is designed to deploy functions or microservices developed with [Ope
      3. If package.json is updated(or when the release is created which updates the version in package.json)
            └── build_push.yml action is triggered, builds and pushes the function image with updated tag.
            
+##### NOTE: Make sure to not combine updates to deploy file with the above function update commit/merge and keep them separate.           
 ##### If deploy files are updated with image tag AND/OR function specific env variables, constraints, labels, secrets
-     4. If the staging-deploy.yml/prod-deploy.yml is updated
+     1. If the staging-deploy.yml/prod-deploy.yml is updated
            >> deploy.yml workflow is triggered. 
                 1. if staging-deploy/prod-deploy.yml is updated with the new image tag.
                     └── The function with updated version is deployed to the STAGING/PROD environment respectively. 
                 2. if staging-deploy/prod-deploy.yml is updated with only new env variables(image tag remains same)
                     └── Re-deploys the function with same tag but with updated env variables to DEV environment. 
-     5. Update to dev-deploy.yml(environment variables/secrets/labels/constraints etc.)
+     2. Update to dev-deploy.yml(environment variables/secrets/labels/constraints etc.)
           └── Triggers auto-dev-deploy.yml action, builds, pushes and automatically deploys to the DEV environment
-     6. Updates to stack.yml does not trigger any actions, although updated configurations will be used the next time deploy action runs. 
-          
+     3. Updates to stack.yml does not trigger any actions, although updated configurations will be used the next time deploy action runs.
+     
+##### Group deploy 
+     1. If the multiple deploy files for the functions in a group is updated, 
+     for example:
+        └── In a group of 6 functions, if staging-deploy.yml is updated for 4 functions, 4 functions of 6 in the group are deployed to the staging cluster.
+     
+
+##### NOTE: No action is triggered for updates to env files(env-dev.yml, env-prod.yml, env-staging.yml)
+           
 ## Scheduled Re-deploy function
 ##### If the cron schedule is triggered for the functions to re-deploy
     Triggers schedule.yml action which builds, pushes and deploys the functions(selected re-deploy functions) to PROD
