@@ -25,14 +25,14 @@ COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : 
 
 # Depending on the deploy file we want to choose a different set of environment variables and credentials
 
-if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ];
+if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ] || [ "$FUNCTION" == 'env-prod.yml' ];
 then
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
     ENV_FILE="env-prod.yml"
     
-elif [ "$COMMITTED_FILES" == 'staging-deploy.yml' ] ||[ "$COMMIT_PATH" == 'staging-deploy.yml' ];
+elif [ "$COMMITTED_FILES" == 'staging-deploy.yml' ] ||[ "$COMMIT_PATH" == 'staging-deploy.yml' ] || [ "$FUNCTION" == 'env-staging.yml' ];
 then
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
@@ -40,7 +40,7 @@ then
     ENV_FILE="env-staging.yml"
 
 #$COMMIT_PATH is a deploy file updated when the deploy action is triggered by the functions from a repo different than faas
-elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ -n "${TAG_OVERRIDE:-}" ];
+elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ -n "${TAG_OVERRIDE:-}" ] || [ "$FUNCTION" == 'env-dev.yml' ];
 then
     COMMITTED_FILES="dev-deploy.yml"
     COMMIT_PATH='dev-deploy.yml'
