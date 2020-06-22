@@ -31,6 +31,7 @@ then
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
     FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
     ENV_FILE="env-prod.yml"
+    COMMITTED_FILES="prod-deploy.yml"
     
 elif [ "$COMMITTED_FILES" == 'staging-deploy.yml' ] ||[ "$COMMIT_PATH" == 'staging-deploy.yml' ] || [ "$FUNCTION" == 'env-staging.yml' ];
 then
@@ -38,6 +39,7 @@ then
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
     FAAS_PASS="${GATEWAY_PASSWORD_STAGING}"
     ENV_FILE="env-staging.yml"
+    COMMITTED_FILES="staging-deploy.yml"
 
 #$COMMIT_PATH is a deploy file updated when the deploy action is triggered by the functions from a repo different than faas
 elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ -n "${TAG_OVERRIDE:-}" ] || [ "$FUNCTION" == 'env-dev.yml' ];
@@ -146,6 +148,21 @@ else
                       done < functions.txt
                       FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
+                else
+                    GROUP_FUNCTIONS="$(ls -d */ | tr -d /)"
+                    groupDeployFuncs=($GROUP_FUNCTIONS)
+                    for func in "${groupDeployFuncs[@]}"
+                    do
+                      yq p -i "$func/$COMMITTED_FILES" "functions"."$func"
+                      # Get the updated image tag if the tag is not latest
+                      IMAGE_TAG=$(yq r "$func/$COMMITTED_FILES" functions."$func".image)
+                      touch updated_stack.yml
+                      yq w -i "$func/$COMMITTED_FILES" functions."$func".image "$GCR_ID""$IMAGE_TAG"
+                      yq merge -i updated_stack.yml "$func/$COMMITTED_FILES"
+                    done
+                    yq merge -i updated_stack.yml stack.yml
+                    cp -f updated_stack.yml stack.yml
+                    faas-cli deploy --gateway="$FAAS_GATEWAY"
                 fi
             fi
         fi
