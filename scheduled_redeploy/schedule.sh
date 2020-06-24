@@ -9,6 +9,7 @@ STACK_FILE="stack.yml"
 FAAS_GATEWAY="${GATEWAY_URL_PROD}"
 FAAS_USER="${GATEWAY_USERNAME_PROD}"
 FAAS_PASS="${GATEWAY_PASSWORD_PROD}"
+ENV_FILE="env-prod.yml"
 
 FUNCTION_NAME="$(basename "${SCHEDULED_REDEPLOY_FUNCS}")"
 
@@ -46,6 +47,7 @@ for func in "${reDeployFuncs[@]}"
 do
   GROUP_PATH="$(dirname $func)"
   FUNCTION_PATH="$(basename $func)"
+  cp "$ENV_FILE" env.yml
   cd "$GITHUB_WORKSPACE/$GROUP_PATH"
   cd "$FUNCTION_PATH" && PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
   # Write the updated version into stack file image properties tag
