@@ -164,24 +164,6 @@ else
                       done < functions.txt
                       FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
-                else
-                    GROUP_FUNCTIONS="$(ls -d */ | tr -d /)"
-                    groupDeployFuncs=($GROUP_FUNCTIONS)
-                    for func in "${groupDeployFuncs[@]}"
-                    do
-                      if [ "$func" != 'template' ];
-                      then
-                          yq p -i "$func/$COMMITTED_FILES" "functions"."$func"
-                          # Get the updated image tag if the tag is not latest
-                          IMAGE_TAG=$(yq r "$func/$COMMITTED_FILES" functions."$func".image)
-                          touch updated_stack.yml
-                          yq w -i "$func/$COMMITTED_FILES" functions."$func".image "$GCR_ID""$IMAGE_TAG"
-                          yq merge -i updated_stack.yml "$func/$COMMITTED_FILES"
-                      fi
-                    done
-                    yq merge -i updated_stack.yml stack.yml
-                    cp -f updated_stack.yml stack.yml
-                    faas-cli deploy --gateway="$FAAS_GATEWAY"
                 fi
             fi
         fi
