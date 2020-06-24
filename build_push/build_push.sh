@@ -35,7 +35,7 @@ then
     if [ -z "${TAG_OVERRIDE:-}" ];
     then
         #If build action is triggered after the release, get the updated version from package file and set it as the image tag in stack file
-        PACKAGE_VERSION="$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
+        PACKAGE_VERSION="$(cat package.json | sed 's/.*"version": "\(.*\)".*/\1/;t;d')"
         FUNCTION_PATH="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
         UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")"
         echo "$UPDATED_STACK_FILE" > $STACK_FILE
@@ -87,7 +87,7 @@ else
                         if [ -z "${TAG_OVERRIDE:-}" ];
                         then
                             # Get the updated version from the package.json file
-                            cd "$FUNCTION_PATH" && PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
+                            cd "$FUNCTION_PATH" && PACKAGE_VERSION=$(cat package.json | sed 's/.*"version": "\(.*\)".*/\1/;t;d')
                             # Write the updated version into stack file image properties tag
                             cd .. && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")
                             echo "$UPDATED_STACK_FILE" > $STACK_FILE
