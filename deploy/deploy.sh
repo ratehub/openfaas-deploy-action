@@ -19,13 +19,29 @@ FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
 echo "$DEPLOY_FILE" > changed_files.txt
 # Add all the functions updated in another file
 echo "$FUNCTION" > functions.txt
-
+sed -i '/^$/d' changed_files.txt
+sed '/\.yml/d' -i functions.txt
 # For group deploy to the target environment(staging/prod) set the deploy files as a variable
 COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 
-# Depending on the deploy file we want to choose a different set of environment variables and credentials
+COMMITS="$(echo "$COMMIT_PATH" | wc -l)"
 
-if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ] || [ "$FUNCTION" == 'env-prod.yml' ];
+if [ "$COMMITS" -gt 1 ];
+then
+    if [[ $COMMIT_PATH == *"prod-deploy.yml"* ]];
+    then
+        COMMIT_PATH="prod-deploy.yml"
+    elif [[ $COMMIT_PATH == *"staging-deploy.yml"* ]];
+    then
+        COMMIT_PATH="staging-deploy.yml"
+    elif [[ $COMMIT_PATH == *"dev-deploy.yml"* ]];
+    then
+        COMMIT_PATH="dev-deploy.yml"
+    fi
+fi
+
+# Depending on the deploy file we want to choose a different set of environment variables and credentials
+if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ];
 then
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
@@ -33,7 +49,7 @@ then
     ENV_FILE="env-prod.yml"
     COMMITTED_FILES="prod-deploy.yml"
     
-elif [ "$COMMITTED_FILES" == 'staging-deploy.yml' ] ||[ "$COMMIT_PATH" == 'staging-deploy.yml' ] || [ "$FUNCTION" == 'env-staging.yml' ];
+elif [ "$COMMITTED_FILES" == 'staging-deploy.yml' ] ||[ "$COMMIT_PATH" == 'staging-deploy.yml' ];
 then
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
@@ -42,7 +58,7 @@ then
     COMMITTED_FILES="staging-deploy.yml"
 
 #$COMMIT_PATH is a deploy file updated when the deploy action is triggered by the functions from a repo different than faas
-elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ -n "${TAG_OVERRIDE:-}" ] || [ "$FUNCTION" == 'env-dev.yml' ];
+elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ -n "${TAG_OVERRIDE:-}" ];
 then
     COMMITTED_FILES="dev-deploy.yml"
     COMMIT_PATH='dev-deploy.yml'
