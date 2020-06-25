@@ -18,11 +18,11 @@ COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
 COMMITS="$(echo "$COMMIT_PATH" | wc -l)"
 if [ "$COMMITS" -gt 1 ];
 then
-   if [[ $COMMIT_PATH == *"prod-deploy.yml"* ]];
+   if [[ $COMMIT_PATH == *"prod-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
    then
        COMMIT_PATH="prod-deploy.yml"
        COMMITTED_FILES="prod-deploy.yml"
-   elif [[ $COMMIT_PATH == *"staging-deploy.yml"* ]];
+   elif [[ $COMMIT_PATH == *"staging-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
    then
        COMMIT_PATH="staging-deploy.yml"
        COMMITTED_FILES="staging-deploy.yml"
