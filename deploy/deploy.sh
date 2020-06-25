@@ -7,6 +7,8 @@ echo "--------- Starting function deployment process ---------"
 # Get the branch name
 BRANCH_NAME="$(echo "$GITHUB_REF" | awk -F"/" '{print $3}')"
 GCR_ID="gcr.io/platform-235214/"
+#Get the deploy files updated
+COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
 #Get the deploy file filename only from the diff
 DEPLOY_FILE="$(echo "$COMMIT_PATH" | awk -F"/" '{print $3}')"
 # For group deploy to the target environment(staging/prod) set the deploy files as a variable
