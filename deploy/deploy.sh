@@ -7,58 +7,7 @@ echo "--------- Starting function deployment process ---------"
 # Get the branch name
 BRANCH_NAME="$(echo "$GITHUB_REF" | awk -F"/" '{print $3}')"
 GCR_ID="gcr.io/platform-235214/"
-#Get the deploy files updated
-COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
-echo "$COMMIT_PATH" > commits.txt
 
-
-if [ -z "${TAG_OVERRIDE:-}" ];
-then
-    #Get the deploy file filename only from the diff
-    DEPLOY_FILE="$(echo "$COMMIT_PATH" | awk -F"/" '{print $3}')"
-    #Get the function name only from the diff
-    FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
-    # Add all the files changed in a file
-    echo "$DEPLOY_FILE" > changed_files.txt
-    # Add all the functions updated in another file
-    echo "$FUNCTION" > initial_functions.txt
-    # Delete blank lines when changes are made within group_path
-    sed '/\.js/d;/\.json/d;/^$/d' -i changed_files.txt
-    # Delete the commit path with update to files -> handler.js, .yml extensions
-    sed '/\.json/d;/\.js/d;/\.yml/d' -i initial_functions.txt
-    # Get the functions of the files changed by removing duplicate for multiple commits within same function path
-    sort -u initial_functions.txt  > functions.txt
-
-    # For group deploy to the target environment(staging/prod) set the deploy files as a variable
-    COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
-    # Get the number of commits which triggered deploy action
-    COMMITS="$(echo "$COMMIT_PATH" | wc -l)"
-    # Assign the COMMIT_PATH to *-deploy.yml if any of them is present in the commits
-    if [ "$COMMITS" -gt 1 ];
-    then
-       if [[ $COMMIT_PATH == *"prod-deploy.yml"* ]];
-       then
-           COMMIT_PATH="prod-deploy.yml"
-       elif [[ $COMMIT_PATH == *"staging-deploy.yml"* ]];
-       then
-           COMMIT_PATH="staging-deploy.yml"
-       elif [[ $COMMIT_PATH == *"dev-deploy.yml"* ]];
-       then
-           COMMIT_PATH="dev-deploy.yml"
-       fi
-    fi
-else
-    DEPLOY_FILE=""
-    COMMITTED_FILES=""
-    #Get the function name only from the diff
-    FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
-    # Add all the functions updated in a file
-    echo "$FUNCTION" > initial_functions.txt
-    # Delete the commit path with update to files -> handler.js, .yml extensions
-    sed '/\.json/d;/\.js/d;/\.yml/d' -i initial_functions.txt
-    # Get the functions of the files changed by removing duplicate for multiple commits within same function path
-    sort -u initial_functions.txt  > functions.txt
-fi
 
 # Depending on the deploy file we want to choose a different set of environment variables and credentials
 if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ];
@@ -134,6 +83,9 @@ else
 
       GROUP_PATH=""
       GROUP_PATH2=""
+      FUNCTION_PATH2=""
+
+      git diff HEAD HEAD~1 --name-only > differences.txt
 
       while IFS= read -r line; do
           #If changes are in root, we can ignore them
@@ -149,37 +101,40 @@ else
                       cd "$GITHUB_WORKSPACE/$GROUP_PATH"
                       cp "$GITHUB_WORKSPACE/template" -r template
                       cp "$ENV_FILE" env.yml
-                      cp "$GITHUB_WORKSPACE/functions.txt" -r functions.txt
+                  fi
+
+                  FUNCTION_PATH="$(echo "$line" | awk -F"/" '{print $2}')"
+                  if [ -d "$FUNCTION_PATH" ];
+                  then
+                      #If we already handled this function based on a prior file, we can ignore it this time around
+                      if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
+                      then
+                          if [ -z "${TAG_OVERRIDE:-}" ];
+                          then
+                              yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
+                              # Get the updated image tag if the tag is not latest
+                              IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
+                              yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
+                          else
+                              #Add prefix to the deploy file
+                              yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
+                              #Update the image properties in the deploy file
+                              yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"${TAG_OVERRIDE}"
+
+                          fi
+                          yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
+                          cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
+                          # Deploy all the functions whose deploy files are updated
+                          if [ "$GITHUB_EVENT_NAME" == "push" ];
+                          then
+                              faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
+                          fi
+                          FUNCTION_PATH2="$FUNCTION_PATH"
+                      fi
                   fi
               fi
           fi
-      done < commits.txt
-
-      while IFS= read -r FUNCTION_PATH; do
-          if [ -z "${TAG_OVERRIDE:-}" ] && [ "$COMMITTED_FILES" != 'dev-deploy.yml' ] ;
-          then
-              yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
-              # Get the updated image tag if the tag is not latest
-              IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
-              yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
-          else
-              #Add prefix to the deploy file
-              yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
-              #Update the image properties in the deploy file
-              yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"${TAG_OVERRIDE}"
-
-          fi
-          yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
-          cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
-          # Deploy all the functions whose deploy files are updated
-          if [ "$GITHUB_EVENT_NAME" == "push" ];
-          then
-              faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
-          fi
-      done < functions.txt
-
-
-
+      done < differences.txt
 fi
 
 if [ "$GITHUB_EVENT_NAME" == "push" ];
