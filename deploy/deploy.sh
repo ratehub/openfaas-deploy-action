@@ -7,7 +7,10 @@ echo "--------- Starting function deployment process ---------"
 # Get the branch name
 BRANCH_NAME="$(echo "$GITHUB_REF" | awk -F"/" '{print $3}')"
 GCR_ID="gcr.io/platform-235214/"
-
+#Get the deploy file filename only from the diff
+DEPLOY_FILE="$(echo "$COMMIT_PATH" | awk -F"/" '{print $3}')"
+# For group deploy to the target environment(staging/prod) set the deploy files as a variable
+COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 
 # Depending on the deploy file we want to choose a different set of environment variables and credentials
 if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ];
