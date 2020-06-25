@@ -9,35 +9,46 @@ BRANCH_NAME="$(echo "$GITHUB_REF" | awk -F"/" '{print $3}')"
 GCR_ID="gcr.io/platform-235214/"
 #Get the deploy files updated
 COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
-#Get the deploy file filename only from the diff
-DEPLOY_FILE="$(echo "$COMMIT_PATH" | awk -F"/" '{print $3}')"
-#Get the function name only from the diff
-FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
 
-
-# Add all the files changed in a file
-echo "$DEPLOY_FILE" > changed_files.txt
-# Add all the functions updated in another file
-echo "$FUNCTION" > functions.txt
-sed -i '/^$/d' changed_files.txt
-sed '/\.yml/d' -i functions.txt
-# For group deploy to the target environment(staging/prod) set the deploy files as a variable
-COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
-
-COMMITS="$(echo "$COMMIT_PATH" | wc -l)"
-
-if [ "$COMMITS" -gt 1 ];
+if [ -z "${TAG_OVERRIDE:-}" ];
 then
-    if [[ $COMMIT_PATH == *"prod-deploy.yml"* ]];
+    #Get the deploy file filename only from the diff
+    DEPLOY_FILE="$(echo "$COMMIT_PATH" | awk -F"/" '{print $3}')"
+    #Get the function name only from the diff
+    FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
+    # Add all the files changed in a file
+    echo "$DEPLOY_FILE" > changed_files.txt
+    # Add all the functions updated in another file
+    echo "$FUNCTION" > functions.txt
+    # Delete blank lines when changes are made within group_path
+    sed '/^$/d' -i changed_files.txt
+    # Delete the commit path with update to files -> handler.js, .yml extensions
+    sed '/\.js/d;/\.yml/d' -i functions.txt
+    # For group deploy to the target environment(staging/prod) set the deploy files as a variable
+    COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
+    # Get the number of commits which triggered deploy action
+    COMMITS="$(echo "$COMMIT_PATH" | wc -l)"
+    # Assign the COMMIT_PATH to *-deploy.yml if any of them is present in the commits
+    if [ "$COMMITS" -gt 1 ];
     then
-        COMMIT_PATH="prod-deploy.yml"
-    elif [[ $COMMIT_PATH == *"staging-deploy.yml"* ]];
-    then
-        COMMIT_PATH="staging-deploy.yml"
-    elif [[ $COMMIT_PATH == *"dev-deploy.yml"* ]];
-    then
-        COMMIT_PATH="dev-deploy.yml"
+       if [[ $COMMIT_PATH == *"prod-deploy.yml"* ]];
+       then
+           COMMIT_PATH="prod-deploy.yml"
+       elif [[ $COMMIT_PATH == *"staging-deploy.yml"* ]];
+       then
+           COMMIT_PATH="staging-deploy.yml"
+       elif [[ $COMMIT_PATH == *"dev-deploy.yml"* ]];
+       then
+           COMMIT_PATH="dev-deploy.yml"
+       fi
     fi
+else
+    # Get the number of commits which triggered deploy action
+    COMMITS="$(echo "$COMMIT_PATH" | wc -l)"
+    #Get the function name only from the diff
+    FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
+    # Add all the functions updated in a file
+    echo "$FUNCTION" > functions.txt
 fi
 
 # Depending on the deploy file we want to choose a different set of environment variables and credentials
