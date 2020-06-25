@@ -11,6 +11,8 @@ GCR_ID="gcr.io/platform-235214/"
 COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
 #Get the deploy file filename only from the diff
 DEPLOY_FILE="$(echo "$COMMIT_PATH" | awk -F"/" '{print $3}')"
+# Add all the files changed in a file
+echo "$DEPLOY_FILE" > changed_files.txt
 # For group deploy to the target environment(staging/prod) set the deploy files as a variable
 COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 
