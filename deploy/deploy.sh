@@ -21,9 +21,9 @@ then
     # Add all the functions updated in another file
     echo "$FUNCTION" > functions.txt
     # Delete blank lines when changes are made within group_path
-    sed '/^$/d' -i changed_files.txt
+    sed '/\.js/d;/\.json/d;/^$/d' -i changed_files.txt
     # Delete the commit path with update to files -> handler.js, .yml extensions
-    sed '/\.js/d;/\.yml/d' -i functions.txt
+    sed '/\.json/d;/\.js/d;/\.yml/d' -i functions.txt
     # For group deploy to the target environment(staging/prod) set the deploy files as a variable
     COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
     # Get the number of commits which triggered deploy action
@@ -43,12 +43,12 @@ then
        fi
     fi
 else
-    # Get the number of commits which triggered deploy action
-    COMMITS="$(echo "$COMMIT_PATH" | wc -l)"
+    COMMITTED_FILES=""
     #Get the function name only from the diff
     FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
     # Add all the functions updated in a file
     echo "$FUNCTION" > functions.txt
+    sed '/\.json/d;/\.js/d;/\.yml/d' -i functions.txt
 fi
 
 # Depending on the deploy file we want to choose a different set of environment variables and credentials
