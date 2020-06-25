@@ -132,7 +132,7 @@ else
                       #If we already handled this function based on a prior file, we can ignore it this time around
                       if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                       then
-                          if [ -z "${TAG_OVERRIDE:-}" ] && [ COMMIT_PATH != "dev-deploy.yml" ];
+                          if [ -z "${TAG_OVERRIDE:-}" ] && [ "$COMMITTED_FILES" != "dev-deploy.yml" ];
                           then
                               yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
                               # Get the updated image tag if the tag is not latest
