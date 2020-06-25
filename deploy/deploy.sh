@@ -164,13 +164,13 @@ fi
 if [ "$GITHUB_EVENT_NAME" == "push" ];
 then
     # Query gateway action so that functions are added to gateway
-    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ] && [ "$DEPLOY_FILE" == 'prod-deploy.yml' ];
+    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ] && [ "$COMMITTED_FILES" == 'prod-deploy.yml' ];
     then
         curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
-    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$DEPLOY_FILE" == 'staging-deploy.yml' ];
+    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$COMMITTED_FILES" == 'staging-deploy.yml' ];
     then
        curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
-    elif [ -n "${AUTH_TOKEN_DEV:-}" ] && [ -n "${TAG_OVERRIDE:-}" ] || [ "$DEPLOY_FILE" == 'dev-deploy.yml' ];
+    elif [ -n "${AUTH_TOKEN_DEV:-}" ] && [ -n "${TAG_OVERRIDE:-}" ] || [ "$COMMITTED_FILES" == 'dev-deploy.yml' ];
     then
        curl -H "Authorization: token ${AUTH_TOKEN_DEV}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-dev/dispatches
     fi
