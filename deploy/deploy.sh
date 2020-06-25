@@ -50,7 +50,7 @@ else
     #Get the function name only from the diff
     FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
     # Add all the functions updated in a file
-    echo "$FUNCTION" > intial_functions.txt
+    echo "$FUNCTION" > initial_functions.txt
     sed '/\.json/d;/\.js/d;/\.yml/d' -i initial_functions.txt
     sort -u initial_functions.txt  > functions.txt
 fi
