@@ -43,6 +43,7 @@ then
        fi
     fi
 else
+    DEPLOY_FILE=""
     COMMITTED_FILES=""
     #Get the function name only from the diff
     FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
