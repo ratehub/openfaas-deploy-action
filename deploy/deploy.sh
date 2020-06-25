@@ -26,8 +26,7 @@ then
    then
        COMMIT_PATH="staging-deploy.yml"
        COMMITTED_FILES="staging-deploy.yml"
-   elif [[ $COMMIT_PATH == *"dev-deploy.yml"* ]];
-   then
+   else
        COMMIT_PATH="dev-deploy.yml"
        COMMITTED_FILES="dev-deploy.yml"
    fi
@@ -133,7 +132,7 @@ else
                       #If we already handled this function based on a prior file, we can ignore it this time around
                       if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                       then
-                          if [ -z "${TAG_OVERRIDE:-}" ];
+                          if [ -z "${TAG_OVERRIDE:-}" ] && [ COMMIT_PATH != "dev-deploy.yml" ];
                           then
                               yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
                               # Get the updated image tag if the tag is not latest
