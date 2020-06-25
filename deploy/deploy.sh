@@ -19,11 +19,13 @@ then
     # Add all the files changed in a file
     echo "$DEPLOY_FILE" > changed_files.txt
     # Add all the functions updated in another file
-    echo "$FUNCTION" > functions.txt
+    echo "$FUNCTION" > initial_functions.txt
     # Delete blank lines when changes are made within group_path
     sed '/\.js/d;/\.json/d;/^$/d' -i changed_files.txt
     # Delete the commit path with update to files -> handler.js, .yml extensions
-    sed '/\.json/d;/\.js/d;/\.yml/d' -i functions.txt
+    sed '/\.json/d;/\.js/d;/\.yml/d' -i initial_functions.txt
+    sort -u initial_functions.txt  > functions.txt
+
     # For group deploy to the target environment(staging/prod) set the deploy files as a variable
     COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
     # Get the number of commits which triggered deploy action
@@ -48,8 +50,9 @@ else
     #Get the function name only from the diff
     FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
     # Add all the functions updated in a file
-    echo "$FUNCTION" > functions.txt
-    sed '/\.json/d;/\.js/d;/\.yml/d' -i functions.txt
+    echo "$FUNCTION" > intial_functions.txt
+    sed '/\.json/d;/\.js/d;/\.yml/d' -i initial_functions.txt
+    sort -u initial_functions.txt  > functions.txt
 fi
 
 # Depending on the deploy file we want to choose a different set of environment variables and credentials
@@ -172,7 +175,10 @@ else
                       cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
                       # Deploy all the functions whose deploy files are updated
                       while IFS= read -r LINE; do
-                          faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$LINE"
+                          if [ "$GITHUB_EVENT_NAME" == "push" ];
+                          then
+                              faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$LINE"
+                          fi
                       done < functions.txt
                       FUNCTION_PATH2="$FUNCTION_PATH"
                     fi
