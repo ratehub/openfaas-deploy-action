@@ -10,22 +10,30 @@ GCR_ID="gcr.io/platform-235214/"
 #Get the deploy files updated
 COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
 #Get the deploy file filename only from the diff
-DEPLOY_FILE="$(echo "$COMMIT_PATH" | awk -F"/" '{print $3}')"
-#Get the function name only from the diff
-FUNCTION="$(echo "$COMMIT_PATH" | awk -F"/" '{print $2}')"
-
-
+#DEPLOY_FILE="$(echo "$COMMIT_PATH" | awk -F"/" '{print $3}')"
 # Add all the files changed in a file
-echo "$DEPLOY_FILE" > changed_files.txt
-# Add all the functions updated in another file
-echo "$FUNCTION" > functions.txt
-
+#echo "$DEPLOY_FILE" > changed_files.txt
 # For group deploy to the target environment(staging/prod) set the deploy files as a variable
-COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
+#COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
+COMMITS="$(echo "$COMMIT_PATH" | wc -l)"
+if [ "$COMMITS" -gt 1 ];
+then
+   if [[ $COMMIT_PATH == *"prod-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
+   then
+       COMMIT_PATH="prod-deploy.yml"
+       COMMITTED_FILES="prod-deploy.yml"
+   elif [[ $COMMIT_PATH == *"staging-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
+   then
+       COMMIT_PATH="staging-deploy.yml"
+       COMMITTED_FILES="staging-deploy.yml"
+   else
+       COMMIT_PATH="dev-deploy.yml"
+       COMMITTED_FILES="dev-deploy.yml"
+   fi
+fi
 
 # Depending on the deploy file we want to choose a different set of environment variables and credentials
-
-if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ] || [ "$FUNCTION" == 'env-prod.yml' ];
+if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ];
 then
     FAAS_GATEWAY="${GATEWAY_URL_PROD}"
     FAAS_USER="${GATEWAY_USERNAME_PROD}"
@@ -33,7 +41,7 @@ then
     ENV_FILE="env-prod.yml"
     COMMITTED_FILES="prod-deploy.yml"
     
-elif [ "$COMMITTED_FILES" == 'staging-deploy.yml' ] ||[ "$COMMIT_PATH" == 'staging-deploy.yml' ] || [ "$FUNCTION" == 'env-staging.yml' ];
+elif [ "$COMMITTED_FILES" == 'staging-deploy.yml' ] ||[ "$COMMIT_PATH" == 'staging-deploy.yml' ];
 then
     FAAS_GATEWAY="${GATEWAY_URL_STAGING}"
     FAAS_USER="${GATEWAY_USERNAME_STAGING}"
@@ -42,7 +50,7 @@ then
     COMMITTED_FILES="staging-deploy.yml"
 
 #$COMMIT_PATH is a deploy file updated when the deploy action is triggered by the functions from a repo different than faas
-elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ -n "${TAG_OVERRIDE:-}" ] || [ "$FUNCTION" == 'env-dev.yml' ];
+elif [ "$COMMITTED_FILES" == 'dev-deploy.yml' ] || [ "$COMMIT_PATH" == 'dev-deploy.yml' ] || [ -n "${TAG_OVERRIDE:-}" ];
 then
     COMMITTED_FILES="dev-deploy.yml"
     COMMIT_PATH='dev-deploy.yml'
@@ -96,93 +104,72 @@ then
     fi
 else
 
-    GROUP_PATH=""
-    GROUP_PATH2=""
-    FUNCTION_PATH2=""
+      GROUP_PATH=""
+      GROUP_PATH2=""
+      FUNCTION_PATH2=""
 
-    git diff HEAD HEAD~1 --name-only > differences.txt
+      git diff HEAD HEAD~1 --name-only > differences.txt
 
-    while IFS= read -r line; do
-        #If changes are in root, we can ignore them
-        if [[ "$line" =~ "/" ]];
-        then
-            GROUP_PATH="$(echo "$line" | awk -F"/" '{print $1}')"
-            #Ignore changes if the folder is prefixed with a "." or "_"
-            if [[ ! "$GROUP_PATH" =~ ^[\._] ]];
-            then
-                if [ "$GROUP_PATH" != "$GROUP_PATH2" ];
-                then
-                    GROUP_PATH2="$GROUP_PATH"
-                    cd "$GITHUB_WORKSPACE/$GROUP_PATH"
-                    cp "$GITHUB_WORKSPACE/template" -r template
-                    cp "$ENV_FILE" env.yml
-                    cp "$GITHUB_WORKSPACE/functions.txt" -r functions.txt
+      while IFS= read -r line; do
+          #If changes are in root, we can ignore them
+          if [[ "$line" =~ "/" ]];
+          then
+              GROUP_PATH="$(echo "$line" | awk -F"/" '{print $1}')"
+              #Ignore changes if the folder is prefixed with a "." or "_"
+              if [[ ! "$GROUP_PATH" =~ ^[\._] ]];
+              then
+                  if [ "$GROUP_PATH" != "$GROUP_PATH2" ];
+                  then
+                      GROUP_PATH2="$GROUP_PATH"
+                      cd "$GITHUB_WORKSPACE/$GROUP_PATH"
+                      cp "$GITHUB_WORKSPACE/template" -r template
+                      cp "$ENV_FILE" env.yml
+                  fi
 
-                fi
-
-                FUNCTION_PATH="$(echo "$line" | awk -F"/" '{print $2}')"
-
-                if [ -d "$FUNCTION_PATH" ];
-                then
-                    #If we already handled this function based on a prior file, we can ignore it this time around
-                    if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
-                    then
-                      if [ -z "${TAG_OVERRIDE:-}" ];
+                  FUNCTION_PATH="$(echo "$line" | awk -F"/" '{print $2}')"
+                  if [ -d "$FUNCTION_PATH" ];
+                  then
+                      #If we already handled this function based on a prior file, we can ignore it this time around
+                      if [ "$FUNCTION_PATH" != "$FUNCTION_PATH2" ];
                       then
-                          yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
-                          # Get the updated image tag if the tag is not latest
-                          IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
-                          yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
-                      else
-                          #Add prefix to the deploy file
-                          yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
-                          #Update the image properties in the deploy file
-                          yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"${TAG_OVERRIDE}"
+                          if [ -z "${TAG_OVERRIDE:-}" ] && [ "$COMMITTED_FILES" != "dev-deploy.yml" ];
+                          then
+                              yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
+                              # Get the updated image tag if the tag is not latest
+                              IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
+                              yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
+                          else
+                              #Add prefix to the deploy file
+                              yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
+                              #Update the image properties in the deploy file
+                              yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"${TAG_OVERRIDE}"
 
+                          fi
+                          yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
+                          cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
+                          # Deploy all the functions whose deploy files are updated
+                          if [ "$GITHUB_EVENT_NAME" == "push" ];
+                          then
+                              faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
+                          fi
+                          FUNCTION_PATH2="$FUNCTION_PATH"
                       fi
-                      yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
-                      cp -f "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
-                      # Deploy all the functions whose deploy files are updated
-                      while IFS= read -r LINE; do
-                          faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$LINE"
-                      done < functions.txt
-                      FUNCTION_PATH2="$FUNCTION_PATH"
-                    fi
-                else
-                    GROUP_FUNCTIONS="$(ls -d */ | tr -d /)"
-                    groupDeployFuncs=($GROUP_FUNCTIONS)
-                    for func in "${groupDeployFuncs[@]}"
-                    do
-                      if [ "$func" != 'template' ];
-                      then
-                          yq p -i "$func/$COMMITTED_FILES" "functions"."$func"
-                          # Get the updated image tag if the tag is not latest
-                          IMAGE_TAG=$(yq r "$func/$COMMITTED_FILES" functions."$func".image)
-                          touch updated_stack.yml
-                          yq w -i "$func/$COMMITTED_FILES" functions."$func".image "$GCR_ID""$IMAGE_TAG"
-                          yq merge -i updated_stack.yml "$func/$COMMITTED_FILES"
-                      fi
-                    done
-                    yq merge -i updated_stack.yml stack.yml
-                    cp -f updated_stack.yml stack.yml
-                    faas-cli deploy --gateway="$FAAS_GATEWAY"
-                fi
-            fi
-        fi
-
-    done < differences.txt
+                  fi
+              fi
+          fi
+      done < differences.txt
 fi
 
 if [ "$GITHUB_EVENT_NAME" == "push" ];
 then
     # Query gateway action so that functions are added to gateway
-    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ] && [ "$DEPLOY_FILE" == 'prod-deploy.yml' ];
+    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ] && [ "$COMMITTED_FILES" == 'prod-deploy.yml' ];
     then
         curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
-    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$DEPLOY_FILE" == 'staging-deploy.yml' ];
+    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$COMMITTED_FILES" == 'staging-deploy.yml' ];
     then
        curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
-    elif [ -n "${AUTH_TOKEN_DEV:-}" ] && [ -n "${TAG_OVERRIDE:-}" ] || [ "$DEPLOY_FILE" == 'dev-deploy.yml' ];
+    elif [ -n "${AUTH_TOKEN_DEV:-}" ] && [ -n "${TAG_OVERRIDE:-}" ] || [ "$COMMITTED_FILES" == 'dev-deploy.yml' ];
     then
        curl -H "Authorization: token ${AUTH_TOKEN_DEV}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-dev/dispatches
     fi
