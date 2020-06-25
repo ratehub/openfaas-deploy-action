@@ -16,20 +16,18 @@ COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
 # For group deploy to the target environment(staging/prod) set the deploy files as a variable
 #COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 COMMITS="$(echo "$COMMIT_PATH" | wc -l)"
-if [ "$COMMITS" -gt 1 ];
+
+if [[ $COMMIT_PATH == *"prod-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
 then
-   if [[ $COMMIT_PATH == *"prod-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
-   then
-       COMMIT_PATH="prod-deploy.yml"
-       COMMITTED_FILES="prod-deploy.yml"
-   elif [[ $COMMIT_PATH == *"staging-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
-   then
-       COMMIT_PATH="staging-deploy.yml"
-       COMMITTED_FILES="staging-deploy.yml"
-   else
-       COMMIT_PATH="dev-deploy.yml"
-       COMMITTED_FILES="dev-deploy.yml"
-   fi
+    COMMIT_PATH="prod-deploy.yml"
+    COMMITTED_FILES="prod-deploy.yml"
+elif [[ $COMMIT_PATH == *"staging-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
+then
+    COMMIT_PATH="staging-deploy.yml"
+    COMMITTED_FILES="staging-deploy.yml"
+else
+    COMMIT_PATH="dev-deploy.yml"
+    COMMITTED_FILES="dev-deploy.yml"
 fi
 
 # Depending on the deploy file we want to choose a different set of environment variables and credentials
