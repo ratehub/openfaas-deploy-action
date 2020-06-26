@@ -59,7 +59,12 @@ else
     GROUP_PATH2=""
     FUNCTION_PATH2=""
 
-    git diff HEAD HEAD~1 --name-only > differences.txt
+    if [ -z "${LATEST_TAG:-}" ] && [ -z "${HOTFIX_TAG:-}" ];
+    then
+        git diff HEAD HEAD~1 --name-only > differences.txt
+    else
+        git diff LATEST_TAG HOTFIX_TAG --stat > differences.txt
+    fi
 
     while IFS= read -r line; do
         #If changes are in root, we can ignore them
