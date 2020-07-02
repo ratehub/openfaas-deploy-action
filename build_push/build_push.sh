@@ -63,7 +63,7 @@ else
     then
         git diff HEAD HEAD~1 --name-only > differences.txt
     else
-        git fetch
+        git pull --tags
         git diff HOTFIX_TAG LATEST_TAG --stat > differences.txt
     fi
 
