@@ -63,8 +63,7 @@ else
     then
         git diff HEAD HEAD~1 --name-only > differences.txt
     else
-        git remote set-url origin git@github.com:ratehub/faas-semver.git
-        git fetch all
+        git fetch
         git diff HOTFIX_TAG LATEST_TAG --stat > differences.txt
     fi
 
