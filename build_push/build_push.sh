@@ -63,8 +63,7 @@ else
     then
         git diff HEAD HEAD~1 --name-only > differences.txt
     else
-        git pull --tags
-        git diff HOTFIX_TAG LATEST_TAG --stat > differences.txt
+        git diff "$HOTFIX_TAG" "$LATEST_TAG" --stat > differences.txt
     fi
 
     while IFS= read -r line; do
