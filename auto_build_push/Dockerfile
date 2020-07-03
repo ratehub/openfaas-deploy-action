@@ -34,9 +34,9 @@ RUN chmod +x /usr/bin/yq
 
 
 # Copies your code file from your action repository to the filesystem path `/` of the container
-COPY build_push.sh /build_push.sh
+COPY auto_build_push.sh /auto_build_push.sh
 
-RUN chmod +x /build_push.sh
+RUN chmod +x /auto_build_push.sh
 
 # Code file to execute when the docker container starts up (`entrypoint.sh`)
-ENTRYPOINT ["/build_push.sh"]
+ENTRYPOINT ["/auto_build_push.sh"]
