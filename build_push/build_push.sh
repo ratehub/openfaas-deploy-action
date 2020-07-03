@@ -55,51 +55,39 @@ then
         faas-cli push --filter="$FUNCTION_PATH"
     fi
 else
-    while IFS= read -r line; do
-        #If changes are in root, we can ignore them
-        if [[ "$line" =~ "/" ]];
-        then
-            GROUP_PATH="$(echo "$line" | awk -F"/" '{print $1}')"
-            #Ignore changes if the folder is prefixed with a "." or "_"
-            if [[ ! "$GROUP_PATH" =~ ^[\._] ]];
-            then
-                if [ "$GROUP_PATH" != "$GROUP_PATH2" ];
-                then
-                    GROUP_PATH2="$GROUP_PATH"
-                    cd "$GITHUB_WORKSPACE/$GROUP_PATH"
-                    cp "$GITHUB_WORKSPACE/template" -r template
-                fi
+    FUNCTION_PATH="$(echo "${TAG}" | cut -f1 -d"-")"
+    for d in */ ;
+    do
+      if [ -d "$FUNCTION_PATH" ];
+      then
+          cd "$d"
+          #if the TAG_OVERRIDE flag is set to latest, update image properties in stack file
+          if [ -z "${TAG_OVERRIDE:-}" ];
+          then
+              # Get the updated version from the package.json file
+              cd "$FUNCTION_PATH" && IMAGE_TAG="$(echo "${TAG}" | sed 's/^[^-]*-//g')"
+              # Write the updated version into stack file image properties tag
+              cd .. && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$IMAGE_TAG")
+              echo "$UPDATED_STACK_FILE" > $STACK_FILE
+          else
+              UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG_OVERRIDE")
+              echo "$UPDATED_STACK_FILE" > $STACK_FILE
+          fi
+          if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+          then
+              faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+          else
+              faas-cli build --filter="$FUNCTION_PATH"
+          fi
+          if [ "$GITHUB_EVENT_NAME" == "push" ];
+          then
+              faas-cli push --filter="$FUNCTION_PATH"
+          fi
+      else
+          cd ..
+      fi
 
-                FUNCTION_PATH="$(echo "${TAG}" | cut -f1 -d"-")"
-                #if the TAG_OVERRIDE flag is set to latest, update image properties in stack file
-                if [ -z "${TAG_OVERRIDE:-}" ];
-                then
-                    # Get the updated version from the package.json file
-                    cd FUNCTION_PATH && IMAGE_TAG="$(echo "${TAG}" | sed 's/^[^-]*-//g')"
-                    # Write the updated version into stack file image properties tag
-                    cd .. && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$IMAGE_TAG")
-                    echo "$UPDATED_STACK_FILE" > $STACK_FILE
-                else
-                    UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$TAG_OVERRIDE")
-                    echo "$UPDATED_STACK_FILE" > $STACK_FILE
-                fi
-                if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
-                then
-                    faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
-                else
-                    faas-cli build --filter="$FUNCTION_PATH"
-                fi
-                if [ "$GITHUB_EVENT_NAME" == "push" ];
-                then
-                    faas-cli push --filter="$FUNCTION_PATH"
-                fi
-                FUNCTION_PATH2="$FUNCTION_PATH"
-                    fi
-                fi
-            fi
-        fi
-    done < differences.txt
-
+   done
 fi
 
 echo "--------- Function build and Push process is done ---------"
