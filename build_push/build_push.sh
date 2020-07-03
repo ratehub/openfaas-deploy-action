@@ -61,6 +61,8 @@ else
       cd "$d"
       if [ -d "$FUNCTION_PATH" ];
       then
+          cp "$GITHUB_WORKSPACE/template" -r template
+          cp "$ENV_FILE" env.yml
           #if the TAG_OVERRIDE flag is set to latest, update image properties in stack file
           if [ -z "${TAG_OVERRIDE:-}" ];
           then
