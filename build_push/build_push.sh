@@ -58,9 +58,9 @@ else
     FUNCTION_PATH="$(echo "${TAG}" | cut -f1 -d"-")"
     for d in */ ;
     do
+      cd "$d"
       if [ -d "$FUNCTION_PATH" ];
       then
-          cd "$d"
           #if the TAG_OVERRIDE flag is set to latest, update image properties in stack file
           if [ -z "${TAG_OVERRIDE:-}" ];
           then
@@ -83,11 +83,9 @@ else
           then
               faas-cli push --filter="$FUNCTION_PATH"
           fi
-      else
-          cd ..
       fi
-
-   done
+      cd ..
+    done
 fi
 
 echo "--------- Function build and Push process is done ---------"
