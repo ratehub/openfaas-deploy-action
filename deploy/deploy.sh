@@ -9,12 +9,8 @@ BRANCH_NAME="$(echo "$GITHUB_REF" | awk -F"/" '{print $3}')"
 GCR_ID="gcr.io/platform-235214/"
 #Get the deploy files updated
 COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
+
 #Get the deploy file filename only from the diff
-#DEPLOY_FILE="$(echo "$COMMIT_PATH" | awk -F"/" '{print $3}')"
-# Add all the files changed in a file
-#echo "$DEPLOY_FILE" > changed_files.txt
-# For group deploy to the target environment(staging/prod) set the deploy files as a variable
-#COMMITTED_FILES="$(awk '!unique[$0]++ { count++ } END { print count == 1 ? $1 : "files of multiple environment changed cannot deploy"  }' changed_files.txt)"
 COMMITS="$(echo "$COMMIT_PATH" | wc -l)"
 if [ "$COMMITS" -gt 1 ];
 then
@@ -60,44 +56,110 @@ then
     ENV_FILE="env-dev.yml"
 fi
 
-
-if [ -n "${DOCKER_USERNAME_2:-}" ] && [ -n "${DOCKER_PASSWORD_2:-}" ];
-then
-    docker login -u "${DOCKER_USERNAME_2}" -p "${DOCKER_PASSWORD_2}" "${DOCKER_REGISTRY_URL_2}"
-fi
-
 faas-cli template pull
-
 
 if [ -n "${CUSTOM_TEMPLATE_URL:-}" ];
 then
     faas-cli template pull "${CUSTOM_TEMPLATE_URL}"
 fi
 
-
 faas-cli login --username="$FAAS_USER" --password="$FAAS_PASS" --gateway="$FAAS_GATEWAY"
 
 # If there's a stack file in the root of the repo, assume we want to deploy everything
 if [ -f "$GITHUB_WORKSPACE/stack.yml" ];
 then
+    cp "$ENV_FILE" env.yml
     if [ -z "${TAG_OVERRIDE:-}" ];
     then
-        # If there's a stack file in the root of the repo, assume we want to deploy everything
         FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-        yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
-        IMAGE_TAG=$(yq r "$COMMIT_PATH" functions."$FUNCTION_NAME".image)
-        yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
+        if [[ "$FUNCTION_NAME" == *"front-end"* ]];
+        then
+            TEMPLATE=$(yq r stack.yml functions.frontend-export)
+            FUNCTIONS=$(yq r $COMMIT_PATH)
+            while IFS= read -r line
+            do
+               echo "$line" >> template.yml
+            done < <(printf '%s\n' "$TEMPLATE")
+            TEMPLATE_FILE="template.yml"
+
+            while IFS= read -r line
+            do
+               echo "$line" >> functions.txt
+            done < <(printf '%s\n' "$FUNCTIONS")
+
+            tt=$(awk '/frontend-export-*/' functions.txt)
+            echo $tt | tr -d ":"| tr "\ " \\n | awk '{print $1}'> new_functions.yml
+
+            FUNCTIONS_FILE="new_functions.yml"
+            while IFS= read -r line
+            do
+              yq p $TEMPLATE_FILE $line >> updated_deploy.yml
+            done < $FUNCTIONS_FILE
+
+            yq merge -i updated_deploy.yml $COMMIT_PATH
+
+            while IFS= read -r line
+            do
+              IMAGE_TAG=$(yq r "$COMMIT_PATH" "$line".image)
+              echo $IMAGE_TAG
+              yq w -i updated_deploy.yml "$line".image. "$GCR_ID""$IMAGE_TAG"
+            done <  new_functions.yml
+            yq p -i updated_deploy.yml "functions"
+            yq merge -i stack.yml updated_deploy.yml
+            yq d -i stack.yml functions.frontend-export
+        else
+            yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
+            IMAGE_TAG=$(yq r "$COMMIT_PATH" functions."$FUNCTION_NAME".image)
+            yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$IMAGE_TAG"
+        fi
     else
         #Get the function name from the package file
         FUNCTION_NAME="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-        #Add prefix to the deploy file	        do
-        yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
-        #Update the image properties in the deploy file
-        yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$FUNCTION_NAME":"${TAG_OVERRIDE}"
+        if [[ "$FUNCTION_NAME" == *"front-end"* ]];
+        then
+            TEMPLATE=$(yq r stack.yml functions.frontend-export)
+            FUNCTIONS=$(yq r $COMMIT_PATH)
+            while IFS= read -r line
+            do
+               echo "$line" >> template.yml
+            done < <(printf '%s\n' "$TEMPLATE")
+            TEMPLATE_FILE="template.yml"
+
+            while IFS= read -r line
+            do
+               echo "$line" >> functions.txt
+            done < <(printf '%s\n' "$FUNCTIONS")
+
+            tt=$(awk '/frontend-export-*/' functions.txt)
+            echo $tt | tr -d ":"| tr "\ " \\n | awk '{print $1}'> new_functions.yml
+
+            FUNCTIONS_FILE="new_functions.yml"
+            while IFS= read -r line
+            do
+              yq p $TEMPLATE_FILE $line >> updated_deploy.yml
+            done < $FUNCTIONS_FILE
+
+            yq merge -i updated_deploy.yml $COMMIT_PATH
+
+            while IFS= read -r line
+            do
+              IMAGE_TAG=$(yq r stack.yml functions.frontend-export.image)
+              yq w -i updated_deploy.yml "$line".image "$IMAGE_TAG"
+            done < new_functions.yml
+            yq p -i updated_deploy.yml "functions"
+            yq merge -i stack.yml updated_deploy.yml
+            yq d -i stack.yml functions.frontend-export
+
+        else
+            #Add prefix to the deploy file
+            yq p -i "$COMMIT_PATH" "functions"."$FUNCTION_NAME"
+            #Update the image properties in the deploy file
+            yq w -i "$COMMIT_PATH" functions."$FUNCTION_NAME".image "$GCR_ID""$FUNCTION_NAME":"${TAG_OVERRIDE}"
+        fi
+        yq merge -i "$COMMIT_PATH" stack.yml
+        cp -f "$COMMIT_PATH" stack.yml
     fi
-    # Merge the deploy file into stack file	    
-    yq merge -i "$COMMIT_PATH" stack.yml	    
-    cp -f "$COMMIT_PATH" stack.yml
+    # Merge the deploy file into stack file
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
         faas-cli deploy --gateway="$FAAS_GATEWAY"
@@ -163,13 +225,13 @@ fi
 if [ "$GITHUB_EVENT_NAME" == "push" ];
 then
     # Query gateway action so that functions are added to gateway
-    if [ -n "${AUTH_TOKEN_PROD}:-}" ] && [ "$BRANCH_NAME" == "master" ] && [ "$COMMITTED_FILES" == 'prod-deploy.yml' ];
+    if [ -n "${API_GATEWAY_AUTH_TOKEN_PROD:-}" ] && [ "$BRANCH_NAME" == "master" ] && [ "$COMMITTED_FILES" == 'prod-deploy.yml' ];
     then
         curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
-    elif [ -n "${AUTH_TOKEN_STAGING}:-}" ] && [ "$COMMITTED_FILES" == 'staging-deploy.yml' ];
+    elif [ -n "${API_GATEWAY_AUTH_TOKEN_STAGING:-}" ] && [ "$COMMITTED_FILES" == 'staging-deploy.yml' ];
     then
        curl -H "Authorization: token ${AUTH_TOKEN_STAGING}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-staging/dispatches
-    elif [ -n "${AUTH_TOKEN_DEV:-}" ] && [ -n "${TAG_OVERRIDE:-}" ] || [ "$COMMITTED_FILES" == 'dev-deploy.yml' ];
+    elif [ -n "${API_GATEWAY_AUTH_TOKEN_DEV:-}" ] && [ -n "${TAG_OVERRIDE:-}" ] || [ "$COMMITTED_FILES" == 'dev-deploy.yml' ];
     then
        curl -H "Authorization: token ${AUTH_TOKEN_DEV}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config-dev/dispatches
     fi

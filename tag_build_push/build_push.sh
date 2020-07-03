@@ -30,22 +30,24 @@ echo "--------- Starting function build and push process ---------"
 if [ -f "$GITHUB_WORKSPACE/$STACK_FILE" ];
 then
     #If build action is triggered after the release, get the updated version from package file and set it as the image tag in stack file
-    IMAGE_TAG="$(cat package.json | sed 's/.*"version": "\(.*\)".*/\1/;t;d')"
-    FUNCTION="$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')"
-    UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions."$FUNCTION".image "$GCR_ID""$FUNCTION":"$IMAGE_TAG")"
+    IMAGE=$(yq r stack.yml functions."*".image | cut -f1 -d ":")
+    UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions.*.image "$GCR_ID""$IMAGE":"${TAG}")"
     echo "$UPDATED_STACK_FILE" > $STACK_FILE
 
-    if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
-    then
-        faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
-    else
-        faas-cli build
-    fi
+    faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" \
+        --build-arg "$BUILD_ARG_2_NAME=$BUILD_ARG_2_VALUE" \
+        --build-arg "$BUILD_ARG_3_NAME=$BUILD_ARG_3_VALUE" \
+        --build-arg "$BUILD_ARG_4_NAME=$BUILD_ARG_4_VALUE" \
+        --build-arg "$BUILD_ARG_5_NAME=$BUILD_ARG_5_VALUE" \
+        --build-arg "$BUILD_ARG_6_NAME=$BUILD_ARG_6_VALUE"
+
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
-        faas-cli push --filter="$FUNCTION"
+        faas-cli push
     fi
+
 else
+
     FUNCTION="$(echo "${TAG}" | cut -f1 -d"-")"
     for GROUP_PATH in */ ;
     do
