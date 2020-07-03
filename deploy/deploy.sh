@@ -10,23 +10,20 @@ GCR_ID="gcr.io/platform-235214/"
 #Get the deploy files updated
 COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
 
-#Get the deploy file filename only from the diff
-COMMITS="$(echo "$COMMIT_PATH" | wc -l)"
-if [ "$COMMITS" -gt 1 ];
+
+if [[ $COMMIT_PATH == *"prod-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
 then
-   if [[ $COMMIT_PATH == *"prod-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
-   then
-       COMMIT_PATH="prod-deploy.yml"
-       COMMITTED_FILES="prod-deploy.yml"
-   elif [[ $COMMIT_PATH == *"staging-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
-   then
-       COMMIT_PATH="staging-deploy.yml"
-       COMMITTED_FILES="staging-deploy.yml"
-   else
-       COMMIT_PATH="dev-deploy.yml"
-       COMMITTED_FILES="dev-deploy.yml"
-   fi
+   COMMIT_PATH="prod-deploy.yml"
+   COMMITTED_FILES="prod-deploy.yml"
+elif [[ $COMMIT_PATH == *"staging-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
+then
+   COMMIT_PATH="staging-deploy.yml"
+   COMMITTED_FILES="staging-deploy.yml"
+else
+   COMMIT_PATH="dev-deploy.yml"
+   COMMITTED_FILES="dev-deploy.yml"
 fi
+
 
 # Depending on the deploy file we want to choose a different set of environment variables and credentials
 if [ "$COMMITTED_FILES" == 'prod-deploy.yml' ] || [ "$COMMIT_PATH" == 'prod-deploy.yml' ];
