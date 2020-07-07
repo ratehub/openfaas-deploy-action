@@ -27,6 +27,22 @@ echo "***********************************************************"
 
 echo "--------- Starting function build and push process ---------"
 
+function getBuildArgs()
+{
+    local  buildArgs=""
+    # currently we support 6 build arg
+    for i in {1..6}
+    do
+        local key="BUILD_ARG_${i}_NAME"
+        local value="BUILD_ARG_${i}_VALUE"
+        if [ -n "${!key:-}" ] && [ -n "${!value:-}" ];
+        then
+            buildArgs="${buildArgs} --build-arg ${!key}=${!value}"
+        fi
+    done
+    echo "$buildArgs"
+}
+
 if [ -f "$GITHUB_WORKSPACE/$STACK_FILE" ];
 then
     #If build action is triggered after the release, get the updated version from package file and set it as the image tag in stack file
@@ -34,12 +50,14 @@ then
     UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions.*.image "$GCR_ID""$IMAGE":"${TAG}")"
     echo "$UPDATED_STACK_FILE" > $STACK_FILE
 
-    faas-cli build --filter="$IMAGE" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" \
-        --build-arg "$BUILD_ARG_2_NAME=$BUILD_ARG_2_VALUE" \
-        --build-arg "$BUILD_ARG_3_NAME=$BUILD_ARG_3_VALUE" \
-        --build-arg "$BUILD_ARG_4_NAME=$BUILD_ARG_4_VALUE" \
-        --build-arg "$BUILD_ARG_5_NAME=$BUILD_ARG_5_VALUE" \
-        --build-arg "$BUILD_ARG_6_NAME=$BUILD_ARG_6_VALUE"
+    BUILD_ARGS=$(getBuildArgs)
+
+    if [ -n "${BUILD_ARGS:-}" ];
+    then
+        faas-cli build $BUILD_ARGS
+    else
+        faas-cli build
+    fi
 
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
