@@ -37,7 +37,7 @@ function getBuildArgs()
         local value="BUILD_ARG_${i}_VALUE"
         if [ -n "${!key:-}" ] && [ -n "${!value:-}" ];
         then
-            buildArgs="${buildArgs} --build-arg $key=$value"
+            buildArgs="${buildArgs} --build-arg ${!key}=${!value}"
         fi
     done
     echo "$buildArgs"
