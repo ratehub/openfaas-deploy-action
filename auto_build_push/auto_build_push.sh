@@ -53,9 +53,9 @@ then
 
     if [ -n "${BUILD_ARGS:-}" ];
     then
-        faas-cli build $BUILD_ARGS
+        faas-cli build $BUILD_ARGS --build-arg DOCKER_TAG=${TAG_OVERRIDE}
     else
-        faas-cli build
+        faas-cli build --build-arg DOCKER_TAG=${TAG_OVERRIDE}
     fi
 
     if [ "$GITHUB_EVENT_NAME" == "push" ];
