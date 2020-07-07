@@ -51,8 +51,6 @@ then
 
     BUILD_ARGS=$(getBuildArgs)
 
-    echo "debug: $BUILD_ARGS"
-
     if [ -n "${BUILD_ARGS:-}" ];
     then
         faas-cli build $BUILD_ARGS
