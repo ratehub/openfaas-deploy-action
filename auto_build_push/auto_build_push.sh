@@ -35,21 +35,12 @@ then
 
     echo "debug: $BUILD_ARG_1_NAME=$BUILD_ARG_1"
 
-    # faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" \
+    faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
     #     --build-arg "$BUILD_ARG_2_NAME=$BUILD_ARG_2_VALUE" \
     #     --build-arg "$BUILD_ARG_3_NAME=$BUILD_ARG_3_VALUE" \
     #     --build-arg "$BUILD_ARG_4_NAME=$BUILD_ARG_4_VALUE" \
     #     --build-arg "$BUILD_ARG_5_NAME=$BUILD_ARG_5_VALUE" \
     #     --build-arg "$BUILD_ARG_6_NAME=$BUILD_ARG_6_VALUE"
-
-    if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
-    then
-        echo "debug: if block"
-        faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
-    else
-        echo "debug: else"
-        faas-cli build
-    fi
 
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
