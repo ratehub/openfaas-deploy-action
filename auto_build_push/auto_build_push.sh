@@ -96,9 +96,9 @@ else
                         UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION".image "$GCR_ID""$FUNCTION":"$TAG_OVERRIDE")
                         echo "$UPDATED_STACK_FILE" > $STACK_FILE
 
-                        if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+                        if [ -n "${BUILD_ARG_1_VALUE:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
                         then
-                            faas-cli build --filter="$FUNCTION" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+                            faas-cli build --filter="$FUNCTION" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1_VALUE"
                         else
                             faas-cli build --filter="$FUNCTION"
                         fi
