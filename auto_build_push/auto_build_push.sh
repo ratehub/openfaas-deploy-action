@@ -33,6 +33,8 @@ then
     UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions.*.image "$GCR_ID""$IMAGE":"$TAG_OVERRIDE")"
     echo "$UPDATED_STACK_FILE" > $STACK_FILE
 
+    echo "debug: $BUILD_ARG_1_NAME=$BUILD_ARG_1"
+
     faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" \
         --build-arg "$BUILD_ARG_2_NAME=$BUILD_ARG_2_VALUE" \
         --build-arg "$BUILD_ARG_3_NAME=$BUILD_ARG_3_VALUE" \
