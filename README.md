@@ -99,7 +99,7 @@ This action is designed to deploy functions or microservices developed with [Ope
         └── In a group of 6 functions, if staging-deploy.yml is updated for 4 functions, 4 functions of 6 in the group are deployed to the staging cluster.
      
 
-##### NOTE: No action is triggered for updates to env files(env-dev.yml, env-prod.yml, env-staging.yml)
+##### NOTE: updating env-*.yml files will deploy all the functions in the group path to the target environment based on the file updated.
            
 ## Scheduled Re-deploy function
 ##### If the cron schedule is triggered for the functions to re-deploy

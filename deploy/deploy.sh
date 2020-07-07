@@ -10,7 +10,6 @@ GCR_ID="gcr.io/platform-235214/"
 #Get the deploy files updated
 COMMIT_PATH="$(git diff --name-only HEAD~1..HEAD "$GITHUB_SHA")"
 
-
 if [[ $COMMIT_PATH == *"prod-deploy.yml"* ]] && [ -z "${TAG_OVERRIDE:-}" ];
 then
    COMMIT_PATH="prod-deploy.yml"
