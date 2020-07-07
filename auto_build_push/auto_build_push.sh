@@ -27,20 +27,36 @@ echo "***********************************************************"
 
 echo "--------- Starting function build and push process ---------"
 
+function getBuildArgs()
+{
+    local  buildArgs=""
+    # currently we support 6 build arg
+    for i in {1..6}
+    do
+        local key="BUILD_ARG_${i}_NAME"
+        local value="BUILD_ARG_${i}_VALUE"
+        if [ -n "${!key:-}" ] && [ -n "${!value:-}" ];
+        then
+            buildArgs="${buildArgs} --build-arg $key=$value"
+        fi
+    done
+    echo "$buildArgs"
+}
+
 if [ -f "$GITHUB_WORKSPACE/$STACK_FILE" ];
 then
     IMAGE=$(yq r stack.yml functions."*".image | cut -f1 -d ":")
     UPDATED_STACK_FILE="$(yq w "$STACK_FILE" functions.*.image "$GCR_ID""$IMAGE":"$TAG_OVERRIDE")"
     echo "$UPDATED_STACK_FILE" > $STACK_FILE
 
-    echo "debug: $BUILD_ARG_1_NAME=$BUILD_ARG_1"
+    BUILD_ARGS=$(getBuildArgs)
 
-    faas-cli build --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1" \
-        --build-arg "$BUILD_ARG_2_NAME=$BUILD_ARG_2_VALUE"
-    #     --build-arg "$BUILD_ARG_3_NAME=$BUILD_ARG_3_VALUE" \
-    #     --build-arg "$BUILD_ARG_4_NAME=$BUILD_ARG_4_VALUE" \
-    #     --build-arg "$BUILD_ARG_5_NAME=$BUILD_ARG_5_VALUE" \
-    #     --build-arg "$BUILD_ARG_6_NAME=$BUILD_ARG_6_VALUE"
+    if [ -n "${BUILD_ARGS:-}" ];
+    then
+        faas-cli build $BUILD_ARGS
+    else
+        faas-cli build
+    fi
 
     if [ "$GITHUB_EVENT_NAME" == "push" ];
     then
