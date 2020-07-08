@@ -66,7 +66,7 @@ then
 
 else
 
-    FUNCTION="$(echo "${TAG}" | cut -f1 -d"-")"
+    FUNCTION="$(echo "${TAG}" | sed 's/\(.*\)-.*/\1/')"
     for GROUP_PATH in */ ;
     do
       cd "$GROUP_PATH"
@@ -74,7 +74,7 @@ else
       then
           cp "$GITHUB_WORKSPACE/template" -r template
           # Get the updated version from the package.json file
-          cd "$FUNCTION" && IMAGE_TAG="$(echo "${TAG}" | sed 's/^[^-]*-//g')"
+          cd "$FUNCTION" && IMAGE_TAG="$(echo "${TAG}" | sed 's|.*-||' )"
           # Write the updated version into stack file image properties tag
           cd .. && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION".image "$GCR_ID""$FUNCTION":"$IMAGE_TAG")
           echo "$UPDATED_STACK_FILE" > $STACK_FILE
