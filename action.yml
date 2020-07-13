@@ -1,9 +1,0 @@
-# action.yml
-name: 'Build, push and deploy OpenFaaS functions'
-description: 'Build, push, and deploy OpenFaaS functions'
-outputs:
-  status:
-    description: 'Whether the process succeeded or failed'
-runs:
-  using: 'docker'
-  image: 'Dockerfile'
