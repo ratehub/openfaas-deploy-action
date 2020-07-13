@@ -54,10 +54,10 @@ do
   cd .. && UPDATED_STACK_FILE=$(yq w "$STACK_FILE" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"$PACKAGE_VERSION")
   echo "$UPDATED_STACK_FILE" > $STACK_FILE
 
-  if [ -n "${BUILD_ARG_1:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
+  if [ -n "${BUILD_ARG_1_VALUE:-}" ] && [ -n "${BUILD_ARG_1_NAME:-}" ];
   then
 
-      faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1"
+      faas-cli build --filter="$FUNCTION_PATH" --build-arg "$BUILD_ARG_1_NAME=$BUILD_ARG_1_VALUE"
   else
       faas-cli build --filter="$FUNCTION_PATH"
   fi
