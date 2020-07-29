@@ -63,7 +63,7 @@ do
   fi
   faas-cli push --filter="$FUNCTION_PATH"
   faas-cli deploy --gateway="$FAAS_GATEWAY" --filter="$FUNCTION_PATH"
-  curl -H "Authorization: token ${AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
+  curl -H "Authorization: token ${API_GATEWAY_AUTH_TOKEN_PROD}" -d '{"event_type":"repository_dispatch"}' https://api.github.com/repos/ratehub/gateway-config/dispatches
 done
 
 
