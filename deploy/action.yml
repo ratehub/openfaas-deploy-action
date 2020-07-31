@@ -1,9 +1,35 @@
-# deploy.yml
-name: 'Function deploy'
-description: 'Deploy FaaS functions to the appropriate OpenFaaS environment'
+# action.yml
+name: 'OpenFaaS build and push'
+description: 'Builds a docker image from your OpenFaaS function and pushes it to your registry'
+inputs:
+  deployment-env:
+    description: ''
+    required: true
+    default: 'dev'
+  openfaas-template-url:
+    description: ''
+    required: false
+  openfaas-gateway:
+    description: 'OpenFaaS gateway URL'
+    required: false
+  openfaas-username:
+    description: 'User for authenticating at OpenFaaS gateway'
+    required: false
+    default: 'admin'
+  openfaas-password:
+    description: 'Password for authenticating at OpenFaaS gateway'
+    required: false
+  
 outputs:
-  status:
-    description: 'Whether the process succeeded or failed'
+  tag:
+    description: 'Image tag built'
+
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  args:
+    - ${{ inputs.stack-file }}
+    - ${{ inputs.openfaas-template-url }}
+    - ${{ inputs.openfaas-gateway }}
+    - ${{ inputs.openfaas-username }}
+    - ${{ inputs.openfaas-password }}

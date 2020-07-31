@@ -4,6 +4,14 @@ set -eux
 
 echo "--------- Starting function deployment process ---------"
 
+echo $1
+echo $2
+echo $3
+echo $4
+echo $5
+
+echo "finish"
+
 # Get the branch name
 BRANCH_NAME="$(echo "$GITHUB_REF" | awk -F"/" '{print $3}')"
 GCR_ID="gcr.io/platform-235214/"
