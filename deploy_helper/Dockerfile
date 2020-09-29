@@ -1,17 +1,16 @@
 FROM openfaas/faas-cli:0.11.3
 
-RUN apk add --update docker bash npm curl
+RUN apk add --update docker bash npm
 
 # Copies your code file from your action repository to the filesystem path `/` of the container
-COPY deploy.sh /deploy.sh
+COPY functions_to_deploy.sh /functions_to_deploy.sh
 
 WORKDIR /action-helper-workspace/
-COPY create-stack.js .
 COPY list-handler-paths.js .
 COPY package*.json /action-helper-workspace/
 RUN npm install
 
-RUN chmod +x /deploy.sh
+RUN chmod +x /functions_to_deploy.sh
 
 # Code file to execute when the docker container starts up
-ENTRYPOINT ["/deploy.sh"]
+ENTRYPOINT ["/functions_to_deploy.sh"]

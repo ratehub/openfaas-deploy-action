@@ -1,35 +1,44 @@
 # action.yml
-name: 'OpenFaaS build and push'
-description: 'Builds a docker image from your OpenFaaS function and pushes it to your registry'
+name: 'OpenFaaS deploy action'
+
+description: 'Deploys OpenFaaS function'
+
 inputs:
   deployment-env:
-    description: ''
-    required: true
+    description: 'Deployment environment - dev, staging or prod'
     default: 'dev'
-  openfaas-template-url:
-    description: ''
-    required: false
-  openfaas-gateway:
-    description: 'OpenFaaS gateway URL'
-    required: false
+  stack-file:
+    description: 'stack.yml path'
+    default: 'stack.yml'
   openfaas-username:
     description: 'User for authenticating at OpenFaaS gateway'
-    required: false
-    default: 'admin'
   openfaas-password:
     description: 'Password for authenticating at OpenFaaS gateway'
-    required: false
-  
-outputs:
-  tag:
-    description: 'Image tag built'
+  openfaas-gateway:
+    description: 'OpenFaaS gateway URL'
+  api-gateway-auth-token:
+    description: 'API gateway auth token'
+  tag-override:
+    description: 'Override the tag specified in *-deploy.yml file'
+  openfaas-template-url:
+    description: 'RH custom template url'
+  image-registry:
+    description: 'GCR [hostname]/[project-id]'
+    default: 'gcr.io/platform-235214/'
+  deploy-function:
+    description: 'Function to deploy'
 
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
+    - ${{ inputs.deployment-env }}
     - ${{ inputs.stack-file }}
-    - ${{ inputs.openfaas-template-url }}
-    - ${{ inputs.openfaas-gateway }}
     - ${{ inputs.openfaas-username }}
     - ${{ inputs.openfaas-password }}
+    - ${{ inputs.openfaas-gateway }}
+    - ${{ inputs.api-gateway-auth-token }}
+    - ${{ inputs.tag-override }}
+    - ${{ inputs.openfaas-template-url }}
+    - ${{ inputs.image-registry }}
+    - ${{ inputs.deploy-function }}
