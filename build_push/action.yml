@@ -1,0 +1,38 @@
+# action.yml
+name: 'OpenFaaS build and push action'
+
+description: 'Builds and pushes OpenFaaS function'
+
+inputs:
+  stack-file:
+    description: 'stack.yml path'
+    default: 'stack.yml'
+  docker-username:
+    description: 'Username for GCP'
+  docker-password:
+    description: 'Password for GCP'
+  docker-registry-url:
+    description: 'Registry url'
+  tag:
+    description: 'tag'
+    default: 'latest'
+  openfaas-template-url:
+    description: 'RH custom template url'
+  image-registry:
+    description: 'GCR [hostname]/[project-id]'
+    default: 'gcr.io/platform-235214/'
+  build-push-function:
+    description: 'Function to build and push to GCR'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.stack-file }}
+    - ${{ inputs.docker-username }}
+    - ${{ inputs.docker-password }}
+    - ${{ inputs.docker-registry-url }}
+    - ${{ inputs.tag }}
+    - ${{ inputs.openfaas-template-url }}
+    - ${{ inputs.image-registry }}
+    - ${{ inputs.build-push-function }}
