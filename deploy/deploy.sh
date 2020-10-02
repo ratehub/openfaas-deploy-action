@@ -218,7 +218,7 @@ else
                               yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
                               #Update the image properties in the deploy file
                               yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"${TAG_OVERRIDE}"
-                              
+                              CONSTRAINTS=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" constraints)
                               if [ -z "$CONSTRAINTS" ];
                               then
                                 yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions."$FUNCTION_PATH".constraints." "doks.digitalocean.com/node-pool=openfaas-pool"
