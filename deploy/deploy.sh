@@ -143,7 +143,7 @@ then
               yq w -i updated_deploy.yml "$line".image "$IMAGE_TAG"
             done < new_functions.yml
             yq p -i updated_deploy.yml "functions"
-            yq merge -i stack.yml updated_deploy.yml
+            yq merge -i stack.yml updated_deploy.yml            
             yq d -i stack.yml functions.frontend-export
 
         else
