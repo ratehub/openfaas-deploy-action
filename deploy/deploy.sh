@@ -199,14 +199,14 @@ else
                               CONSTRAINTS=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" constraints)
                               if [ "$COMMITTED_FILES" == "prod-deploy.yml"]; # If deploying to prod add gke openfaas node pool as a default constraint
                               then
-                                if [ -z "$CONSTRAINTS" ];
+                                if [ -z "${CONSTRAINTS:-}" ];
                                 then
                                     yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions."$FUNCTION_PATH".constraints.[+]" "cloud.google.com/gke-nodepool=openfaas-fn"
                                 else
                                     echo "### Constraints Already specified ###"
                                 fi
                               else
-                                if [ -z "$CONSTRAINTS" ]; # If deploying to staging add doks openfaas node pool as a default constraint(for now until functions are moved to GKE-staging)
+                                if [ -z "${CONSTRAINTS:-}" ]; # If deploying to staging add doks openfaas node pool as a default constraint(for now until functions are moved to GKE-staging)
                                 then
                                     yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions."$FUNCTION_PATH".constraints.[+]" "doks.digitalocean.com/node-pool=openfaas-pool"
                                 else
@@ -220,9 +220,9 @@ else
                               #Update the image properties in the deploy file
                               yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"${TAG_OVERRIDE}"
                               CONSTRAINTS=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" constraints)
-                              if [ -z "$CONSTRAINTS" ];
+                              if [ -z "${CONSTRAINTS:-}" ];
                               then
-                                yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions."$FUNCTION_PATH".constraints." "doks.digitalocean.com/node-pool=openfaas-pool"
+                                yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions."$FUNCTION_PATH".constraints.[+]" "doks.digitalocean.com/node-pool=openfaas-pool"
                               else
                                 echo "### Constraints Already specified ###"
                               fi
