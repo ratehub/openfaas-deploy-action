@@ -11,8 +11,6 @@ inputs:
     description: 'Username for GCP'
   docker-password:
     description: 'Password for GCP'
-  docker-registry-url:
-    description: 'Registry url'
   tag:
     description: 'tag'
     default: 'latest'
@@ -31,7 +29,6 @@ runs:
     - ${{ inputs.stack-file }}
     - ${{ inputs.docker-username }}
     - ${{ inputs.docker-password }}
-    - ${{ inputs.docker-registry-url }}
     - ${{ inputs.tag }}
     - ${{ inputs.openfaas-template-url }}
     - ${{ inputs.image-registry }}

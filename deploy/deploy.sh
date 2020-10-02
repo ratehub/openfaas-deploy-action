@@ -16,8 +16,7 @@ set -eu
 faas-cli template pull
 
 # openfaas custom template pull
-if [ -n "$8" ];
-then
+if [ -n "$8" ]; then
     faas-cli template pull $8
 fi
 
@@ -25,8 +24,7 @@ echo $4 | faas-cli login --username=$3 --password-stdin --gateway=$5
 
 cd "$GITHUB_WORKSPACE/${10}"
 
-if [ ! -d "template" ];
-then
+if [ ! -d "template" ]; then
     cp -R "$GITHUB_WORKSPACE/template" template
 fi
 
@@ -40,13 +38,9 @@ echo "Starting to deploy ${10} function"
 # gcr hostname and project id
 # tag override (optional)
 node /action-helper-workspace/create-stack.js $1 "./$1-deploy.yml" "$GITHUB_WORKSPACE/$2" $9 $7
-
-echo "updated-stack.yml file:"
 cat updated-stack.yml
-echo ""
 
-if [[ ${10} != "." ]];
-then
+if [[ ${10} != "." ]]; then
     faas-cli deploy -f updated-stack.yml --gateway=$5 --filter=${10}
 else
     faas-cli deploy -f updated-stack.yml --gateway=$5
@@ -54,15 +48,13 @@ fi
 
 cd -
 
-if [[ $1 == "prod"  ]];
-then
+if [[ $1 == "prod"  ]]; then
     API_GATEWAY_CONFIG_URL="https://api.github.com/repos/ratehub/gateway-config/dispatches"
 else
     API_GATEWAY_CONFIG_URL="https://api.github.com/repos/ratehub/gateway-config-$1/dispatches"
 fi
 
 # Query gateway action so that functions are added to gateway
-if [ -n "$6" ];
-then
+if [ -n "$6" ]; then
     curl -H "Authorization: token $6" -d '{"event_type":"repository_dispatch"}' $API_GATEWAY_CONFIG_URL
 fi
