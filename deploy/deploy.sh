@@ -208,6 +208,7 @@ else
                               then
                                 yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "constraints.[+]" "doks.digitalocean.com/node-pool=openfaas-pool"
                               else
+                                echo "### Constraints Already specified ###"
                               fi
 
                           fi
