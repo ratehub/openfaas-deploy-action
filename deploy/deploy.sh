@@ -196,6 +196,8 @@ else
                               # Get the updated image tag if the tag is not latest
                               IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
                               yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
+                              ls -lah
+                              cat "$FUNCTION_PATH/$COMMITTED_FILES"
                               CONSTRAINTS=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" constraints)
                               if [ "$COMMITTED_FILES" == "prod-deploy.yml"]; # If deploying to prod add gke openfaas node pool as a default constraint
                               then
@@ -222,7 +224,7 @@ else
                               CONSTRAINTS=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" constraints)
                               if [ -z "${CONSTRAINTS:-}" ];
                               then
-                                yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions."$FUNCTION_PATH".constraints." "doks.digitalocean.com/node-pool=openfaas-pool"
+                                yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions."$FUNCTION_PATH".constraints.[-]" "doks.digitalocean.com/node-pool=openfaas-pool"
                               else
                                 echo "### Constraints Already specified ###"
                               fi
