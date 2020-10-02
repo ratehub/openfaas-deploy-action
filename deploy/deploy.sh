@@ -208,6 +208,7 @@ else
                                     echo "### Constraints Already specified ###"
                                 fi
                               else
+                                
                                 if [ -z "${CONSTRAINTS:-}" ]; # If deploying to staging add doks openfaas node pool as a default constraint(for now until functions are moved to GKE-staging)
                                 then
                                     yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions."$FUNCTION_PATH".constraints.[+]" "doks.digitalocean.com/node-pool=openfaas-pool"
@@ -217,6 +218,8 @@ else
                               fi   
                             
                           else
+                              ls -lah
+                              cat "$FUNCTION_PATH/$COMMITTED_FILES"
                               #Add prefix to the deploy file
                               yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
                               #Update the image properties in the deploy file
@@ -224,7 +227,7 @@ else
                               CONSTRAINTS=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" constraints)
                               if [ -z "${CONSTRAINTS:-}" ];
                               then
-                                yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions."$FUNCTION_PATH".constraints.[-]" "doks.digitalocean.com/node-pool=openfaas-pool"
+                                yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions."$FUNCTION_PATH".constraints.[+]" "doks.digitalocean.com/node-pool=openfaas-pool"
                               else
                                 echo "### Constraints Already specified ###"
                               fi
