@@ -206,7 +206,7 @@ else
                               CONSTRAINTS=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" constraints)
                               if [ -z "$CONSTRAINTS" ];
                               then
-                                yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "constraints.[+]" "doks.digitalocean.com/node-pool=openfaas-pool"
+                                yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "constraints.[+]" "doks.digitalocean.com/node-pool=platform"
                               else
                                 echo "### Constraints Already specified ###"
                               fi
