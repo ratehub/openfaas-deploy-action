@@ -210,6 +210,7 @@ else
                               else
                                 echo "### Constraints Already specified ###"
                               fi
+                              cat "$FUNCTION_PATH/$COMMITTED_FILES"
 
                           fi
                           yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
