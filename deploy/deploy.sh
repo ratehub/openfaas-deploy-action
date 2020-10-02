@@ -196,11 +196,19 @@ else
                               # Get the updated image tag if the tag is not latest
                               IMAGE_TAG=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image)
                               yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$IMAGE_TAG"
+                              
+
                           else
                               #Add prefix to the deploy file
                               yq p -i "$FUNCTION_PATH/$COMMITTED_FILES" "functions"."$FUNCTION_PATH"
                               #Update the image properties in the deploy file
                               yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" functions."$FUNCTION_PATH".image "$GCR_ID""$FUNCTION_PATH":"${TAG_OVERRIDE}"
+                              CONSTRAINTS=$(yq r "$FUNCTION_PATH/$COMMITTED_FILES" constraints)
+                              if [ -z "$CONSTRAINTS" ];
+                              then
+                                yq w -i "$FUNCTION_PATH/$COMMITTED_FILES" "constraints.[+]" "doks.digitalocean.com/node-pool=openfaas-pool"
+                              else
+                              fi
 
                           fi
                           yq merge -i "$FUNCTION_PATH/$COMMITTED_FILES" stack.yml
