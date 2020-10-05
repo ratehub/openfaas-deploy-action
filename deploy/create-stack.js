@@ -12,6 +12,8 @@ const yaml = require('js-yaml');
 const fs = require('fs');
 const object = require('lodash/fp/object');
 
+const defaultNodePoolConstraint = 'doks.digitalocean.com/node-pool=openfaas-pool';
+
 if (process.argv.length < 6) {
     console.log("Insufficient args supplied!");
     // Exit - fail
@@ -55,7 +57,8 @@ try {
         return acc;
     }, {});
 
-    // Append GCR project ID to image and override tag if needed
+    // Append GCR project ID to image, override tag and 
+    // Update node-pool constraint if needed
     Object.keys(updatedFunctions).forEach(key => {
         const image = updatedFunctions[key].image;
         // read the tag from image after `:`
@@ -63,12 +66,14 @@ try {
         const imageWithUpdatedTag = tagOverrride
             ? image.replace(tag, tagOverrride)
             : image;
-        // build_push actions update the original stack.yml file
-        // hence a check before appending
-        const imageWithProjectId = imageWithUpdatedTag.startsWith(gcrProjectId)
-            ? imageWithUpdatedTag
-            : `${gcrProjectId}${imageWithUpdatedTag}`;
+
+        const imageWithProjectId = `${gcrProjectId}${imageWithUpdatedTag}`;
         updatedFunctions[key].image = imageWithProjectId;
+
+        // Update node-pool constraint
+        if (!updatedFunctions[key].constraints) {
+            updatedFunctions[key].constraints = [defaultNodePoolConstraint];
+        }
     });
 
     // Create updated/final stack json
