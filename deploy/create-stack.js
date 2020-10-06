@@ -39,10 +39,7 @@ try {
 
     // Merge global settings
     const functionsWithGlobalSettings = Object.keys(functions).reduce((acc, key) => {
-        acc[key] = {
-            ...functions[key],
-            ...globalSettings
-        }
+        acc[key] = object.merge(functions[key], globalSettings);
         return acc;
     }, {});
 
