@@ -44,15 +44,17 @@ try {
     }, {});
 
     // Merge function specific settings
-    const updatedFunctions = Object.keys(deployFunctions).reduce((acc, key) => {
-        const globalSettingFunction = functionsWithGlobalSettings[key]
-            ? functionsWithGlobalSettings[key]
-            : functionsWithGlobalSettings[Object.keys(functionsWithGlobalSettings)[0]];
+    const updatedFunctions = deployFunctions
+        ? Object.keys(deployFunctions).reduce((acc, key) => {
+            const globalSettingFunction = functionsWithGlobalSettings[key]
+                ? functionsWithGlobalSettings[key]
+                : functionsWithGlobalSettings[Object.keys(functionsWithGlobalSettings)[0]];
 
-        acc[key] = object.merge(globalSettingFunction, deployFunctions[key]);
+            acc[key] = object.merge(globalSettingFunction, deployFunctions[key]);
 
-        return acc;
-    }, {});
+            return acc;
+        }, {})
+        : functionsWithGlobalSettings;
 
     // Append GCR project ID to image, override tag and 
     // Update node-pool constraint if needed

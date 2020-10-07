@@ -30,6 +30,11 @@ fi
 
 echo "Starting to deploy ${10} function"
 
+if [ ! -f "./$1-deploy.yml" ]; then
+    echo "Function specific deploy config not found!"
+    touch "./$1-deploy.yml"
+fi
+
 # create `updated-stack.yml` file
 # Args:
 # deployment evironment
