@@ -6,7 +6,9 @@ set -eu
 # $2 force
 # $3 used-by
 
-"Stack file: $1"
+ls -la
+
+echo "Stack file: $1"
 
 # List for files updated
 git diff HEAD HEAD~1 --name-only > differences.txt
