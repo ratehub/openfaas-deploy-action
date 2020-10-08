@@ -43,17 +43,24 @@ else
         # Ignore changes if the file is prefixed with a "." or "_"
         if [[ ! "$line" =~ ^[\._] && ! ("$3" == "build-push" && "$line" =~ .*-deploy.yml) ]]; then
             if [[ ! "$line" =~ "/" ]]; then
-                echo "case 1"
+                echo "case 1 - changes at root of repo"
                 echo "STACK_HANDLERS" >> handler-list.txt
                 break
             else
                 SUB_DIR="$(echo "$line" | awk -F"/" '{print $1}')"
+                echo "first sub-dir: $SUB_DIR"
+
+                if [[ "$SUB_DIR" =~ "/" && $(grep -F -w "./$SUB_DIR" all-handlers.txt) ]]; then
+                    echo "first sub-dir is a group path"
+                    SUB_DIR="$(echo "$SUB_DIR" | awk -F"/" '{print $1}')"
+                fi
+
                 # Changes are in `sub-dir` and not already added to deploy list
                 if [[ $(grep -F -w "./$SUB_DIR" all-handlers.txt) && $(grep -F -L "$SUB_DIR" handler-list.txt) ]]; then
-                    echo "case 2a"
+                    echo "case 2a - changes to directory or file specific to a faas-function"
                     echo "./$SUB_DIR" >> handler-list.txt
                 elif [[ $(grep -F -L "./$SUB_DIR" all-handlers.txt) ]]; then
-                    echo "case 2b"
+                    echo "case 2b - changes to directory or file common to all stack functions"
                     echo "STACK_HANDLERS" >> handler-list.txt
                     break
                 fi
