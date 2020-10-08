@@ -47,19 +47,24 @@ else
                 echo "STACK_HANDLERS" >> handler-list.txt
                 break
             else
-                SUB_DIR="$(echo "$line" | awk -F"/" '{print $1}')"
-                echo "first sub-dir: $SUB_DIR"
+                SUB_DIR_1="$(echo "$line" | awk -F"/" '{print $1}')"
+                SUB_DIR_2="$(echo "$line" | awk -F"/" '{print $2}')"
+                echo "first sub-dir 1: $SUB_DIR_1"
+                echo "first sub-dir 2: $SUB_DIR_2"
 
-                if [[ "$SUB_DIR" =~ "/" && $(grep -F -w "./$SUB_DIR" all-handlers.txt) ]]; then
-                    echo "first sub-dir is a group path"
-                    SUB_DIR="$(echo "$SUB_DIR" | awk -F"/" '{print $1}')"
+                FUNCTION_PATH=""
+                if [[ $(grep -F -w "./$SUB_DIR_2" all-handlers.txt) ]]; then
+                    FUNCTION_PATH=$SUB_DIR_2
+                else
+                    FUNCTION_PATH=$SUB_DIR_1
                 fi
+                echo "Function path: $FUNCTION_PATH"
 
                 # Changes are in `sub-dir` and not already added to deploy list
-                if [[ $(grep -F -w "./$SUB_DIR" all-handlers.txt) && $(grep -F -L "$SUB_DIR" handler-list.txt) ]]; then
+                if [[ $(grep -F -w "./$FUNCTION_PATH" all-handlers.txt) && $(grep -F -L "$FUNCTION_PATH" handler-list.txt) ]]; then
                     echo "case 2a - changes to directory or file specific to a faas-function"
-                    echo "./$SUB_DIR" >> handler-list.txt
-                elif [[ $(grep -F -L "./$SUB_DIR" all-handlers.txt) ]]; then
+                    echo "./$FUNCTION_PATH" >> handler-list.txt
+                elif [[ $(grep -F -L "./$FUNCTION_PATH" all-handlers.txt) ]]; then
                     echo "case 2b - changes to directory or file common to all stack functions"
                     echo "STACK_HANDLERS" >> handler-list.txt
                     break
