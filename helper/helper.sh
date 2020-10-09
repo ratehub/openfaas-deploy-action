@@ -14,6 +14,16 @@ echo "Stack file: $1"
 git diff HEAD HEAD~1 --name-only > differences.txt
 cat differences.txt
 
+GROUP_PATH="."
+if [[ "$1" =~ "/" ]]; then
+    echo "stack file contains group path"
+    GROUP_PATH="$(echo "$1" | awk -F"/" '{print $1}')"
+    sed -i '/"$GROUP_PATH"/!d' differences.txt
+fi
+
+echo "differences file after filter:"
+cat differences.txt
+
 # Read and list all handlers from stack.yml to all-handlers.txt
 # Args: 1. file path to store results 2. stack file path
 node /action-helper-workspace/list-handler-paths.js all-handlers.txt $1
@@ -21,7 +31,7 @@ ALL_HANDLERS=$(cat all-handlers.txt)
 
 echo "Used by: $3"
 
-echo "All handlers: $ALL_HANDLERS"
+echo "All handlers in the given stack: $ALL_HANDLERS"
 
 # List of handlers to act upon
 touch handler-list.txt
@@ -112,3 +122,4 @@ fi
 
 echo "Output: $FUNCTIONS"
 echo ::set-output name=function-list::$FUNCTIONS
+echo ::set-output name=group::$GROUP_PATH
