@@ -12,6 +12,10 @@ set -eu
 #  $8 openfaas-template-url
 #  $9 image-registry
 # $10 deploy-function
+# $11 group-path
+
+
+echo "group-path: ${10}"
 
 faas-cli template pull
 
