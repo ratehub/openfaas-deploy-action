@@ -18,8 +18,10 @@ GROUP_PATH="."
 if [[ "$1" =~ "/" ]]; then
     echo "stack file contains group path"
     GROUP_PATH="$(echo "$1" | awk -F"/" '{print $1}')"
-    sed -i '/\<$GROUP_PATH\>/!d' differences.txt
+    sed -i "/\<$GROUP_PATH\>/!d" differences.txt
 fi
+
+echo "group-path: $GROUP_PATH"
 
 echo "differences file after filter:"
 cat differences.txt
