@@ -13,7 +13,7 @@ set -eu
 
 
 TAG=$4
-GROUP_PATH=$8
+GROUP_PATH="testing"
 
 function getBuildArgs()
 {
