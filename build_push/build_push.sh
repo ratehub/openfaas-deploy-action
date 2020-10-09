@@ -9,11 +9,17 @@ set -eu
 # $5 openfaas-template-url
 # $6 image-registry
 # $7 build-push-function
-# $8 group-path
 
 
 TAG=$4
 GROUP_PATH="testing"
+
+echo "stack-file: $1"
+echo "docker-username: $2"
+echo "tag: $TAG"
+echo "openfaas-template-url: $5"
+echo "image-registry: $6"
+echo "build-push-function: $7"
 
 function getBuildArgs()
 {
