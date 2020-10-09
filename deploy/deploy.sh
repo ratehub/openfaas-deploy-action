@@ -14,12 +14,14 @@ set -eu
 # $10 deploy-function
 # $11 group-path
 
+GROUP_PATH=${11}
+
 ls -la
 
 echo $4 | faas-cli login --username=$3 --password-stdin --gateway=$5
 
-cd ${11}
-cd ${10}
+cd GROUP_PATH
+cd "${10}"
 
 # if [ ! -d "template" ]; then
 #     cp -R "$GITHUB_WORKSPACE/template" template
@@ -49,7 +51,7 @@ fi
 # stack file path
 # gcr hostname and project id
 # tag override (optional)
-node /action-helper-workspace/create-stack.js $1 "./$1-deploy.yml" "$GITHUB_WORKSPACE/$2" $9 $7
+node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/$GROUP_PATH/$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/$GROUP_PATH/$2" $9 $7
 cat updated-stack.yml
 
 if [[ ${10} != "." ]]; then
