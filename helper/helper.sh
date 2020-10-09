@@ -12,6 +12,7 @@ echo "Stack file: $1"
 
 # List for files updated
 git diff HEAD HEAD~1 --name-only > differences.txt
+echo "differences file before filter:"
 cat differences.txt
 
 GROUP_PATH="."
@@ -65,7 +66,7 @@ else
                 echo "first sub-dir 2: $SUB_DIR_2"
 
                 FUNCTION_PATH=""
-                if [[ $(grep -F -w "./$SUB_DIR_2" all-handlers.txt) ]]; then
+                if [[ $GROUP_PATH != "." && $(grep -F -w "./$SUB_DIR_2" all-handlers.txt) ]]; then
                     FUNCTION_PATH=$SUB_DIR_2
                 else
                     FUNCTION_PATH=$SUB_DIR_1
@@ -118,7 +119,7 @@ fi
 # Add '[' and ']' at start and end respectively
 FUNCTIONS="[$FUNCTIONS]"
 
-if [[ "$FUNCTIONS" == "[]" ]]; then
+if [[ $FUNCTIONS == "[]" ]]; then
     FUNCTIONS="[\"nothing\"]"
 fi
 
