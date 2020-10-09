@@ -15,8 +15,6 @@ inputs:
 outputs:
   function-list:
     description: 'List of functions for strategy matrix'
-  group-path:
-    description: 'T'
 
 runs:
   using: 'docker'

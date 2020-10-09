@@ -123,8 +123,10 @@ if [[ $FUNCTIONS == "[]" ]]; then
     FUNCTIONS="[\"nothing\"]"
 fi
 
-echo "Output: $FUNCTIONS"
-echo "Group path: $GROUP_PATH"
+echo "function-names: $FUNCTIONS"
+echo "function-group: $GROUP_PATH"
 
-echo ::set-output name=function-list::$FUNCTIONS
-echo ::set-output name=group-path::$GROUP_PATH
+FUNCTION_LIST="{\"function-names\":$FUNCTIONS,\"function-group\":$GROUP_PATH}"
+echo "Output: $FUNCTION_LIST"
+
+echo ::set-output name=function-list::$FUNCTION_LIST
