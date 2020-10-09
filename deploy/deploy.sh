@@ -31,6 +31,8 @@ if [ -n "$8" ]; then
     faas-cli template pull $8
 fi
 
+echo "pwd"
+pwd
 ls -la
 
 echo "Starting to deploy ${10} function"

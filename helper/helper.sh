@@ -124,5 +124,7 @@ if [[ $FUNCTIONS == "[]" ]]; then
 fi
 
 echo "Output: $FUNCTIONS"
+echo "Group path: $GROUP_PATH"
+
 echo ::set-output name=function-list::$FUNCTIONS
-echo ::set-output name=group::$GROUP_PATH
+echo ::set-output name=group-path::$GROUP_PATH

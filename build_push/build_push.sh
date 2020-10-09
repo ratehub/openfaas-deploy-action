@@ -37,6 +37,9 @@ echo $3 | docker login --username $2 --password-stdin $6
 ls -la
 
 cd $8
+echo "pwd"
+pwd
+ls -la
 
 # custom and default faas-template pull
 faas-cli template pull
