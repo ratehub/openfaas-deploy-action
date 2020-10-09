@@ -14,23 +14,24 @@ set -eu
 # $10 deploy-function
 # $11 group-path
 
+ls -la
 
-echo "group-path: ${10}"
+echo $4 | faas-cli login --username=$3 --password-stdin --gateway=$5
+
+cd ${11}
+cd ${10}
+
+# if [ ! -d "template" ]; then
+#     cp -R "$GITHUB_WORKSPACE/template" template
+# fi
 
 faas-cli template pull
-
 # openfaas custom template pull
 if [ -n "$8" ]; then
     faas-cli template pull $8
 fi
 
-echo $4 | faas-cli login --username=$3 --password-stdin --gateway=$5
-
-cd "$GITHUB_WORKSPACE/${10}"
-
-if [ ! -d "template" ]; then
-    cp -R "$GITHUB_WORKSPACE/template" template
-fi
+ls -la
 
 echo "Starting to deploy ${10} function"
 
@@ -54,8 +55,6 @@ if [[ ${10} != "." ]]; then
 else
     faas-cli deploy -f updated-stack.yml --gateway=$5
 fi
-
-cd -
 
 if [[ $1 == "prod"  ]]; then
     API_GATEWAY_CONFIG_URL="https://api.github.com/repos/ratehub/gateway-config/dispatches"
