@@ -105,28 +105,21 @@ fi
 FUNCTIONS=""
 while IFS= read -r line; do
     if [[ $line == "." ]]; then
-        FUNCTIONS="$FUNCTIONS \"$line\","
+        FUNCTIONS="$FUNCTIONS {\"function-name\": \"$line\", \"function-group\": \"$GROUP_PATH\"},"
     else
         funcName=$(echo $line | sed "s/.\//""/g")
-        FUNCTIONS="$FUNCTIONS \"$funcName\","
+        FUNCTIONS="$FUNCTIONS {\"function-name\": \"$funcName\", \"function-group\": \"$GROUP_PATH\"},"
     fi
 done < handler-list.txt
 
 # Trim ',' from the end
 if [ ${#FUNCTIONS} -ge 1 ]; then
-FUNCTIONS=${FUNCTIONS::-1}
-fi
-# Add '[' and ']' at start and end respectively
-FUNCTIONS="[$FUNCTIONS]"
-
-if [[ $FUNCTIONS == "[]" ]]; then
+    FUNCTIONS=${FUNCTIONS::-1}
+    FUNCTIONS="{\"include\":[$FUNCTIONS]}"
+else
     FUNCTIONS="[\"nothing\"]"
 fi
 
-echo "function-names: $FUNCTIONS"
-echo "function-group: $GROUP_PATH"
+echo "Output: $FUNCTIONS"
 
-FUNCTION_LIST="{\"include\":{\"function-names\":$FUNCTIONS,\"function-group\":\"$GROUP_PATH\"}}"
-echo "Output: $FUNCTION_LIST"
-
-echo ::set-output name=function-list::$FUNCTION_LIST
+echo ::set-output name=function-list::$FUNCTIONS
