@@ -87,7 +87,7 @@ do
                     fi
                 fi
             fi
-        done < differences.txt
+        done < filtered-differences.txt
     fi
 
     cat handler-list.txt
@@ -122,7 +122,7 @@ if [ ${#FUNCTIONS} -ge 1 ]; then
     FUNCTIONS=${FUNCTIONS::-1}
     FUNCTIONS="{\"include\":[$FUNCTIONS]}"
 else
-    FUNCTIONS="[\"nothing\"]"
+    FUNCTIONS="{\"include\":[{\"function-name\": \"nothing\", \"function-group\": \"nothing\"}]}"
 fi
 
 echo "Output: $FUNCTIONS"
