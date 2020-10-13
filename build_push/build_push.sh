@@ -12,10 +12,6 @@ set -eu
 
 
 TAG=$4
-GROUP_PATH="testing"
-
-GROUP_PATH_RE=$8
-echo "passed group-path: $GROUP_PATH_RE"
 
 echo "stack-file: $1"
 echo "docker-username: $2"
@@ -23,6 +19,7 @@ echo "tag: $TAG"
 echo "openfaas-template-url: $5"
 echo "image-registry: $6"
 echo "build-push-function: $7"
+echo "group-path: $8"
 
 function getBuildArgs()
 {
@@ -46,7 +43,7 @@ echo $3 | docker login --username $2 --password-stdin $6
 
 ls -la
 
-cd $GROUP_PATH
+cd $8
 echo "pwd"
 pwd
 
@@ -65,7 +62,7 @@ echo "Starting to build and push $7 function"
 # stack file path
 # gcr hostname and project id
 # tag
-node /action-helper-workspace/update-image.js "$GITHUB_WORKSPACE/$GROUP_PATH/$1" $6 $4
+node /action-helper-workspace/update-image.js "$GITHUB_WORKSPACE/$8/$1" $6 $4
 cat updated-stack.yml
 
 BUILD_ARGS=$(getBuildArgs)
