@@ -10,6 +10,14 @@ ls -la
 
 echo "Stack file: $1"
 
+stack_files=""
+IFS=', ' read -r -a stack_files <<< $1
+
+for stack in "${stack_files[@]}"
+do
+    echo $stack
+done
+
 # List for files updated
 git diff HEAD HEAD~1 --name-only > differences.txt
 echo "differences file before filter:"
