@@ -126,7 +126,7 @@ fi
 echo "function-names: $FUNCTIONS"
 echo "function-group: $GROUP_PATH"
 
-FUNCTION_LIST="{\"function-names\":$FUNCTIONS,\"function-group\":\"$GROUP_PATH\"}"
+FUNCTION_LIST="{\"include\":{\"function-names\":$FUNCTIONS,\"function-group\":\"$GROUP_PATH\"}}"
 echo "Output: $FUNCTION_LIST"
 
 echo ::set-output name=function-list::$FUNCTION_LIST
