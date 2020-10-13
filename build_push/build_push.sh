@@ -14,6 +14,9 @@ set -eu
 TAG=$4
 GROUP_PATH="testing"
 
+GROUP_PATH_RE=$8
+echo "passed group-path: $GROUP_PATH_RE"
+
 echo "stack-file: $1"
 echo "docker-username: $2"
 echo "tag: $TAG"
