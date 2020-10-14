@@ -14,30 +14,18 @@ set -eu
 # $10 deploy-function
 # $11 group-path
 
-GROUP_PATH=${11}
-
-ls -la
-
 echo $4 | faas-cli login --username=$3 --password-stdin --gateway=$5
 
-cd GROUP_PATH
-cd "${10}"
+echo "Starting to deploy ${10} function under ${11} group"
 
-# if [ ! -d "template" ]; then
-#     cp -R "$GITHUB_WORKSPACE/template" template
-# fi
+cd ${11}
+cd ${10}
 
 faas-cli template pull
 # openfaas custom template pull
 if [ -n "$8" ]; then
     faas-cli template pull $8
 fi
-
-echo "pwd"
-pwd
-ls -la
-
-echo "Starting to deploy ${10} function"
 
 if [ ! -f "./$1-deploy.yml" ]; then
     echo "Function specific deploy config not found!"
@@ -46,12 +34,12 @@ fi
 
 # create `updated-stack.yml` file
 # Args:
-# deployment evironment
+# 
 # function specific deploy settings
 # stack file path
 # gcr hostname and project id
 # tag override (optional)
-node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/$GROUP_PATH/$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/$GROUP_PATH/$2" $9 $7
+node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${11}/global-$1-deploy.yml" "$1-deploy.yml" "$GITHUB_WORKSPACE/${11}/$2" $9 $7
 cat updated-stack.yml
 
 if [[ ${10} != "." ]]; then

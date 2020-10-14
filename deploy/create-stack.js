@@ -2,7 +2,7 @@
 // global and function specific settings to already present stack.yml file
 
 // Expects following arguments:
-// 1. deployment environment - dev, staging or prod
+// 1. 
 // 2. relative path to function specific deploy settings
 // 3. relative path to stack.yml
 // 4. gcr hostname and project id
@@ -30,7 +30,7 @@ const tagOverrride = process.argv[6] ? process.argv[6] : undefined;
 try {
     // read all yamls
     const stack = yaml.safeLoad(fs.readFileSync(stackFile, 'utf8'));
-    const globalSettings = yaml.safeLoad(fs.readFileSync(deployFilePath, 'utf8'));
+    const globalSettings = yaml.safeLoad(fs.readFileSync(globalFilePath, 'utf8'));
     const deployFunctions = yaml.safeLoad(fs.readFileSync(deployFilePath, 'utf8'));
 
     // version 1.0 is converted to 1 while converting yaml to json

@@ -29,7 +29,6 @@ inputs:
     description: 'Function to deploy'
   group-path:
     description: 'Function to build and push to GCR'
-    default: '.'
 
 runs:
   using: 'docker'
