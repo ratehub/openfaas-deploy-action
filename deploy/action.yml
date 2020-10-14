@@ -26,7 +26,10 @@ inputs:
     description: 'GCR [hostname]/[project-id]'
     default: 'gcr.io/platform-235214/'
   deploy-function:
-    description: 'Function to deploy'
+    description: 'Function name'
+  group-path:
+    description: 'Function group'
+    default: '.'
 
 runs:
   using: 'docker'
@@ -42,3 +45,4 @@ runs:
     - ${{ inputs.openfaas-template-url }}
     - ${{ inputs.image-registry }}
     - ${{ inputs.deploy-function }}
+    - ${{ inputs.group-path }}

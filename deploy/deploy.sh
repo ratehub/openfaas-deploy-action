@@ -12,23 +12,20 @@ set -eu
 #  $8 openfaas-template-url
 #  $9 image-registry
 # $10 deploy-function
+# $11 group-path
+
+echo $4 | faas-cli login --username=$3 --password-stdin --gateway=$5
+
+echo "Starting to deploy ${11}/${10} function"
+
+cd ${11}
+cd ${10}
 
 faas-cli template pull
-
 # openfaas custom template pull
 if [ -n "$8" ]; then
     faas-cli template pull $8
 fi
-
-echo $4 | faas-cli login --username=$3 --password-stdin --gateway=$5
-
-cd "$GITHUB_WORKSPACE/${10}"
-
-if [ ! -d "template" ]; then
-    cp -R "$GITHUB_WORKSPACE/template" template
-fi
-
-echo "Starting to deploy ${10} function"
 
 if [ ! -f "./$1-deploy.yml" ]; then
     echo "Function specific deploy config not found!"
@@ -37,12 +34,12 @@ fi
 
 # create `updated-stack.yml` file
 # Args:
-# deployment evironment
+# global settings
 # function specific deploy settings
 # stack file path
 # gcr hostname and project id
 # tag override (optional)
-node /action-helper-workspace/create-stack.js $1 "./$1-deploy.yml" "$GITHUB_WORKSPACE/$2" $9 $7
+node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${11}/global-$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/${11}/$2" $9 $7
 cat updated-stack.yml
 
 if [[ ${10} != "." ]]; then
@@ -50,8 +47,6 @@ if [[ ${10} != "." ]]; then
 else
     faas-cli deploy -f updated-stack.yml --gateway=$5
 fi
-
-cd -
 
 if [[ $1 == "prod"  ]]; then
     API_GATEWAY_CONFIG_URL="https://api.github.com/repos/ratehub/gateway-config/dispatches"

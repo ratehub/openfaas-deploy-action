@@ -20,7 +20,10 @@ inputs:
     description: 'GCR [hostname]/[project-id]'
     default: 'gcr.io/platform-235214/'
   build-push-function:
-    description: 'Function to build and push to GCR'
+    description: 'Function name'
+  group-path:
+    description: 'Function group'
+    default: '.'
 
 runs:
   using: 'docker'
@@ -33,3 +36,4 @@ runs:
     - ${{ inputs.openfaas-template-url }}
     - ${{ inputs.image-registry }}
     - ${{ inputs.build-push-function }}
+    - ${{ inputs.group-path }}

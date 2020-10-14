@@ -32,20 +32,22 @@ function getBuildArgs()
 # docker login
 echo $3 | docker login --username $2 --password-stdin $6
 
+cd $8
+
 # custom and default faas-template pull
 faas-cli template pull
 if [ -n "$5" ]; then
     faas-cli template pull $5
 fi
 
-echo "Starting to build and push $7 function"
+echo "Starting to build and push $8/$7 function"
 
 # create `updated-stack.yml` file
 # Args:
 # stack file path
 # gcr hostname and project id
 # tag
-node /action-helper-workspace/update-image.js "$GITHUB_WORKSPACE/$1" $6 $4
+node /action-helper-workspace/update-image.js "$GITHUB_WORKSPACE/$8/$1" $6 $4
 cat updated-stack.yml
 
 BUILD_ARGS=$(getBuildArgs)
