@@ -4,7 +4,7 @@ set -eu
 
 # $1 stack-file
 # $2 force
-# $3 used-by
+# $3 caller
 
 # List for files updated
 git diff HEAD HEAD~1 --name-only > all-differences.txt
@@ -12,7 +12,7 @@ echo "all differences file"
 cat all-differences.txt
 
 
-FUNCTIONS=""
+FUNCTION_DETAILS=""
 IFS=', ' read -r -a stack_files <<< $1
 for stack in "${stack_files[@]}"
 do
@@ -112,23 +112,23 @@ do
     # map each handler to corresponding function name
     while IFS= read -r line; do
         if [[ $line == "." ]]; then
-            FUNCTIONS="$FUNCTIONS {\"function-name\": \"$line\", \"function-group\": \"$GROUP_PATH\"},"
+            FUNCTION_DETAILS="$FUNCTION_DETAILS {\"function-name\": \"$line\", \"function-group\": \"$GROUP_PATH\"},"
         else
             funcName=$(echo $line | sed "s/.\//""/g")
-            FUNCTIONS="$FUNCTIONS {\"function-name\": \"$funcName\", \"function-group\": \"$GROUP_PATH\"},"
+            FUNCTION_DETAILS="$FUNCTION_DETAILS {\"function-name\": \"$funcName\", \"function-group\": \"$GROUP_PATH\"},"
         fi
     done < handler-list.txt
 
 done
 
 # Trim ',' from the end
-if [ ${#FUNCTIONS} -ge 1 ]; then
-    FUNCTIONS=${FUNCTIONS::-1}
-    FUNCTIONS="{\"include\":[$FUNCTIONS]}"
+if [ ${#FUNCTION_DETAILS} -ge 1 ]; then
+    FUNCTION_DETAILS=${FUNCTION_DETAILS::-1}
+    FUNCTION_DETAILS="{\"include\":[$FUNCTION_DETAILS]}"
 else
-    FUNCTIONS="{\"include\":[{\"function-name\": \"nothing\", \"function-group\": \"nothing\"}]}"
+    FUNCTION_DETAILS="{\"include\":[{\"function-name\": \"none\", \"function-group\": \"none\"}]}"
 fi
 
-echo "Output: $FUNCTIONS"
+echo "Output: $FUNCTION_DETAILS"
 
-echo ::set-output name=function-list::$FUNCTIONS
+echo ::set-output name=function-details::$FUNCTION_DETAILS

@@ -9,11 +9,11 @@ inputs:
     default: 'stack.yml'
   force:
     description: 'Add passed function to output even if nothing is changed in the source code'
-  used-by:
-    description: 'Tells which action will use the output - deploy or build_push'
+  caller:
+    description: 'Tells which action will consume the output - deploy or build_push'
 
 outputs:
-  function-list:
+  function-details:
     description: 'List of functions for strategy matrix'
 
 runs:
@@ -22,4 +22,4 @@ runs:
   args:
     - ${{ inputs.stack-file }}
     - ${{ inputs.force }}
-    - ${{ inputs.used-by }}
+    - ${{ inputs.caller }}
