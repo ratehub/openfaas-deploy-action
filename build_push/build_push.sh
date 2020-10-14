@@ -10,16 +10,7 @@ set -eu
 # $6 image-registry
 # $7 build-push-function
 
-
 TAG=$4
-
-echo "stack-file: $1"
-echo "docker-username: $2"
-echo "tag: $TAG"
-echo "openfaas-template-url: $5"
-echo "image-registry: $6"
-echo "build-push-function: $7"
-echo "group-path: $8"
 
 function getBuildArgs()
 {
@@ -41,11 +32,7 @@ function getBuildArgs()
 # docker login
 echo $3 | docker login --username $2 --password-stdin $6
 
-ls -la
-
 cd $8
-echo "pwd"
-pwd
 
 # custom and default faas-template pull
 faas-cli template pull
@@ -53,9 +40,7 @@ if [ -n "$5" ]; then
     faas-cli template pull $5
 fi
 
-ls -la
-
-echo "Starting to build and push $7 function"
+echo "Starting to build and push $8/$7 function"
 
 # create `updated-stack.yml` file
 # Args:

@@ -2,7 +2,7 @@
 // global and function specific settings to already present stack.yml file
 
 // Expects following arguments:
-// 1. 
+// 1. gobal settings file
 // 2. relative path to function specific deploy settings
 // 3. relative path to stack.yml
 // 4. gcr hostname and project id

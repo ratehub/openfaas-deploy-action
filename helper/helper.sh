@@ -6,7 +6,6 @@ set -eu
 # $2 force
 # $3 used-by
 
-
 # List for files updated
 git diff HEAD HEAD~1 --name-only > all-differences.txt
 echo "all differences file"

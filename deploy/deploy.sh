@@ -16,7 +16,7 @@ set -eu
 
 echo $4 | faas-cli login --username=$3 --password-stdin --gateway=$5
 
-echo "Starting to deploy ${10} function under ${11} group"
+echo "Starting to deploy ${11}/${10} function"
 
 cd ${11}
 cd ${10}
@@ -34,12 +34,12 @@ fi
 
 # create `updated-stack.yml` file
 # Args:
-# 
+# global settings
 # function specific deploy settings
 # stack file path
 # gcr hostname and project id
 # tag override (optional)
-node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${11}/global-$1-deploy.yml" "$1-deploy.yml" "$GITHUB_WORKSPACE/${11}/$2" $9 $7
+node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${11}/global-$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/${11}/$2" $9 $7
 cat updated-stack.yml
 
 if [[ ${10} != "." ]]; then
