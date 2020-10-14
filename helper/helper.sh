@@ -39,7 +39,10 @@ do
 
     echo "All handlers in the given stack: $ALL_HANDLERS"
 
-    # List of handlers to act upon
+    # List of handlers
+    if [ -f handler-list.txt ]; then
+        rm handler-list.txt
+    fi
     touch handler-list.txt
 
     if [ -n "$2" ]; then
