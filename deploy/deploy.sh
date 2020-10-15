@@ -42,11 +42,7 @@ fi
 node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${11}/global-$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/${11}/$2" $9 $7
 cat updated-stack.yml
 
-if [[ ${10} != "." ]]; then
-    faas-cli deploy -f updated-stack.yml --gateway=$5 --filter=${10}
-else
-    faas-cli deploy -f updated-stack.yml --gateway=$5
-fi
+faas-cli deploy -f updated-stack.yml --gateway=$5
 
 if [[ $1 == "prod"  ]]; then
     API_GATEWAY_CONFIG_URL="https://api.github.com/repos/ratehub/gateway-config/dispatches"
