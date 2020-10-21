@@ -9,6 +9,7 @@ set -eu
 # $5 openfaas-template-url
 # $6 image-registry
 # $7 build-push-function
+# $8 group-path
 
 TAG=$4
 

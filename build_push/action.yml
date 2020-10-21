@@ -12,7 +12,7 @@ inputs:
   docker-password:
     description: 'Password for GCP'
   tag:
-    description: 'tag'
+    description: 'Image tag to be pushed'
     default: 'latest'
   openfaas-template-url:
     description: 'RH custom template url'
