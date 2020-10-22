@@ -7,6 +7,7 @@ COPY deploy.sh /deploy.sh
 
 WORKDIR /action-helper-workspace/
 COPY create-stack.js .
+COPY create-new-config.js .
 COPY package*.json /action-helper-workspace/
 RUN npm install
 
