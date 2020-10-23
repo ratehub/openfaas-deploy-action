@@ -21,7 +21,7 @@ do
     if [[ "$stack" =~ "/" ]]; then
         echo "stack file contains group path"
         GROUP_PATH="$(echo "$stack" | awk -F"/" '{print $1}')"
-        sed "/\<$GROUP_PATH\>/!d" all-differences.txt > filtered-differences.txt
+        sed "/^\<$GROUP_PATH\>\//!d" all-differences.txt > filtered-differences.txt
     else
         cp all-differences.txt filtered-differences.txt
     fi
