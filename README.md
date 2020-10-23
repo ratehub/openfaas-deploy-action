@@ -2,9 +2,7 @@
 
 This action is designed to deploy functions or microservices developed with [OpenFaaS](https://www.openfaas.com).
 
-
-## Requirements
-1. Your repository must be organized in one of the following ways: 
+Your repository can be organized in one of the following ways: 
    1. A single stack.yml file and dev-deploy/prod-deploy/staging-deploy.yml file in the function path for each function.
    ```
       your-repo/
@@ -19,13 +17,13 @@ This action is designed to deploy functions or microservices developed with [Ope
         │   └── staging-deploy.yml
         │   └── prod-deploy.yml
         │
-        └── env-dev.yml
-        └── env-prod.yml
-        └── env-staging.yml     
+        └── global-dev-deploy.yml
+        └── global-prod-deploy.yml
+        └── global-staging-deploy.yml     
         └── stack.yml
    ```
       This method will result in function being built, pushed, and deployed every time something changes in the function path. 
-      
+
    2. Functions grouped into related folders, each with their own stack.yml file and dev-deploy/prod-deploy/staging-deploy.yml files (For repos with a large number of functions)  
    ```
       your-repo/
@@ -40,9 +38,9 @@ This action is designed to deploy functions or microservices developed with [Ope
         │   │   └── dev-deploy.yml
         │   │   └── staging-deploy.yml
         │   └── └── prod-deploy.yml
-        │   └── env-dev.yml
-        │   └── env-prod.yml
-        │   └── env-staging.yml         
+        │   └── global-dev-deploy.yml
+        │   └── global-prod-deploy.yml
+        │   └── global-staging-deploy.yml         
         │   └── stack.yml
         │
         └── group-2/
@@ -56,18 +54,17 @@ This action is designed to deploy functions or microservices developed with [Ope
         │   │   └── dev-deploy.yml
         │   │   └── staging-deploy.yml
         │   └── └── prod-deploy.yml
-        │   └── env-dev.yml
-        │   └── env-prod.yml
-        │   └── env-staging.yml
+        │   └── global-dev-deploy.yml
+        │   └── global-prod-deploy.yml
+        │   └── global-staging-deploy.yml
         │   └── stack.yml          
         │        
         └── group-3/   
-            
+
    ```
       Function folder names must correspond exactly to the name of a function in the stack.yml in its group folder.
       In addition, this method will only build, push, and deploy based on which files changed in the last commit. So if any files changed in a given function's folder, that function will be deployed. 
-      
-      
+
 # Usage
 ## Commits to master branch
 ##### If changes are made to one function specifically and are included in the PR, when merged
@@ -80,8 +77,9 @@ This action is designed to deploy functions or microservices developed with [Ope
            └── Triggers auto-dev-deploy.yml action which auto-deploys updated function to DEV environment
      3. If package.json is updated(or when the release is created which updates the version in package.json)
            └── build_push.yml action is triggered, builds and pushes the function image with updated tag.
-           
-##### NOTE: Make sure to not combine updates to deploy file with the above function update commit/merge and keep them separate.           
+
+##### NOTE: Make sure to not combine updates to deploy file with the above function update commit/merge and keep them separate.
+
 ##### If deploy files are updated with image tag AND/OR function specific env variables, constraints, labels, secrets
      1. If the staging-deploy.yml/prod-deploy.yml is updated
            >> deploy.yml workflow is triggered. 
@@ -92,20 +90,13 @@ This action is designed to deploy functions or microservices developed with [Ope
      2. Update to dev-deploy.yml(environment variables/secrets/labels/constraints etc.)
           └── Triggers auto-dev-deploy.yml action, builds, pushes and automatically deploys to the DEV environment
      3. Updates to stack.yml does not trigger any actions, although updated configurations will be used the next time deploy action runs.
-     
+
 ##### Group deploy 
      1. If the multiple deploy files for the functions in a group is updated, 
      for example:
         └── In a group of 6 functions, if staging-deploy.yml is updated for 4 functions, 4 functions of 6 in the group are deployed to the staging cluster.
-     
 
-##### NOTE: updating env-*.yml files will deploy all the functions in the group path to the target environment based on the file updated.
-           
-## Scheduled Re-deploy function
-##### If the cron schedule is triggered for the functions to re-deploy
-    Triggers schedule.yml action which builds, pushes and deploys the functions(selected re-deploy functions) to PROD
-         
+##### NOTE: updating global-*-deploy.yml files will deploy all the functions in the group path to the target environment based on the file updated.
+
 ## On Pull request to master branch
     Triggers status.yml action to run function build for all the updated functions for status check.
-    
-    
