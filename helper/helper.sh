@@ -80,13 +80,15 @@ do
                     echo "Function path: $FUNCTION_PATH"
 
                     # Changes are in `sub-dir` and not already added to deploy list
-                    if [[ $(grep -F -w "./$FUNCTION_PATH" all-handlers.txt) && $(grep -F -L "$FUNCTION_PATH" handler-list.txt) ]]; then
+                    if [[ $(grep -F -w "./$FUNCTION_PATH" all-handlers.txt) && $(grep -L -w "^./$FUNCTION_PATH$" handler-list.txt) ]]; then
                         echo "case 2a - changes to directory or file specific to a faas-function"
                         echo "./$FUNCTION_PATH" >> handler-list.txt
                     elif [[ $(grep -F -L "./$FUNCTION_PATH" all-handlers.txt) ]]; then
                         echo "case 2b - changes to directory or file common to all stack functions"
                         echo "STACK_HANDLERS" >> handler-list.txt
                         break
+                    else
+                        echo "Nothing added for $FUNCTION_PATH"
                     fi
                 fi
             fi
