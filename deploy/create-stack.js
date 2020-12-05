@@ -12,7 +12,7 @@ const yaml = require('js-yaml');
 const fs = require('fs');
 const object = require('lodash/fp/object');
 
-if (process.argv.length < 6) {
+if (process.argv.length < 7) {
     console.log("Insufficient args supplied!");
     // Exit - fail
     process.exit(1);
@@ -23,13 +23,17 @@ const globalFilePath = process.argv[2];
 const deployFilePath = process.argv[3];
 const stackFile = process.argv[4];
 const gcrProjectId = process.argv[5];
-const tagOverrride = process.argv[6] ? process.argv[6] : undefined;
+const devStageConfigPath = process.argv[6];
+const tagOverrride = process.argv[7] ? process.argv[7] : undefined;
 
 try {
     // read all yamls
     const stack = yaml.safeLoad(fs.readFileSync(stackFile, 'utf8'));
     const globalSettings = yaml.safeLoad(fs.readFileSync(globalFilePath, 'utf8'));
     const deployFunctions = yaml.safeLoad(fs.readFileSync(deployFilePath, 'utf8'));
+    const devStageConfig = devStageConfigPath !== 'none'
+        ? yaml.safeLoad(fs.readFileSync(devStageConfigPath, 'utf8'))
+        : undefined;
 
     // version 1.0 is converted to 1 while converting yaml to json
     stack.version = stack.version.toFixed(1);
@@ -42,7 +46,7 @@ try {
     }, {});
 
     // Merge function specific settings
-    const updatedFunctions = deployFunctions
+    const functionsWithLocalSettings = deployFunctions
         ? Object.keys(deployFunctions).reduce((acc, key) => {
             const globalSettingFunction = functionsWithGlobalSettings[key]
                 ? functionsWithGlobalSettings[key]
@@ -53,6 +57,10 @@ try {
             return acc;
         }, {})
         : functionsWithGlobalSettings;
+
+    const updatedFunctions = devStageConfig
+    ? object.merge(functionsWithLocalSettings, devStageConfig)
+    : functionsWithLocalSettings;
 
     // Append GCR project ID to image, override tag and 
     // Update node-pool constraint if needed

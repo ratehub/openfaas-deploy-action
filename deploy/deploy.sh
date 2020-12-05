@@ -13,6 +13,7 @@ set -eu
 #  $9 image-registry
 # $10 deploy-function
 # $11 group-path
+# $12 developer-stage-config
 
 echo $4 | faas-cli login --username=$3 --password-stdin --gateway=$5
 
@@ -39,7 +40,7 @@ fi
 # stack file path
 # gcr hostname and project id
 # tag override (optional)
-node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${11}/global-$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/${11}/$2" $9 $7
+node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${11}/global-$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/${11}/$2" $9 ${12} $7
 cat updated-stack.yml
 
 faas-cli deploy -f updated-stack.yml --gateway=$5

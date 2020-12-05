@@ -30,6 +30,9 @@ inputs:
   group-path:
     description: 'Function group'
     default: '.'
+  developer-stage-config:
+    description: 'Config for developer specific stage'
+    default: 'none'
 
 runs:
   using: 'docker'
@@ -46,3 +49,4 @@ runs:
     - ${{ inputs.image-registry }}
     - ${{ inputs.deploy-function }}
     - ${{ inputs.group-path }}
+    - ${{ inputs.developer-stage-config }}
