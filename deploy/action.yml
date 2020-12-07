@@ -30,7 +30,7 @@ inputs:
   group-path:
     description: 'Function group'
     default: '.'
-  developer-stage-config:
+  override-global-config:
     description: 'Config for developer specific stage'
     default: 'none'
 
@@ -49,4 +49,4 @@ runs:
     - ${{ inputs.image-registry }}
     - ${{ inputs.deploy-function }}
     - ${{ inputs.group-path }}
-    - ${{ inputs.developer-stage-config }}
+    - ${{ inputs.override-global-config }}

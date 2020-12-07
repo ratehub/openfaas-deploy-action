@@ -13,7 +13,7 @@ set -eu
 #  $9 image-registry
 # $10 deploy-function
 # $11 group-path
-# $12 developer-stage-config
+# $12 override-global-config
 
 echo $4 | faas-cli login --username=$3 --password-stdin --gateway=$5
 

@@ -24,7 +24,7 @@ const deployFilePath = process.argv[3];
 const stackFile = process.argv[4];
 const gcrProjectId = process.argv[5];
 const devStageConfigPath = process.argv[6];
-const tagOverrride = process.argv[7] ? process.argv[7] : undefined;
+const tagOverride = process.argv[7] ? process.argv[7] : undefined;
 
 try {
     // read all yamls
@@ -68,8 +68,8 @@ try {
         const image = updatedFunctions[key].image;
         // read the tag from image after `:`
         const tag = image.match(/:(.*)/g).pop().replace(":", "");
-        const imageWithUpdatedTag = tagOverrride
-            ? image.replace(tag, tagOverrride)
+        const imageWithUpdatedTag = tagOverride
+            ? image.replace(tag, tagOverride)
             : image;
 
         const imageWithProjectId = `${gcrProjectId}${imageWithUpdatedTag}`;
