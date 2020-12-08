@@ -6,7 +6,8 @@
 // 2. relative path to function specific deploy settings
 // 3. relative path to stack.yml
 // 4. gcr hostname and project id
-// 5. tag override (optional)
+// 5. config override
+// 6. tag override (optional)
 
 const yaml = require('js-yaml');
 const fs = require('fs');
@@ -59,8 +60,8 @@ try {
         : functionsWithGlobalSettings;
 
     const updatedFunctions = devStageConfig
-    ? object.merge(functionsWithLocalSettings, devStageConfig)
-    : functionsWithLocalSettings;
+        ? object.merge(functionsWithLocalSettings, devStageConfig)
+        : functionsWithLocalSettings;
 
     // Append GCR project ID to image, override tag and 
     // Update node-pool constraint if needed
