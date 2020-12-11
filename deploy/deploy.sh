@@ -40,7 +40,12 @@ fi
 # stack file path
 # gcr hostname and project id
 # tag override (optional)
-node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${11}/global-$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/${11}/$2" $9 ${12} $7
+if [[ ${12} == "none"  ]]; then
+    node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${11}/global-$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/${11}/$2" $9 $7
+else
+    node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${11}/global-$1-deploy.yml" "./${12}" "$GITHUB_WORKSPACE/${11}/$2" $9 $7
+fi
+
 cat updated-stack.yml
 
 echo "faas-cli deploy -f updated-stack.yml --gateway=$5"
