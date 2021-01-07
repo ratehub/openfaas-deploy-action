@@ -27,6 +27,12 @@ function getBuildArgs()
     done
     # bake-in DOCKER_TAG build arg
     buildArgs="${buildArgs} --build-arg DOCKER_TAG=${TAG}"
+
+    # bake-in GITHUB_SHA build arg
+    buildArgs="${buildArgs} --build-arg GIT_SHA=${GITHUB_SHA}"
+
+    # bake-in GITHUB_REF build arg. Aka refs/heads/main or refs/tags/1.0.0
+    buildArgs="${buildArgs} --build-arg GIT_REF=${GITHUB_REF}"
     echo "$buildArgs"
 }
 
