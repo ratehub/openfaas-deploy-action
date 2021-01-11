@@ -2,19 +2,13 @@ const path = require('path');
 
 
 function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunctions) {
-
     let updatedFunctions = [];
 
     for (var i = 0; i < filteredUpdatedFiles.length; i++) {
         const updatedFile = filteredUpdatedFiles[i];
-        console.log('updatedFile:', updatedFile);
-
-        // Ignore changes if the file is prefixed with a "." or "_"
-        if (!(updatedFile.startsWith('.') || updatedFile.startsWith('_'))
-            && !(caller == "build_push" && updatedFile.endsWith('deploy.yml'))) {
+        if (!(caller == "build_push" && updatedFile.endsWith('deploy.yml'))) {
 
             if (updatedFile.includes('/')) {
-
                 const functionPath = path.dirname(path.relative(groupPath, updatedFile));
                 console.log('functionPath:', functionPath);
 
@@ -37,7 +31,6 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
         }
     }
     return updatedFunctions;
-
 }
 
 module.exports = analyseUpdatedFiles;
