@@ -9,7 +9,7 @@ inputs:
     default: 'dev'
   stack-file:
     description: 'stack.yml path'
-    default: 'stack.yml'
+    default: 'stack-deploy.yml'
   openfaas-username:
     description: 'User for authenticating at OpenFaaS gateway'
   openfaas-password:
