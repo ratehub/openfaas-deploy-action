@@ -5,7 +5,7 @@ description: 'Deploys OpenFaaS function'
 
 inputs:
   deployment-env:
-    description: 'Deployment environment - dev, staging or prod'
+    description: 'Deployment environment - dev, qa or prod'
     default: 'dev'
   stack-file:
     description: 'stack.yml path'
