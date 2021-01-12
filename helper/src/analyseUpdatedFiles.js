@@ -15,9 +15,9 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
                 if (stackFunctions.includes(functionPath) && !updatedFunctions.includes(functionPath)) {
                     console.log('case 2a - changes to directory or file specific to a faas-function');
                     updatedFunctions.push(functionPath);
-                } else if (!stackFunctions.includes(functionPath)) {
+                } else if (!stackFunctions.includes(functionPath) && functionPath === '.') {
                     console.log('case 2b - changes to directory or file common to all stack functions');
-                    updatedFunctions = stackFunctions;
+                    updatedFunctions = ['.'];
                     break;
                 } else {
                     console.log(`Nothing added for ${functionPath}`);
