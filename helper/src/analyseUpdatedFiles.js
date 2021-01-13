@@ -25,7 +25,7 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
 
             } else {
                 console.log('case 1 - changes at root of repo');
-                updatedFunctions = stackFunctions;
+                updatedFunctions = ['.'];
                 break;
             }
         }
