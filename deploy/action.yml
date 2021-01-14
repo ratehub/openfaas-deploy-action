@@ -16,8 +16,6 @@ inputs:
     description: 'Password for authenticating at OpenFaaS gateway'
   openfaas-gateway:
     description: 'OpenFaaS gateway URL'
-  api-gateway-auth-token:
-    description: 'API gateway auth token'
   tag-override:
     description: 'Override the tag specified in *-deploy.yml file'
   openfaas-template-url:
@@ -43,7 +41,6 @@ runs:
     - ${{ inputs.openfaas-username }}
     - ${{ inputs.openfaas-password }}
     - ${{ inputs.openfaas-gateway }}
-    - ${{ inputs.api-gateway-auth-token }}
     - ${{ inputs.tag-override }}
     - ${{ inputs.openfaas-template-url }}
     - ${{ inputs.image-registry }}

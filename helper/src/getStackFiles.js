@@ -7,7 +7,7 @@ const GITHUB_WORKSPACE = process.env.GITHUB_WORKSPACE;
 async function getStackFiles(caller) {
 
     const patterns = GITHUB_WORKSPACE.includes('ratehub-k8s')
-        ? ['stack-deploy.yml', '**/stack-deploy.yml', '**/**/stack-deploy.yml']
+        ? ['stack-deploy.yml', '**/stack-deploy.yml', '**/**/stack-deploy.yml'] // Test this
         : ['stack.yml', '**/stack.yml', '**/**/stack.yml'];
 
     const globber = await glob.create(patterns.join('\n'));

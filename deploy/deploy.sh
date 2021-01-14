@@ -7,30 +7,29 @@ set -eu
 #  $3 openfaas-username
 #  $4 openfaas-password
 #  $5 openfaas-gateway
-#  $6 api-gateway-auth-token
-#  $7 tag-override
-#  $8 openfaas-template-url
-#  $9 image-registry
-# $10 deploy-function
-# $11 group-path
-# $12 config-override
+#  $6 tag-override
+#  $7 openfaas-template-url
+#  $8 image-registry
+#  $9 deploy-function
+# $10 group-path
+# $11 config-override
 
 echo $4 | faas-cli login --username=$3 --password-stdin --gateway=$5
 
-echo "Starting to deploy ${11}/${10} function"
+echo "Starting to deploy ${10}/$9 function"
 
-cd ${11}
 cd ${10}
+cd $9
 
 faas-cli template pull
 # openfaas custom template pull
-if [ -n "$8" ]; then
-    faas-cli template pull $8
+if [ -n "$7" ]; then
+    faas-cli template pull $7
 fi
 
 if [ ! -f "./$1-deploy.yml" ]; then
     echo "Function specific deploy config not found!"
-    node /action-helper-workspace/create-new-config.js ${10} "./$1-deploy.yml"
+    node /action-helper-workspace/create-new-config.js $9 "./$1-deploy.yml"
 fi
 
 # create `updated-stack.yml` file
@@ -40,23 +39,12 @@ fi
 # stack file path
 # gcr hostname and project id
 # tag override (optional)
-if [[ ${12} == "none"  ]]; then
-    node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${11}/global-$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/${11}/$2" $9 $7
+if [[ ${11} == "none"  ]]; then
+    node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/${10}/$2" $8 $6
 else
-    node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${11}/global-$1-deploy.yml" "./${12}" "$GITHUB_WORKSPACE/${11}/$2" $9 $7
+    node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml" "./${11}" "$GITHUB_WORKSPACE/${10}/$2" $8 $6
 fi
 
 cat updated-stack.yml
 
-echo "faas-cli deploy -f updated-stack.yml --gateway=$5"
-
-if [[ $1 == "prod"  ]]; then
-    API_GATEWAY_CONFIG_URL="https://api.github.com/repos/ratehub/gateway-config/dispatches"
-else
-    API_GATEWAY_CONFIG_URL="https://api.github.com/repos/ratehub/gateway-config-$1/dispatches"
-fi
-
-# Query gateway action so that functions are added to gateway
-if [ -n "$6" ]; then
-    curl -H "Authorization: token $6" -d '{"event_type":"repository_dispatch"}' $API_GATEWAY_CONFIG_URL
-fi
+faas-cli deploy -f updated-stack.yml --gateway=$5
