@@ -4,11 +4,11 @@ const path = require('path');
 
 const GITHUB_WORKSPACE = process.env.GITHUB_WORKSPACE;
 
-async function getStackFiles(caller) {
+async function getStackFiles() {
 
     const patterns = GITHUB_WORKSPACE.includes('ratehub-k8s')
-        ? ['stack-deploy.yml', '**/stack-deploy.yml', '**/**/stack-deploy.yml'] // Test this
-        : ['stack.yml', '**/stack.yml', '**/**/stack.yml'];
+        ? ['stack-deploy.yml', '**/stack-deploy.yml']
+        : ['stack.yml', '**/stack.yml'];
 
     const globber = await glob.create(patterns.join('\n'));
     const files = await globber.glob();

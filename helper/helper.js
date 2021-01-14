@@ -13,7 +13,7 @@ const {
         const caller = core.getInput('caller');
         console.log('Caller:', caller);
 
-        const stackFiles = await getStackFiles(caller);
+        const stackFiles = await getStackFiles();
         console.log('Stack files:', stackFiles);
 
         // List for files updated
