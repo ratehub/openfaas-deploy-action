@@ -27,9 +27,8 @@ if [ -n "$7" ]; then
     faas-cli template pull $7
 fi
 
-if [ ! -f "./$1-deploy.yml" ]; then
-    echo "Function specific deploy config not found!"
-    node /action-helper-workspace/create-new-config.js $9 "./$1-deploy.yml"
+if [ ! -f "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml" ]; then
+    touch "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml"
 fi
 
 # create `updated-stack.yml` file
