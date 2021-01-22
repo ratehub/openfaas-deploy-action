@@ -17,7 +17,7 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
                     updatedFunctions.push(functionPath);
                 } else if (!stackFunctions.includes(functionPath)) { // TODO: maybe only need if and else [need to test]
                     console.log('case 2b - changes to directory or file common to all stack functions');
-                    updatedFunctions = ['.'];
+                    updatedFunctions = addAllFunctionPaths(stackFunctions);
                     break;
                 } else {
                     console.log(`Nothing added for ${functionPath}`);
@@ -25,12 +25,16 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
 
             } else {
                 console.log('case 1 - changes at root of repo');
-                updatedFunctions = ['.'];
+                updatedFunctions = addAllFunctionPaths(stackFunctions);
                 break;
             }
         }
     }
     return updatedFunctions;
+}
+
+function addAllFunctionPaths(stackFunctions) {
+    return stackFunctions.length === 1 ? ['.'] : stackFunctions;
 }
 
 module.exports = analyseUpdatedFiles;
