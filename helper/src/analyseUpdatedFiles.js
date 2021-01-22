@@ -1,5 +1,8 @@
 const path = require('path');
+const fs = require('fs');
 
+
+const GITHUB_WORKSPACE = process.env.GITHUB_WORKSPACE;
 
 function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunctions) {
     let updatedFunctions = [];
@@ -17,7 +20,7 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
                     updatedFunctions.push(functionPath);
                 } else if (!stackFunctions.includes(functionPath)) { // TODO: maybe only need if and else [need to test]
                     console.log('case 2b - changes to directory or file common to all stack functions');
-                    updatedFunctions = addAllFunctionPaths(stackFunctions);
+                    updatedFunctions = addAllFunctionPaths(stackFunctions, groupPath);
                     break;
                 } else {
                     console.log(`Nothing added for ${functionPath}`);
@@ -25,7 +28,7 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
 
             } else {
                 console.log('case 1 - changes at root of repo');
-                updatedFunctions = addAllFunctionPaths(stackFunctions);
+                updatedFunctions = addAllFunctionPaths(stackFunctions, groupPath);
                 break;
             }
         }
@@ -33,8 +36,19 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
     return updatedFunctions;
 }
 
-function addAllFunctionPaths(stackFunctions) {
-    return stackFunctions.length === 1 ? ['.'] : stackFunctions;
+function addAllFunctionPaths(stackFunctions, groupPath) {
+
+    if (stackFunctions.length === 1) {
+        // single function case
+        const functionName = stackFunctions[0];
+        if (fs.existsSync(path.join(GITHUB_WORKSPACE, groupPath, functionName))) {
+            return [`${functionName}`];
+        } else {
+            return ['.'];
+        }
+    }
+
+    return stackFunctions;
 }
 
 module.exports = analyseUpdatedFiles;
