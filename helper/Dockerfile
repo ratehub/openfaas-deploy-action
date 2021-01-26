@@ -1,4 +1,4 @@
-FROM openfaas/faas-cli:0.11.3
+FROM openfaas/faas-cli:0.12.3
 
 RUN apk add --update docker bash npm
 

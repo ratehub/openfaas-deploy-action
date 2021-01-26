@@ -1,4 +1,4 @@
-FROM openfaas/faas-cli:0.11.3
+FROM openfaas/faas-cli:0.12.13
 
 ARG BUILD_ARG_1_NAME
 ARG BUILD_ARG_1_VALUE
