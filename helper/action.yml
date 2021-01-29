@@ -4,22 +4,17 @@ name: 'OpenFaaS deploy action helper'
 description: 'Determines which functions needs to be acted upon'
 
 inputs:
-  stack-file:
-    description: 'Path of stack.yml file'
-    default: 'stack.yml'
-  force:
-    description: 'Add passed function to output even if nothing is changed in the source code'
   caller:
     description: 'Tells which action will consume the output - deploy or build_push'
+    default: 'build_push'
+  force:
+    description: 'Add passed function to output even if nothing is changed in the source code'
+    default: 'none'
 
 outputs:
   function-details:
     description: 'List of functions for strategy matrix'
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.stack-file }}
-    - ${{ inputs.force }}
-    - ${{ inputs.caller }}
+  using: 'node12'
+  main: 'helper.js'

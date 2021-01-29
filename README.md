@@ -3,60 +3,60 @@
 This action is designed to deploy functions or microservices developed with [OpenFaaS](https://www.openfaas.com).
 
 Your repository can be organized in one of the following ways: 
-   1. A single stack.yml file and dev-deploy/prod-deploy/staging-deploy.yml file in the function path for each function.
+   1. A single stack.yml file and dev-deploy/prod-deploy/qa-deploy.yml file in the function path for each function.
    ```
       your-repo/
         ├── function 1/
         │   └── handler.js
         │   └── dev-deploy.yml
-        │   └── staging-deploy.yml
+        │   └── qa-deploy.yml
         │   └── prod-deploy.yml  
         ├── function 2/
         │   └── handler.js
         │   └── dev-deploy.yml
-        │   └── staging-deploy.yml
+        │   └── qa-deploy.yml
         │   └── prod-deploy.yml
         │
         └── global-dev-deploy.yml
         └── global-prod-deploy.yml
-        └── global-staging-deploy.yml     
+        └── global-qa-deploy.yml     
         └── stack.yml
    ```
       This method will result in function being built, pushed, and deployed every time something changes in the function path. 
 
-   2. Functions grouped into related folders, each with their own stack.yml file and dev-deploy/prod-deploy/staging-deploy.yml files (For repos with a large number of functions)  
+   2. Functions grouped into related folders, each with their own stack.yml file and dev-deploy/prod-deploy/qa-deploy.yml files (For repos with a large number of functions)  
    ```
       your-repo/
         ├── group-1/
         │   ├── function 1/
         │   │   └── handler.js
         │   │   └── dev-deploy.yml
-        │   │   └── staging-deploy.yml
+        │   │   └── qa-deploy.yml
         │   │   └── prod-deploy.yml  
         │   ├── function 2/
         │   │   └── handler.js
         │   │   └── dev-deploy.yml
-        │   │   └── staging-deploy.yml
+        │   │   └── qa-deploy.yml
         │   └── └── prod-deploy.yml
         │   └── global-dev-deploy.yml
         │   └── global-prod-deploy.yml
-        │   └── global-staging-deploy.yml         
+        │   └── global-qa-deploy.yml         
         │   └── stack.yml
         │
         └── group-2/
         │   ├── function 1/
         │   │   └── handler.js
         │   │   └── dev-deploy.yml
-        │   │   └── staging-deploy.yml
+        │   │   └── qa-deploy.yml
         │   │   └── prod-deploy.yml  
         │   ├── function 2/
         │   │   └── handler.js
         │   │   └── dev-deploy.yml
-        │   │   └── staging-deploy.yml
+        │   │   └── qa-deploy.yml
         │   └── └── prod-deploy.yml
         │   └── global-dev-deploy.yml
         │   └── global-prod-deploy.yml
-        │   └── global-staging-deploy.yml
+        │   └── global-qa-deploy.yml
         │   └── stack.yml          
         │        
         └── group-3/   
@@ -81,11 +81,11 @@ Your repository can be organized in one of the following ways:
 ##### NOTE: Make sure to not combine updates to deploy file with the above function update commit/merge and keep them separate.
 
 ##### If deploy files are updated with image tag AND/OR function specific env variables, constraints, labels, secrets
-     1. If the staging-deploy.yml/prod-deploy.yml is updated
+     1. If the qa-deploy.yml/prod-deploy.yml is updated
            >> deploy.yml workflow is triggered. 
-                1. if staging-deploy/prod-deploy.yml is updated with the new image tag.
-                    └── The function with updated version is deployed to the STAGING/PROD environment respectively. 
-                2. if staging-deploy/prod-deploy.yml is updated with only new env variables(image tag remains same)
+                1. if qa-deploy/prod-deploy.yml is updated with the new image tag.
+                    └── The function with updated version is deployed to the QA/PROD environment respectively. 
+                2. if qa-deploy/prod-deploy.yml is updated with only new env variables(image tag remains same)
                     └── Re-deploys the function with same tag but with updated env variables to DEV environment. 
      2. Update to dev-deploy.yml(environment variables/secrets/labels/constraints etc.)
           └── Triggers auto-dev-deploy.yml action, builds, pushes and automatically deploys to the DEV environment
@@ -94,7 +94,7 @@ Your repository can be organized in one of the following ways:
 ##### Group deploy 
      1. If the multiple deploy files for the functions in a group is updated, 
      for example:
-        └── In a group of 6 functions, if staging-deploy.yml is updated for 4 functions, 4 functions of 6 in the group are deployed to the staging cluster.
+        └── In a group of 6 functions, if qa-deploy.yml is updated for 4 functions, 4 functions of 6 in the group are deployed to the qa cluster.
 
 ##### NOTE: updating global-*-deploy.yml files will deploy all the functions in the group path to the target environment based on the file updated.
 

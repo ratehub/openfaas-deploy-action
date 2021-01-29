@@ -5,19 +5,17 @@ description: 'Deploys OpenFaaS function'
 
 inputs:
   deployment-env:
-    description: 'Deployment environment - dev, staging or prod'
+    description: 'Deployment environment - dev, qa or prod'
     default: 'dev'
   stack-file:
     description: 'stack.yml path'
-    default: 'stack.yml'
+    default: 'stack-deploy.yml'
   openfaas-username:
     description: 'User for authenticating at OpenFaaS gateway'
   openfaas-password:
     description: 'Password for authenticating at OpenFaaS gateway'
   openfaas-gateway:
     description: 'OpenFaaS gateway URL'
-  api-gateway-auth-token:
-    description: 'API gateway auth token'
   tag-override:
     description: 'Override the tag specified in *-deploy.yml file'
   openfaas-template-url:
@@ -43,7 +41,6 @@ runs:
     - ${{ inputs.openfaas-username }}
     - ${{ inputs.openfaas-password }}
     - ${{ inputs.openfaas-gateway }}
-    - ${{ inputs.api-gateway-auth-token }}
     - ${{ inputs.tag-override }}
     - ${{ inputs.openfaas-template-url }}
     - ${{ inputs.image-registry }}

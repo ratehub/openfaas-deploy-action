@@ -10,6 +10,7 @@ set -eu
 # $6 image-registry
 # $7 build-push-function
 # $8 group-path
+# $9 gcr-push
 
 TAG=$4
 
@@ -62,8 +63,12 @@ echo "Build args: $BUILD_ARGS"
 
 if [[ $7 != "." ]]; then
     faas-cli build -f updated-stack.yml $BUILD_ARGS --filter=$7
-    faas-cli push -f updated-stack.yml --filter=$7
+    if [ $9 == true ]; then
+        faas-cli push -f updated-stack.yml --filter=$7
+    fi
 else
     faas-cli build -f updated-stack.yml $BUILD_ARGS
-    faas-cli push -f updated-stack.yml
+    if [ $9 == true ]; then
+        faas-cli push -f updated-stack.yml
+    fi
 fi
