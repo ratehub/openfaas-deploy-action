@@ -13,7 +13,6 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
 
             if (updatedFile.includes('/')) {
                 const functionPath = path.dirname(path.relative(groupPath, updatedFile));
-                console.log('functionPath:', functionPath);
 
                 if (stackFunctions.includes(functionPath) && !updatedFunctions.includes(functionPath)) {
                     console.log('case 2a - changes to directory or file specific to a faas-function');
@@ -38,8 +37,8 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
 
 function addAllFunctionPaths(stackFunctions, groupPath) {
 
+    // single function cases only
     if (stackFunctions.length === 1) {
-        // single function case
         const functionName = stackFunctions[0];
         if (fs.existsSync(path.join(GITHUB_WORKSPACE, groupPath, functionName))) {
             return [`${functionName}`];
