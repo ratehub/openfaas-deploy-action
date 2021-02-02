@@ -62,13 +62,13 @@ BUILD_ARGS=$(getBuildArgs)
 echo "Build args: $BUILD_ARGS"
 
 if [[ $7 != "." ]]; then
-    faas-cli build -f updated-stack.yml $BUILD_ARGS --filter=$7
+    echo "faas-cli build -f updated-stack.yml $BUILD_ARGS --filter=$7"
     if [ $9 == true ]; then
-        faas-cli push -f updated-stack.yml --filter=$7
+        echo "faas-cli push -f updated-stack.yml --filter=$7"
     fi
 else
-    faas-cli build -f updated-stack.yml $BUILD_ARGS
+    echo "faas-cli build -f updated-stack.yml $BUILD_ARGS"
     if [ $9 == true ]; then
-        faas-cli push -f updated-stack.yml
+        echo "faas-cli push -f updated-stack.yml"
     fi
 fi

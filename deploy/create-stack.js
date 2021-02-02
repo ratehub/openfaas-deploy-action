@@ -30,7 +30,6 @@ try {
     // read all yamls
     const stack = yaml.safeLoad(fs.readFileSync(stackFile, 'utf8'));
     const globalSettings = yaml.safeLoad(fs.readFileSync(globalFilePath, 'utf8'));
-    console.log('globalSettings: ', globalSettings);
     const deployFunctions = yaml.safeLoad(fs.readFileSync(deployFilePath, 'utf8'));
 
     // version 1.0 is converted to 1 while converting yaml to json
@@ -43,8 +42,6 @@ try {
         return acc;
     }, {});
 
-    console.log('functionsWithGlobalSettings: ', functionsWithGlobalSettings);
-    
     // Merge function specific settings
     const updatedFunctions = deployFunctions
         ? Object.keys(deployFunctions).reduce((acc, key) => {
