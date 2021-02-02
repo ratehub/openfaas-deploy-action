@@ -28,6 +28,7 @@ if [ -n "$7" ]; then
 fi
 
 if [ ! -f "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml" ]; then
+    echo "No global config file!"
     touch "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml"
 fi
 
@@ -44,6 +45,6 @@ else
     node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml" "./${11}" "$GITHUB_WORKSPACE/${10}/$2" $8 $6
 fi
 
-# cat updated-stack.yml
+cat updated-stack.yml
 
-faas-cli deploy -f updated-stack.yml --gateway=$5
+echo "faas-cli deploy -f updated-stack.yml --gateway=$5"
