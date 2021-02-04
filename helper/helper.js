@@ -11,16 +11,22 @@ const {
 (async () => {
     try {
         const caller = core.getInput('caller');
+        console.log('caller: ', caller);
         const stackFiles = await getStackFiles();
+        console.log('stackFiles: ', stackFiles);
 
         // List for files updated
         const updatedFiles = await getDiff();
+        console.log('updatedFiles: ', updatedFiles);
 
         const functionDetails = stackFiles.map(stack => {
 
             const groupPath = stack.includes('/') ? stack.substring(0, stack.lastIndexOf('/')) : '.';
+            console.log('groupPath: ', groupPath);
             const filteredUpdatedFiles = groupPath === '.' ? updatedFiles : updatedFiles.filter(file => file.startsWith(groupPath));
+            console.log('filteredUpdatedFiles: ', filteredUpdatedFiles);
             const stackFunctions = getStackFunctions(stack);
+            console.log('stackFunctions: ', stackFunctions);
             const force = core.getInput('force');
 
             if (force !== 'none') {
