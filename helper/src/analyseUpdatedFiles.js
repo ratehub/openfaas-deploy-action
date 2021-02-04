@@ -13,6 +13,7 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
 
             if (updatedFile.includes('/')) {
                 const functionPath = path.dirname(path.relative(groupPath, updatedFile));
+                console.log('functionPath:', functionPath);
 
                 if (stackFunctions.includes(functionPath) && !updatedFunctions.includes(functionPath)) {
                     console.log('case 2a - changes to directory or file specific to a faas-function');
