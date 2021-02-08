@@ -23,7 +23,11 @@ const {
 
             const groupPath = stack.includes('/') ? stack.substring(0, stack.lastIndexOf('/')) : '.';
             console.log('groupPath: ', groupPath);
-            const filteredUpdatedFiles = groupPath === '.' ? updatedFiles : updatedFiles.filter(file => file.startsWith(groupPath));
+
+            const filteredUpdatedFiles = groupPath === '.'
+                ? updatedFiles
+                : updatedFiles.filter(file => (file.startsWith(groupPath) || file.includes('common')));
+
             console.log('filteredUpdatedFiles: ', filteredUpdatedFiles);
             const stackFunctions = getStackFunctions(stack);
             console.log('stackFunctions: ', stackFunctions);
