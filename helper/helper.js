@@ -15,6 +15,7 @@ const {
 
         // List for files updated
         const updatedFiles = await getDiff();
+
         const functionDetails = stackFiles.map(stack => {
 
             const groupPath = stack.includes('/') ? stack.substring(0, stack.lastIndexOf('/')) : '.';

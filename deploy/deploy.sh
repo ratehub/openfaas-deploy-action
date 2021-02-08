@@ -28,7 +28,6 @@ if [ -n "$7" ]; then
 fi
 
 if [ ! -f "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml" ]; then
-    echo "No global config file!"
     touch "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml"
 fi
 
