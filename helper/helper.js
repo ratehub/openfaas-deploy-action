@@ -19,7 +19,11 @@ const {
         const functionDetails = stackFiles.map(stack => {
 
             const groupPath = stack.includes('/') ? stack.substring(0, stack.lastIndexOf('/')) : '.';
-            const filteredUpdatedFiles = groupPath === '.' ? updatedFiles : updatedFiles.filter(file => file.startsWith(groupPath));
+
+            const filteredUpdatedFiles = groupPath === '.'
+                ? updatedFiles
+                : updatedFiles.filter(file => (file.startsWith(groupPath) || file.includes('common')));
+
             const stackFunctions = getStackFunctions(stack);
             const force = core.getInput('force');
 
