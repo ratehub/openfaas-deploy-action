@@ -35,16 +35,18 @@ const {
             const force = core.getInput('force');
             console.log('force: ', force);
 
-            if (force !== 'none') {
+            if (!force || force === 'none') {
+                console.log('Analysing git diff...');
+                const updatedFunctions = analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunctions);
+                console.log('updatedFunctions: ', updatedFunctions);
+                return generateFunctionDetails(groupPath, updatedFunctions);
+            } else {
+                console.log('Not analysing git diff...');
                 if (force === '*') {
                     return generateFunctionDetails(groupPath, stackFunctions);
                 } else {
                     return generateFunctionDetails(groupPath, force.split(','));
                 }
-            } else {
-                const updatedFunctions = analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunctions);
-                console.log('updatedFunctions: ', updatedFunctions);
-                return generateFunctionDetails(groupPath, updatedFunctions);
             }
 
         });

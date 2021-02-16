@@ -5,7 +5,6 @@ const fs = require('fs');
 const GITHUB_WORKSPACE = process.env.GITHUB_WORKSPACE;
 
 function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunctions) {
-    console.log('Analysing git diff...');
     let updatedFunctions = [];
     console.log('filteredUpdatedFiles: ', filteredUpdatedFiles);
 
