@@ -43,11 +43,13 @@ const {
                 }
             } else {
                 const updatedFunctions = analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunctions);
+                console.log('updatedFunctions: ', updatedFunctions);
                 return generateFunctionDetails(groupPath, updatedFunctions);
             }
 
         });
 
+        console.log('functionDetails: ', functionDetails);
         const formattedOutput = functionDetails.flat().length === 0
             ? { 'include': [{ 'function-name': 'none', 'function-group': 'none' }] }
             : { 'include': functionDetails.flat() }

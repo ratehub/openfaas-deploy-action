@@ -5,10 +5,13 @@ const fs = require('fs');
 const GITHUB_WORKSPACE = process.env.GITHUB_WORKSPACE;
 
 function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunctions) {
+    console.log('Analysing git diff...');
     let updatedFunctions = [];
+    console.log('filteredUpdatedFiles: ', filteredUpdatedFiles);
 
     for (var i = 0; i < filteredUpdatedFiles.length; i++) {
         const updatedFile = filteredUpdatedFiles[i];
+        console.log('updatedFile: ', updatedFile);
         if (!(caller == "build_push" && updatedFile.endsWith('deploy.yml'))) {
 
             if (updatedFile.includes('/')) {
@@ -30,6 +33,8 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
                 break;
             }
         }
+
+        console.log('updatedFunctions: ', updatedFunctions);
     }
     return updatedFunctions;
 }
