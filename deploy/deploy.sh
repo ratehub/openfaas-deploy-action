@@ -46,4 +46,4 @@ fi
 
 # cat updated-stack.yml
 
-faas-cli deploy -f updated-stack.yml --gateway=$5
+echo "faas-cli deploy -f updated-stack.yml --gateway=$5"
