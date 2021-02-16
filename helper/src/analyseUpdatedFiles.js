@@ -12,20 +12,20 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
         if (!(caller == "build_push" && updatedFile.endsWith('deploy.yml'))) {
 
             if (updatedFile.includes('/')) {
-                const functionPath = updatedFile.substring(0, updatedFile.indexOf('/'));
+                const functionPath = path.dirname(path.relative(groupPath, updatedFile));
                 console.log('functionPath:', functionPath);
 
                 if (stackFunctions.includes(functionPath) && !updatedFunctions.includes(functionPath)) {
-                    console.log('Analysing git diff - changes to directory or file specific to a faas-function');
+                    console.log('Analysed git diff - changes to directory or file specific to a faas-function');
                     updatedFunctions.push(functionPath);
                 } else {
-                    console.log('Analysing git diff - changes to directory or file common to all stack functions');
+                    console.log('Analysed git diff - changes to directory or file common to all stack functions');
                     updatedFunctions = addAllFunctionPaths(stackFunctions, groupPath);
                     break;
                 }
 
             } else {
-                console.log('Analysing git diff - changes at root of repo');
+                console.log('Analysed git diff - changes at root of repo');
                 updatedFunctions = addAllFunctionPaths(stackFunctions, groupPath);
                 break;
             }
