@@ -10,7 +10,9 @@ async function getStackFiles() {
     //     ? ['stack-deploy.yml', '**/stack-deploy.yml']
     //     : ['stack.yml', '**/stack.yml'];
 
-    const patterns = ['stack-deploy.yml', '**/stack-deploy.yml'];
+    // const patterns = ['stack-deploy.yml', '**/stack-deploy.yml'];
+
+    const patterns = ['stack.yml', '**/stack.yml'];
 
     const globber = await glob.create(patterns.join('\n'));
     const files = await globber.glob();
