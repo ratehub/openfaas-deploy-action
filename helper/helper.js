@@ -22,7 +22,7 @@ const {
 
             const filteredUpdatedFiles = groupPath === '.'
                 ? updatedFiles
-                : updatedFiles.filter(file => (file.startsWith(groupPath) || file.includes('common')));
+                : updatedFiles.filter(file => (file.startsWith(groupPath) || file.startsWith('common/')));
 
             const stackFunctions = getStackFunctions(stack);
             const force = core.getInput('force');
