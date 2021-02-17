@@ -18,10 +18,12 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
                 if (stackFunctions.includes(functionPath) && !updatedFunctions.includes(functionPath)) {
                     console.log('Analysed git diff - changes to directory or file specific to a faas-function');
                     updatedFunctions.push(functionPath);
-                } else {
+                } else if (!stackFunctions.includes(functionPath)) {
                     console.log('Analysed git diff - changes to directory or file common to all stack functions');
                     updatedFunctions = addAllFunctionPaths(stackFunctions, groupPath);
                     break;
+                } else {
+                    console.log(`Analysed git diff - nothing added for ${functionPath}`);
                 }
 
             } else {
