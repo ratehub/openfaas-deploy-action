@@ -12,7 +12,8 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
         if (!(caller == "build_push" && updatedFile.endsWith('deploy.yml'))) {
 
             if (updatedFile.includes('/')) {
-                const functionPath = path.dirname(path.relative(groupPath, updatedFile));
+                const dirPath = path.dirname(path.relative(groupPath, updatedFile));
+                const functionPath = dirPath.includes('/') ? dirPath.substring(0, dirPath.indexOf('/')) : dirPath;
                 console.log('functionPath:', functionPath);
 
                 if (stackFunctions.includes(functionPath) && !updatedFunctions.includes(functionPath)) {
