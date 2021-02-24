@@ -28,11 +28,9 @@ const {
             const force = core.getInput('force');
 
             if (!force || force === 'none') {
-                console.log('Analysing git diff.');
                 const updatedFunctions = analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunctions);
                 return generateFunctionDetails(groupPath, updatedFunctions);
             } else {
-                console.log('Force param supplied.');
                 if (force === '*') {
                     return generateFunctionDetails(groupPath, stackFunctions);
                 } else {
