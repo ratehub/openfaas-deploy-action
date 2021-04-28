@@ -1,0 +1,23 @@
+# action.yml
+name: 'OpenFaaS remove action'
+
+description: 'Remove OpenFaaS function'
+
+inputs:
+  openfaas-username:
+    description: 'User for authenticating at OpenFaaS gateway'
+  openfaas-password:
+    description: 'Password for authenticating at OpenFaaS gateway'
+  openfaas-gateway:
+    description: 'OpenFaaS gateway URL'
+  function-name:
+    description: 'Name of function to remove'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.openfaas-username }}
+    - ${{ inputs.openfaas-password }}
+    - ${{ inputs.openfaas-gateway }}
+    - ${{ inputs.function-name }}
