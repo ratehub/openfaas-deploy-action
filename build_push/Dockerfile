@@ -29,7 +29,8 @@ ENV BUILD_ARG_6_VALUE=${BUILD_ARG_6_VALUE}
 RUN apk add --update docker bash npm curl openssh
 
 # Turn off the host-key validation
-RUN echo $'Host *\n\
+RUN mkdir ~/.ssh && \ 
+    echo $'Host *\n\
     StrictHostKeyChecking no\n\
     UserKnownHostsFile=/dev/null' > ~/.ssh/config
 
