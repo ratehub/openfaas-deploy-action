@@ -1,6 +1,6 @@
 FROM openfaas/faas-cli:0.11.3
 
-RUN apk add --update docker bash npm curl ssh
+RUN apk add --update docker bash npm curl openssh
 
 # Copies your code file from your action repository to the filesystem path `/` of the container
 COPY deploy.sh /deploy.sh

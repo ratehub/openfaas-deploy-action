@@ -26,7 +26,7 @@ ENV BUILD_ARG_5_VALUE=${BUILD_ARG_5_VALUE}
 ENV BUILD_ARG_6_NAME=${BUILD_ARG_6_NAME}
 ENV BUILD_ARG_6_VALUE=${BUILD_ARG_6_VALUE}
 
-RUN apk add --update docker bash npm curl ssh
+RUN apk add --update docker bash npm curl openssh
 
 # Copies your code file from your action repository to the filesystem path `/` of the container
 COPY build_push.sh /build_push.sh
