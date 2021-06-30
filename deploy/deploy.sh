@@ -21,11 +21,11 @@ echo "Starting to deploy ${10}/$9 function"
 cd ${10}
 cd $9
 
-faas-cli template pull
-# openfaas custom template pull
-if [ -n "$7" ]; then
-    faas-cli template pull $7
-fi
+# faas-cli template pull
+# # openfaas custom template pull
+# if [ -n "$7" ]; then
+#     faas-cli template pull $7
+# fi
 
 if [ ! -f "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml" ]; then
     touch "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml"
