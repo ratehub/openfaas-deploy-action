@@ -26,13 +26,13 @@ ENV BUILD_ARG_5_VALUE=${BUILD_ARG_5_VALUE}
 ENV BUILD_ARG_6_NAME=${BUILD_ARG_6_NAME}
 ENV BUILD_ARG_6_VALUE=${BUILD_ARG_6_VALUE}
 
-RUN apk add --update docker bash npm curl openssh
+RUN apk add --update docker bash npm curl
 
 # Turn off the host-key validation
-RUN mkdir ~/.ssh && \ 
-    echo $'Host *\n\
-    StrictHostKeyChecking no\n\
-    UserKnownHostsFile=/dev/null' > ~/.ssh/config
+# RUN mkdir ~/.ssh && \ 
+#     echo $'Host *\n\
+#     StrictHostKeyChecking no\n\
+#     UserKnownHostsFile=/dev/null' > ~/.ssh/config
 
 # Copies your code file from your action repository to the filesystem path `/` of the container
 COPY build_push.sh /build_push.sh

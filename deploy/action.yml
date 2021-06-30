@@ -18,8 +18,6 @@ inputs:
     description: 'OpenFaaS gateway URL'
   tag-override:
     description: 'Override the tag specified in *-deploy.yml file'
-  openfaas-template-url:
-    description: 'RH custom template url'
   image-registry:
     description: 'GCR [hostname]/[project-id]'
     default: 'gcr.io/platform-235214/'
@@ -42,7 +40,6 @@ runs:
     - ${{ inputs.openfaas-password }}
     - ${{ inputs.openfaas-gateway }}
     - ${{ inputs.tag-override }}
-    - ${{ inputs.openfaas-template-url }}
     - ${{ inputs.image-registry }}
     - ${{ inputs.deploy-function }}
     - ${{ inputs.group-path }}

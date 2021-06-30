@@ -8,27 +8,20 @@ set -eu
 #  $4 openfaas-password
 #  $5 openfaas-gateway
 #  $6 tag-override
-#  $7 openfaas-template-url
-#  $8 image-registry
-#  $9 deploy-function
-# $10 group-path
-# $11 config-override
+#  $7 image-registry
+#  $8 deploy-function
+#  $9 group-path
+# $10 config-override
 
 echo $4 | faas-cli login --username=$3 --password-stdin --gateway=$5
 
-echo "Starting to deploy ${10}/$9 function"
+echo "Starting to deploy $9/$8 function"
 
-cd ${10}
 cd $9
+cd $8
 
-# faas-cli template pull
-# # openfaas custom template pull
-# if [ -n "$7" ]; then
-#     faas-cli template pull $7
-# fi
-
-if [ ! -f "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml" ]; then
-    touch "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml"
+if [ ! -f "$GITHUB_WORKSPACE/$9/global-$1-deploy.yml" ]; then
+    touch "$GITHUB_WORKSPACE/$9/global-$1-deploy.yml"
 fi
 
 # create `updated-stack.yml` file
@@ -38,10 +31,10 @@ fi
 # stack file path
 # gcr hostname and project id
 # tag override (optional)
-if [[ ${11} == "none"  ]]; then
-    node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/${10}/$2" $8 $6
+if [[ ${10} == "none"  ]]; then
+    node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/$9/global-$1-deploy.yml" "./$1-deploy.yml" "$GITHUB_WORKSPACE/$9/$2" $7 $6
 else
-    node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/${10}/global-$1-deploy.yml" "./${11}" "$GITHUB_WORKSPACE/${10}/$2" $8 $6
+    node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/$9/global-$1-deploy.yml" "./${10}" "$GITHUB_WORKSPACE/$9/$2" $7 $6
 fi
 
 # cat updated-stack.yml
