@@ -28,6 +28,7 @@ const gcrProjectId = process.argv[5];
 const tagOverride = process.argv[6] ? process.argv[6] : undefined;
 
 function customizer(objValue, srcValue) {
+    console.log('customizer invoked:', object.isArray(objValue));
     if (object.isArray(objValue)) {
         console.log('concating', objValue, 'with', srcValue);
         return objValue.concat(srcValue);
