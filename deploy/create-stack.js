@@ -11,8 +11,7 @@
 
 const yaml = require('js-yaml');
 const fs = require('fs');
-const object = require('lodash/fp/object');
-const { concat } = require('lodash');
+const { isArray, mergeWith } = require('lodash');
 
 if (process.argv.length < 6) {
     console.log("Insufficient args supplied!");
@@ -28,9 +27,7 @@ const gcrProjectId = process.argv[5];
 const tagOverride = process.argv[6] ? process.argv[6] : undefined;
 
 function customizer(objValue, srcValue) {
-    console.log('customizer invoked:', object.isArray(objValue));
-    if (object.isArray(objValue)) {
-        console.log('concating', objValue, 'with', srcValue);
+    if (isArray(objValue)) {
         return objValue.concat(srcValue);
     }
 }
@@ -45,15 +42,11 @@ try {
     stack.version = stack.version.toFixed(1);
     const functions = stack.functions;
 
-    console.log('[create-stack] stack functions:', functions);
-
     // Merge global settings
     const functionsWithGlobalSettings = Object.keys(functions).reduce((acc, key) => {
-        acc[key] = object.mergeWith(functions[key], globalSettings, customizer);
+        acc[key] = mergeWith(functions[key], globalSettings, customizer);
         return acc;
     }, {});
-
-    console.log('[create-stack] functionsWithGlobalSettings:', functionsWithGlobalSettings);
 
     // Merge function specific settings
     const updatedFunctions = deployFunctions
@@ -62,7 +55,7 @@ try {
                 ? functionsWithGlobalSettings[key]
                 : functionsWithGlobalSettings[Object.keys(functionsWithGlobalSettings)[0]];
 
-            acc[key] = object.mergeWith(globalSettingFunction, deployFunctions[key], customizer);
+            acc[key] = mergeWith(globalSettingFunction, deployFunctions[key], customizer);
 
             return acc;
         }, {})
