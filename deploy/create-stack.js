@@ -12,6 +12,7 @@
 const yaml = require('js-yaml');
 const fs = require('fs');
 const object = require('lodash/fp/object');
+const { concat } = require('lodash');
 
 if (process.argv.length < 6) {
     console.log("Insufficient args supplied!");
@@ -28,6 +29,7 @@ const tagOverride = process.argv[6] ? process.argv[6] : undefined;
 
 function customizer(objValue, srcValue) {
     if (object.isArray(objValue)) {
+        console.log('concating', objValue, 'with', srcValue);
         return objValue.concat(srcValue);
     }
 }
@@ -42,11 +44,15 @@ try {
     stack.version = stack.version.toFixed(1);
     const functions = stack.functions;
 
+    console.log('[create-stack] stack functions:', functions);
+
     // Merge global settings
     const functionsWithGlobalSettings = Object.keys(functions).reduce((acc, key) => {
         acc[key] = object.mergeWith(functions[key], globalSettings, customizer);
         return acc;
     }, {});
+
+    console.log('[create-stack] functionsWithGlobalSettings:', functionsWithGlobalSettings);
 
     // Merge function specific settings
     const updatedFunctions = deployFunctions
@@ -74,8 +80,6 @@ try {
         const imageWithProjectId = `${gcrProjectId}${imageWithUpdatedTag}`;
         updatedFunctions[key].image = imageWithProjectId;
     });
-
-    console.log('[create-stack] updatedFunctions:', updatedFunctions);
 
     // Create updated/final stack json
     const updatedStack = {
