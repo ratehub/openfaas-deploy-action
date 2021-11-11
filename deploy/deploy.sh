@@ -38,7 +38,7 @@ else
 fi
 
 # log only non FE stack.yml
-if [[ $9 =~ "frontend" ]]; then
+if ! [[ $9 =~ "frontend" ]]; then
     cat updated-stack.yml
 fi
 
