@@ -11,7 +11,7 @@
 
 const yaml = require('js-yaml');
 const fs = require('fs');
-const object = require('lodash/fp/object');
+const { isArray, mergeWith } = require('lodash');
 
 if (process.argv.length < 6) {
     console.log("Insufficient args supplied!");
@@ -26,6 +26,12 @@ const stackFile = process.argv[4];
 const gcrProjectId = process.argv[5];
 const tagOverride = process.argv[6] ? process.argv[6] : undefined;
 
+function customizer(objValue, srcValue) {
+    if (isArray(objValue)) {
+        return objValue.concat(srcValue);
+    }
+}
+
 try {
     // read all yamls
     const stack = yaml.safeLoad(fs.readFileSync(stackFile, 'utf8'));
@@ -38,7 +44,7 @@ try {
 
     // Merge global settings
     const functionsWithGlobalSettings = Object.keys(functions).reduce((acc, key) => {
-        acc[key] = object.merge(functions[key], globalSettings);
+        acc[key] = mergeWith(functions[key], globalSettings, customizer);
         return acc;
     }, {});
 
@@ -49,7 +55,7 @@ try {
                 ? functionsWithGlobalSettings[key]
                 : functionsWithGlobalSettings[Object.keys(functionsWithGlobalSettings)[0]];
 
-            acc[key] = object.merge(globalSettingFunction, deployFunctions[key]);
+            acc[key] = mergeWith(globalSettingFunction, deployFunctions[key], customizer);
 
             return acc;
         }, {})
