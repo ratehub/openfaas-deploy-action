@@ -37,6 +37,6 @@ else
     node /action-helper-workspace/create-stack.js "$GITHUB_WORKSPACE/$9/global-$1-deploy.yml" "./${10}" "$GITHUB_WORKSPACE/$9/$2" $7 $6
 fi
 
-# cat updated-stack.yml
+cat updated-stack.yml
 
-faas-cli deploy -f updated-stack.yml --gateway=$5
+# faas-cli deploy -f updated-stack.yml --gateway=$5
