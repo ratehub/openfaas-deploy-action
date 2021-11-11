@@ -42,4 +42,4 @@ if ! [[ $9 =~ "frontend" ]]; then
     cat updated-stack.yml
 fi
 
-# faas-cli deploy -f updated-stack.yml --gateway=$5
+faas-cli deploy -f updated-stack.yml --gateway=$5
