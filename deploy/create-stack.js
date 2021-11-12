@@ -11,7 +11,7 @@
 
 const yaml = require('js-yaml');
 const fs = require('fs');
-const { isArray, mergeWith } = require('lodash');
+const { isArray, mergeWith } = require('lodash/fp');
 
 if (process.argv.length < 6) {
     console.log("Insufficient args supplied!");
@@ -55,7 +55,7 @@ try {
                 ? functionsWithGlobalSettings[key]
                 : functionsWithGlobalSettings[Object.keys(functionsWithGlobalSettings)[0]];
 
-            acc[key] = mergeWith(globalSettingFunction, deployFunctions[key], customizer);
+            acc[key] = mergeWith(deployFunctions[key], globalSettingFunction, customizer);
 
             return acc;
         }, {})
