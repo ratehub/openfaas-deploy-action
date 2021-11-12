@@ -11,7 +11,6 @@
 
 const yaml = require('js-yaml');
 const fs = require('fs');
-// const { isArray, mergeWith } = require('lodash/fp');
 const { isArray, mergeWith } = require('lodash');
 
 if (process.argv.length < 6) {
