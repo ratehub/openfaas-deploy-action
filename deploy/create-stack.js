@@ -11,7 +11,7 @@
 
 const yaml = require('js-yaml');
 const fs = require('fs');
-const { isArray, mergeWith } = require('lodash');
+const { isArray, mergeWith, uniq } = require('lodash');
 
 if (process.argv.length < 6) {
     console.log("Insufficient args supplied!");
@@ -28,7 +28,7 @@ const tagOverride = process.argv[6] ? process.argv[6] : undefined;
 
 function customizer(objValue, srcValue) {
     if (isArray(objValue)) {
-        return objValue.concat(srcValue);
+        return uniq(objValue.concat(srcValue));
     }
 }
 
