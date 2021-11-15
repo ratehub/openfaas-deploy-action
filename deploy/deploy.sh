@@ -38,8 +38,9 @@ else
 fi
 
 # log only non FE stack.yml
-if ! [[ $9 =~ "frontend" ]]; then
-    cat updated-stack.yml
-fi
+# if ! [[ $9 =~ "frontend" ]]; then
+#     cat updated-stack.yml
+# fi
 
-faas-cli deploy -f updated-stack.yml --gateway=$5
+cat updated-stack.yml
+# faas-cli deploy -f updated-stack.yml --gateway=$5
