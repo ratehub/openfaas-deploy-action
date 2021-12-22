@@ -11,7 +11,7 @@ const {
 (async () => {
     try {
         const caller = core.getInput('caller');
-        const stackFiles = await getStackFiles();
+        const stackFiles = await getStackFiles(caller);
 
         // List for files updated
         const updatedFiles = await getDiff();

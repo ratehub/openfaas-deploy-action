@@ -13,7 +13,7 @@ const {
         const groupPath = core.getInput('group-path');
         const subPath = core.getInput('deploy-function');
         const environment = core.getInput('deployment-env');
-        console.log(`>>> Starting to generate stack file: ${groupPath}/${subPath}`);
+        console.log(`>>> Generating stack file: ${groupPath}/${subPath}`);
 
         await generateStackFile(groupPath, subPath, environment);
 
