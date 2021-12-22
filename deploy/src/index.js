@@ -1,4 +1,4 @@
-const installFaasCli = require('./installFaasCli');
+const installFaasCli = require('../../common/installFaasCli');
 const generateStackFile = require('./generateStackFile');
 
 
