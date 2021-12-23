@@ -12,7 +12,8 @@ async function installFaasCli({ isLoginRequired = false } = {}) {
         const password = core.getInput('openfaas-password');
         const gateway = core.getInput('openfaas-gateway');
 
-        await exec.exec(`./faas-cli login --username=${user} --password=${password} --gateway=${gateway}`)
+        const faasLoginArgs = [`--username=${user}`, '--password-stdin', `--gateway=${gateway}`];
+        await exec.exec('./faas-cli login', faasLoginArgs, { input: password });
     }
 }
 
