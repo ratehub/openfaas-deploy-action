@@ -29,18 +29,10 @@ inputs:
   config-override:
     description: 'Config for developer specific stage'
     default: 'none'
+  faas-cli-version:
+    description: 'faas-cli version to install'
+    default: '0.14.1'
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.deployment-env }}
-    - ${{ inputs.stack-file }}
-    - ${{ inputs.openfaas-username }}
-    - ${{ inputs.openfaas-password }}
-    - ${{ inputs.openfaas-gateway }}
-    - ${{ inputs.tag-override }}
-    - ${{ inputs.image-registry }}
-    - ${{ inputs.deploy-function }}
-    - ${{ inputs.group-path }}
-    - ${{ inputs.config-override }}
+  using: 'node16'
+  main: 'deploy.js'

@@ -27,17 +27,10 @@ inputs:
   gcr-push:
     description: 'Flag for pushing image to GCR'
     default: true
+  faas-cli-version:
+    description: 'faas-cli version to install'
+    default: '0.14.1'
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.stack-file }}
-    - ${{ inputs.docker-username }}
-    - ${{ inputs.docker-password }}
-    - ${{ inputs.tag }}
-    - ${{ inputs.openfaas-template-url }}
-    - ${{ inputs.image-registry }}
-    - ${{ inputs.build-push-function }}
-    - ${{ inputs.group-path }}
-    - ${{ inputs.gcr-push }}
+  using: 'node16'
+  main: 'buildAndPush.js'

@@ -38,7 +38,6 @@ function analyseUpdatedFiles(filteredUpdatedFiles, caller, groupPath, stackFunct
 }
 
 function addAllFunctionPaths(stackFunctions, groupPath) {
-
     // single function cases only
     if (stackFunctions.length === 1) {
         const functionName = stackFunctions[0];
