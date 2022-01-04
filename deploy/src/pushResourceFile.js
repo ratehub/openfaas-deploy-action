@@ -1,0 +1,47 @@
+const exec = require('@actions/exec');
+const path = require('path');
+
+
+const RESOURCE_FILE = 'resource.yaml';
+
+async function pushResourceFile(groupPath, subPath, environment) {
+    await exec.exec('git config --global user.name ratehub-machine');
+    await exec.exec('git config --global user.email dev@ratehub.ca');
+
+    const crdBasePath = environment === 'prod' ? 'crd' : `crd/${environment}`;
+    const groupName = path.basename(groupPath);
+    const crdPath = `${crdBasePath}/${groupName}/${subPath}`;
+
+    await exec.exec(`mkdir -p ${crdPath}`);
+    await exec.exec(`mv ${RESOURCE_FILE} ${crdPath}`);
+
+    let gitStatusOutput = '';
+    const options = {
+        'listeners': {
+            stdout: (data) => {
+                gitStatusOutput += data.toString();
+            }
+        }
+    };
+    await exec.exec('git status --porcelain', [], options); // give the output in an easy-to-parse format
+
+    if (gitStatusOutput.includes(RESOURCE_FILE) || gitStatusOutput.includes('crd/')) {
+        await exec.exec(`git add ${crdPath}/${RESOURCE_FILE}`);
+        await exec.exec(`git commit -m "crd(${subPath === '.' ? groupName : `${groupName}/${subPath}`}): Update ${RESOURCE_FILE}"`);
+        await push(crdPath);
+    } else {
+        console.log('No changes to resource file.');
+    }
+}
+
+async function push(crdPath) {
+    try {
+        await exec.exec('git push origin HEAD');
+    } catch (error) {
+        console.log('git push failed, retrying...');
+        await exec.exec('git pull --rebase');
+        await push(crdPath);
+    }
+}
+
+module.exports = pushResourceFile;
