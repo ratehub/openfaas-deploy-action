@@ -8,6 +8,7 @@ const {
     analyseUpdatedFiles,
 } = require('./src');
 
+
 (async () => {
     try {
         const caller = core.getInput('caller');

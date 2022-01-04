@@ -5,10 +5,10 @@ description: 'Determines which functions needs to be acted upon'
 
 inputs:
   caller:
-    description: 'Tells which action will consume the output - deploy or build_push'
+    description: 'Consumer - deploy or build_push'
     default: 'build_push'
   force:
-    description: 'Add passed function to output even if nothing is changed in the source code'
+    description: 'Add it to output even if nothing is changed in the source code'
     default: 'none'
 
 outputs:

@@ -21,7 +21,7 @@ inputs:
   image-registry:
     description: 'GCR [hostname]/[project-id]'
     default: 'gcr.io/platform-235214/'
-  deploy-function:
+  function-name:
     description: 'Function name'
   group-path:
     description: 'Function group'

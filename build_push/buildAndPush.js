@@ -22,12 +22,13 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
         await exec.exec('docker login', dockerLoginArgs, { input: password });
 
         const groupPath = core.getInput('group-path');
-        const subPath = core.getInput('build-push-function');
+        // assume subpath is same as function name
+        const subPath = core.getInput('function-name');
 
         process.chdir(`${groupPath}`);
 
         await exec.exec(`${FAAS} template pull`);
-        const customTemplateUrl = core.getInput('openfaas-template-url');
+        const customTemplateUrl = core.getInput('custom-template-url');
         if (customTemplateUrl) {
             await exec.exec(`${FAAS} template pull ${customTemplateUrl}`);
         }
@@ -41,9 +42,8 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
         const buildArgs = getBuildArgs(tag);
         console.log(`Build args: ${buildArgs}`);
 
-        const isPushRequired = core.getInput('gcr-push');
+        const isPushRequired = core.getInput('enable-image-push');
         if (subPath !== '.') {
-            // we assume subpath is same as function name
             await exec.exec(`${FAAS} build -f updated-stack.yml ${buildArgs} --filter=${subPath}`);
             if (isPushRequired) {
                 await exec.exec(`${FAAS} push -f updated-stack.yml --filter=${subPath}`);

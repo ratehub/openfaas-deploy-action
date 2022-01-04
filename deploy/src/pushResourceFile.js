@@ -28,19 +28,20 @@ async function pushResourceFile(groupPath, subPath, environment) {
     if (gitStatusOutput.includes(RESOURCE_FILE) || gitStatusOutput.includes('crd/')) {
         await exec.exec(`git add ${crdPath}/${RESOURCE_FILE}`);
         await exec.exec(`git commit -m "crd(${subPath === '.' ? groupName : `${groupName}/${subPath}`}): Update ${RESOURCE_FILE}"`);
-        await push(crdPath);
+        await push();
     } else {
         console.log('No changes to resource file.');
     }
 }
 
-async function push(crdPath) {
+async function push() {
     try {
         await exec.exec('git push origin HEAD');
     } catch (error) {
-        console.log('git push failed, retrying...');
+        console.log('Error: git push failed');
+        console.log('Retrying...');
         await exec.exec('git pull --rebase');
-        await push(crdPath);
+        await push();
     }
 }
 
