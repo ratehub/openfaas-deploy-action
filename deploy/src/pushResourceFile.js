@@ -30,7 +30,7 @@ async function pushResourceFile(groupPath, subPath, environment) {
     };
     await exec.exec('git status --porcelain', [], options); // give the output in an easy-to-parse format
 
-    if (gitStatusOutput.includes(RESOURCE_FILE) || gitStatusOutput.includes(CLUSTERS[environment])) {
+    if (gitStatusOutput.includes(CLUSTERS[environment])) {
         await exec.exec(`git add ${crdPath}/${RESOURCE_FILE}`);
         await exec.exec(`git commit -m "deploy(${subPath === '.' ? groupName : `${groupName}/${subPath}`}): Update ${RESOURCE_FILE}"`);
         await push();
