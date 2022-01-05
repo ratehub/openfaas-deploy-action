@@ -1,6 +1,7 @@
 const exec = require('@actions/exec');
 const core = require('@actions/core');
 
+
 async function installFaasCli({ isLoginRequired = false } = {}) {
     const version = core.getInput('faas-cli-version');
     await exec.exec(`curl -L https://github.com/openfaas/faas-cli/releases/download/${version}/faas-cli -o faas-cli`);

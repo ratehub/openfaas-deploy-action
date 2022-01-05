@@ -14,17 +14,17 @@ inputs:
   tag:
     description: 'Image tag to be pushed'
     default: 'latest'
-  openfaas-template-url:
+  custom-template-url:
     description: 'RH custom template url'
   image-registry:
     description: 'GCR [hostname]/[project-id]'
     default: 'gcr.io/platform-235214/'
-  build-push-function:
+  function-name:
     description: 'Function name'
   group-path:
     description: 'Function group'
     default: '.'
-  gcr-push:
+  enable-image-push:
     description: 'Flag for pushing image to GCR'
     default: true
   faas-cli-version:
