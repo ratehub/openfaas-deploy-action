@@ -22,8 +22,7 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
         await exec.exec('docker login', dockerLoginArgs, { input: password });
 
         const groupPath = core.getInput('group-path');
-        // assume subpath is same as function name
-        const subPath = core.getInput('function-name');
+        const subPath = core.getInput('function-name'); // assume subpath is same as function name
 
         process.chdir(`${groupPath}`);
 
