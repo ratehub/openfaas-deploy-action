@@ -3,12 +3,17 @@ const path = require('path');
 
 
 const RESOURCE_FILE = 'resource.yaml';
+const CLUSTERS = {
+    dev: 'do-dev-1',
+    qa: 'gke-staging-01',
+    prod: 'gcp-prod-01'
+}
 
 async function pushResourceFile(groupPath, subPath, environment) {
     await exec.exec('git config --global user.name ratehub-machine');
     await exec.exec('git config --global user.email dev@ratehub.ca');
 
-    const crdBasePath = environment === 'prod' ? 'crd' : `crd/${environment}`;
+    const crdBasePath = path.join(CLUSTERS[environment], `ratehub-${environment}`, 'faas-functions');
     const groupName = path.basename(groupPath);
     const crdPath = `${crdBasePath}/${groupName}/${subPath}`;
 
@@ -27,7 +32,7 @@ async function pushResourceFile(groupPath, subPath, environment) {
 
     if (gitStatusOutput.includes(RESOURCE_FILE) || gitStatusOutput.includes('crd/')) {
         await exec.exec(`git add ${crdPath}/${RESOURCE_FILE}`);
-        await exec.exec(`git commit -m "crd(${subPath === '.' ? groupName : `${groupName}/${subPath}`}): Update ${RESOURCE_FILE}"`);
+        await exec.exec(`git commit -m "deploy(${subPath === '.' ? groupName : `${groupName}/${subPath}`}): Update ${RESOURCE_FILE}"`);
         await push();
     } else {
         console.log('No changes to resource file.');
