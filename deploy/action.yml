@@ -23,6 +23,7 @@ inputs:
     default: 'gcr.io/platform-235214/'
   function-name:
     description: 'Function name'
+    default: '.'
   group-path:
     description: 'Function group'
     default: '.'

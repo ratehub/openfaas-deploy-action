@@ -13,7 +13,7 @@ async function pushResourceFile(groupPath, subPath, environment) {
     await exec.exec('git config --global user.name ratehub-machine');
     await exec.exec('git config --global user.email dev@ratehub.ca');
 
-    const crdBasePath = path.join(CLUSTERS[environment], `ratehub-${environment}`, 'faas-functions');
+    const crdBasePath = path.join(CLUSTERS[environment], 'faas-functions');
     const groupName = path.basename(groupPath);
     const crdPath = `${crdBasePath}/${groupName}/${subPath}`;
 
