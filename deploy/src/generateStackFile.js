@@ -59,7 +59,7 @@ async function generateStackFile(groupPath, subPath, environment) {
             updatedFunctions[key].image = imageWithProjectId;
         });
 
-        // write the final stack
+        // generate final stack file
         Object.keys(updatedFunctions).forEach(functionName => {
             const finalStack = {
                 ...stack,
@@ -68,7 +68,7 @@ async function generateStackFile(groupPath, subPath, environment) {
                 }
             }
 
-            // write final stack to updated-stack.yml
+            // write final stack
             writeFileSync(functionName, dump(finalStack, {
                 // do not convert duplicate objects into references
                 noRefs: true
