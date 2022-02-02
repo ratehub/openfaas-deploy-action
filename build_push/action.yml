@@ -19,8 +19,8 @@ inputs:
   image-registry:
     description: 'GCR [hostname]/[project-id]'
     default: 'gcr.io/platform-235214/'
-  function-name:
-    description: 'Function name'
+  function-path:
+    description: 'Function subpath'
     default: '.'
   group-path:
     description: 'Function group'

@@ -2,14 +2,18 @@ const exec = require('@actions/exec');
 const path = require('path');
 
 
-const RESOURCE_FILE = 'resource.yaml';
 const CLUSTERS = {
     dev: 'do-dev-1',
     qa: 'gke-staging-01',
     prod: 'gcp-prod-01'
 }
 
-async function pushResourceFile(groupPath, subPath, environment) {
+async function pushResourceFile(groupPath, subPath, environment, resourceFilePaths = []) {
+    let resourceFiles = '';
+    for (let index = 0; index < resourceFilePaths.length; index++) {
+        resourceFiles = `${resourceFiles} ${resourceFilePaths[index]}`;
+    }
+
     await exec.exec('git config --global user.name ratehub-machine');
     await exec.exec('git config --global user.email dev@ratehub.ca');
 
@@ -18,7 +22,7 @@ async function pushResourceFile(groupPath, subPath, environment) {
     const crdPath = `${crdBasePath}/${groupName}/${subPath}`;
 
     await exec.exec(`mkdir -p ${crdPath}`);
-    await exec.exec(`mv ${RESOURCE_FILE} ${crdPath}`);
+    await exec.exec(`mv ${resourceFiles} ${crdPath}`);
 
     let gitStatusOutput = '';
     const options = {
@@ -31,8 +35,8 @@ async function pushResourceFile(groupPath, subPath, environment) {
     await exec.exec('git status --porcelain', [], options); // give the output in an easy-to-parse format
 
     if (gitStatusOutput.includes(CLUSTERS[environment])) {
-        await exec.exec(`git add ${crdPath}/${RESOURCE_FILE}`);
-        await exec.exec(`git commit -m "deploy(${subPath === '.' ? groupName : `${groupName}/${subPath}`}): Update ${RESOURCE_FILE}"`);
+        await exec.exec(`git add ${crdPath}/*`);
+        await exec.exec(`git commit -m "deploy(${subPath === '.' ? groupName : `${groupName}/${subPath}`}): Update resource definition file(s)."`);
         await push();
     } else {
         console.log('No changes to resource file.');
