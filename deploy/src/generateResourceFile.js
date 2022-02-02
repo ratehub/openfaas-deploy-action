@@ -15,12 +15,17 @@ async function generateResourceFile(stackFilePaths = []) {
         }
     };
 
+    const generatedFiles = [];
     for (let index = 0; index < stackFilePaths.length; index++) {
         const stackFile = stackFilePaths[index];
         await exec.exec(`${FAAS} generate -f ${stackFile}`, [], options);
-        writeFileSync(stackFile, crd);
+        const fileName = `${stackFile}.yaml`
+        writeFileSync(fileName, crd);
+        generatedFiles.push(fileName);
         crd = '';
     }
+
+    return generatedFiles;
 }
 
 module.exports = generateResourceFile;

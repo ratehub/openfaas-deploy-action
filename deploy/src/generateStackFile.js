@@ -68,8 +68,6 @@ async function generateStackFile(groupPath, subPath, environment) {
                 }
             }
 
-            console.log('>>> final stack:', finalStack);
-
             // write final stack to updated-stack.yml
             writeFileSync(functionName, dump(finalStack, {
                 // do not convert duplicate objects into references
