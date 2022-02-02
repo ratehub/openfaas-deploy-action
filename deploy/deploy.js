@@ -16,7 +16,8 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
         await installFaasCli({ isLoginRequired: true });
 
         const groupPath = core.getInput('group-path');
-        const subPath = core.getInput('function-name'); // assume subpath is same as function name
+        const subPath = core.getInput('function-path');
+        // we assume subpath is same as function name
         const environment = core.getInput('deployment-env');
 
         console.log(`Generating stack file: ${groupPath}/${subPath}`);
@@ -25,9 +26,7 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
         const gateway = core.getInput('openfaas-gateway');
         for (let index = 0; index < generatedStackFilePaths.length; index++) {
             const stackFile = generatedStackFilePaths[index];
-            console.log('>>> faas-cli deploy command:');
-            console.log(`${FAAS} deploy -f ${stackFile} --gateway=${gateway}`);
-            // await exec.exec(`${FAAS} deploy -f ${stackFile} --gateway=${gateway}`);
+            await exec.exec(`${FAAS} deploy -f ${stackFile} --gateway=${gateway}`);
         }
 
         const generatedResourceFilePaths = await generateResourceFile(generatedStackFilePaths);

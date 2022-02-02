@@ -42,7 +42,7 @@ const {
         });
 
         const formattedOutput = functionDetails.flat().length === 0
-            ? { 'include': [{ 'function-name': 'none', 'function-group': 'none' }] }
+            ? { 'include': [{ 'function-sub-path': 'none', 'function-group-path': 'none' }] }
             : { 'include': functionDetails.flat() }
 
         console.log('output:', formattedOutput);

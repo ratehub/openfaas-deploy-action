@@ -2,7 +2,6 @@ const exec = require('@actions/exec');
 const path = require('path');
 
 
-const RESOURCE_FILE = 'resource.yaml';
 const CLUSTERS = {
     dev: 'do-dev-1',
     qa: 'gke-staging-01',
