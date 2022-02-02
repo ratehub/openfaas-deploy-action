@@ -59,6 +59,8 @@ async function generateStackFile(groupPath, subPath, environment) {
             updatedFunctions[key].image = imageWithProjectId;
         });
 
+
+        console.log('>>> updatedFunctions:', JSON.stringify(updatedFunctions, null, 4));
         // generate final stack file
         Object.keys(updatedFunctions).forEach(functionName => {
             const finalStack = {
@@ -67,6 +69,8 @@ async function generateStackFile(groupPath, subPath, environment) {
                     [functionName]: updatedFunctions[functionName]
                 }
             }
+
+            console.log('>>> final stack:', JSON.stringify(finalStack, null, 4));
 
             // write final stack
             writeFileSync(functionName, dump(finalStack, {
