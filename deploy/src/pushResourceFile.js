@@ -9,7 +9,7 @@ const CLUSTERS = {
     prod: 'gcp-prod-01'
 }
 
-async function pushResourceFile(groupPath, subPath, environment) {
+async function pushResourceFile(groupPath, subPath, environment, stackFilePaths =[]) {
     await exec.exec('git config --global user.name ratehub-machine');
     await exec.exec('git config --global user.email dev@ratehub.ca');
 

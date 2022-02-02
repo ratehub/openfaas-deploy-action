@@ -4,7 +4,7 @@ const { writeFileSync } = require('fs');
 
 const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
 
-async function generateResourceFile() {
+async function generateResourceFile(stackFilePaths = []) {
     let crd = '';
 
     const options = {
@@ -15,8 +15,12 @@ async function generateResourceFile() {
         }
     };
 
-    await exec.exec(`${FAAS} generate -f updated-stack.yml`, [], options);
-    writeFileSync('resource.yaml', crd);
+    for (let index = 0; index < stackFilePaths.length; index++) {
+        const stackFile = stackFilePaths[index];
+        await exec.exec(`${FAAS} generate -f ${stackFile}`, [], options);
+        writeFileSync(stackFile, crd);
+        crd = '';
+    }
 }
 
 module.exports = generateResourceFile;

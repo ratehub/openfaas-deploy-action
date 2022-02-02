@@ -64,12 +64,22 @@ async function generateStackFile(groupPath, subPath, environment) {
             ...stack,
             functions: updatedFunctions
         }
+        console.log('>>> updatedStack:', updatedStack);
 
-        // write final stack to updated-stack.yml
-        writeFileSync('updated-stack.yml', dump(updatedStack, {
-            // do not convert duplicate objects into references
-            noRefs: true
-        }));
+        // write the final stack
+        Object.keys(updatedFunctions).forEach(functionName => {
+            const finalStack = {
+                ...stack,
+                functions: updatedFunctions[functionName],
+            }
+            // write final stack to updated-stack.yml
+            writeFileSync(functionName, dump(finalStack, {
+                // do not convert duplicate objects into references
+                noRefs: true
+            }));
+        });
+
+        return Object.keys(updatedFunctions);
     } catch (e) {
         console.log('Error generating final stack file:', e);
         process.exit(1);

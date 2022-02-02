@@ -20,13 +20,15 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
         const environment = core.getInput('deployment-env');
 
         console.log(`Generating stack file: ${groupPath}/${subPath}`);
-        await generateStackFile(groupPath, subPath, environment);
+        const generatedStackFilePaths = await generateStackFile(groupPath, subPath, environment);
+        console.log('>>> generatedStackFilePath:', generatedStackFilePaths);
 
         const gateway = core.getInput('openfaas-gateway');
         // await exec.exec(`${FAAS} deploy -f updated-stack.yml --gateway=${gateway}`);
 
-        await generateResourceFile();
-        await pushResourceFile(groupPath, subPath, environment);
+        await generateResourceFile(generatedStackFilePaths);
+        await exec.exec('ls -la');
+        // await pushResourceFile(groupPath, subPath, environment, generatedStackFilePaths);
     } catch (error) {
         core.setFailed(error.message);
     }
