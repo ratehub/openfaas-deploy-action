@@ -42,7 +42,7 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
         const buildArgs = getBuildArgs(tag);
         console.log(`Build args: ${buildArgs}`);
 
-        const isPushRequired = core.getInput('enable-image-push');
+        const isPushRequired = core.getInput('enable-image-push') === 'yes';
         if (subPath !== '.') {
             await exec.exec(`${FAAS} build -f updated-stack.yml ${buildArgs} --filter=${subPath}`);
             if (isPushRequired) {

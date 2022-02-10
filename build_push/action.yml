@@ -27,7 +27,7 @@ inputs:
     default: '.'
   enable-image-push:
     description: 'Flag for pushing image to GCR'
-    default: true
+    default: 'yes'
   faas-cli-version:
     description: 'faas-cli version to install'
     default: '0.14.1'
