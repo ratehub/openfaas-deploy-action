@@ -26,7 +26,7 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
         const gateway = core.getInput('openfaas-gateway');
         for (let index = 0; index < generatedStackFilePaths.length; index++) {
             const stackFile = generatedStackFilePaths[index];
-            await exec.exec(`${FAAS} deploy -f ${stackFile} --gateway=${gateway}`);
+            console.log(`${FAAS} deploy -f ${stackFile} --gateway=${gateway}`);
         }
 
         const generatedResourceFilePaths = await generateResourceFile(generatedStackFilePaths);
