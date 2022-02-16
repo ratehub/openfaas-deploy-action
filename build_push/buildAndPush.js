@@ -44,14 +44,14 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
 
         const isPushRequired = core.getInput('enable-image-push') === 'yes';
         if (subPath !== '.') {
-            await exec.exec(`${FAAS} build -f updated-stack.yml ${buildArgs} --filter=${subPath}`);
+            console.log(`${FAAS} build -f updated-stack.yml ${buildArgs} --filter=${subPath}`);
             if (isPushRequired) {
-                await exec.exec(`${FAAS} push -f updated-stack.yml --filter=${subPath}`);
+                console.log(`${FAAS} push -f updated-stack.yml --filter=${subPath}`);
             }
         } else {
-            await exec.exec(`${FAAS} build -f updated-stack.yml ${buildArgs}`);
+            console.log(`${FAAS} build -f updated-stack.yml ${buildArgs}`);
             if (isPushRequired) {
-                await exec.exec(`${FAAS} push -f updated-stack.yml`);
+                console.log(`${FAAS} push -f updated-stack.yml`);
             }
         }
     } catch (error) {
