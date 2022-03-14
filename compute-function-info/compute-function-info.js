@@ -7,6 +7,7 @@ const getStackFiles = require('../common/getStackFiles');
 (async () => {
     try {
         const tag = core.getInput('git-tag');
+        console.log('>>> tag:', tag);
 
         const pattern = '[0-9]+\.[0-9]+\.[0-9]+.*$';
         const matchIndex = tag.search(pattern);
@@ -14,12 +15,17 @@ const getStackFiles = require('../common/getStackFiles');
 
         // we assume subpath is same as function name
         const funcitonName = tag.substring(0, matchIndex - 1);
+        console.log('>>> funcitonName:', funcitonName);
+
         const stackFiles = await getStackFiles('build_push');
+        console.log('>>> stackFiles:', stackFiles);
         let groupPath = '';
 
         for (let index = 0; index < stackFiles.length; index++) {
             const stackFilePath = stackFiles[index];
+            console.log('>>> stackFilePath:', stackFilePath);
             const stack = safeLoad(readFileSync(stackFilePath, 'utf8'));
+            console.log('>>> stack:', stack);
             const found = stack.functions.find(name => name === funcitonName);
 
             if (found) {
