@@ -1,10 +1,22 @@
 const core = require('@actions/core');
 
+
+const github = require('@actions/github');
+
+
 const getStackFiles = require('../common/getStackFiles');
 const getStackFunctions = require('../common/getStackFunctions');
 
 (async () => {
     try {
+
+        const context = github.context;
+        console.log('>>> context: ', context);
+
+        const { GITHUB_REF } = process.env;
+        console.log('>>> GITHUB_REF: ', GITHUB_REF);
+
+
         const tag = core.getInput('git-tag');
         console.log('>>> tag:', tag);
 
