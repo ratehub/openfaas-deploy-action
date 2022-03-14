@@ -22,7 +22,7 @@ const getStackFunctions = require('../common/getStackFunctions');
             const found = stackFunctions.find(name => name === funcitonName);
 
             if (found) {
-                groupPath = stackFilePath.includes('/') ? stackFilePath.substring(0, stack.lastIndexOf('/')) : '.';
+                groupPath = stackFilePath.includes('/') ? stackFilePath.substring(0, stackFilePath.lastIndexOf('/')) : '.';
                 break;
             }
         }
