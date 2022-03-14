@@ -28,9 +28,9 @@ const getStackFunctions = require('../common/getStackFunctions');
         }
 
         const formattedOutput = groupPath === ''
-            ? { 'include': { 'function-sub-path': 'none', 'function-group-path': 'none' } }
+            ? { 'function-sub-path': 'none', 'function-group-path': 'none' }
             // we assume subpath is same as function name
-            : { 'include': { 'function-sub-path': funcitonName, 'function-group-path': groupPath } }
+            : { 'function-sub-path': funcitonName, 'function-group-path': groupPath }
 
         console.log('output:', formattedOutput);
         core.setOutput("function-info", formattedOutput);
