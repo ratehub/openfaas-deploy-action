@@ -1,0 +1,14 @@
+# action.yml
+name: 'OpenFaaS helper action to compute funtion information'
+
+description: 'Compute funtion information based on git tag'
+
+inputs:
+  git-tag:
+
+outputs:
+  function-info:
+
+runs:
+  using: 'node12'
+  main: 'compute-function-info.js'
