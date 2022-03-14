@@ -3,6 +3,7 @@ const { safeLoad } = require('js-yaml');
 const { readFileSync } = require('fs');
 
 const getStackFiles = require('../common/getStackFiles');
+const getStackFunctions = require('../common/getStackFunctions');
 
 (async () => {
     try {
@@ -26,7 +27,9 @@ const getStackFiles = require('../common/getStackFiles');
             console.log('>>> stackFilePath:', stackFilePath);
             const stack = safeLoad(readFileSync(stackFilePath, 'utf8'));
             console.log('>>> stack:', stack);
-            const found = stack.functions.find(name => name === funcitonName);
+            const stackFunctions = getStackFunctions(stack);
+            console.log('>>> stackFunctions:', stackFunctions);
+            const found = stackFunctions.find(name => name === funcitonName);
 
             if (found) {
                 groupPath = stackFilePath.includes('/') ? stackFilePath.substring(0, stack.lastIndexOf('/')) : '.';
