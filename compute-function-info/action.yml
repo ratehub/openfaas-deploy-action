@@ -4,8 +4,6 @@ name: 'OpenFaaS helper action to compute funtion information'
 description: 'Compute funtion information based on git tag'
 
 inputs:
-  git-tag:
-    description: 'Git tag'
 
 outputs:
   function-info:
