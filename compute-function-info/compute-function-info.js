@@ -1,6 +1,4 @@
 const core = require('@actions/core');
-const { safeLoad } = require('js-yaml');
-const { readFileSync } = require('fs');
 
 const getStackFiles = require('../common/getStackFiles');
 const getStackFunctions = require('../common/getStackFunctions');
@@ -13,8 +11,6 @@ const getStackFunctions = require('../common/getStackFunctions');
         const pattern = '[0-9]+\.[0-9]+\.[0-9]+.*$';
         const matchIndex = tag.search(pattern);
 
-
-        // we assume subpath is same as function name
         const funcitonName = tag.substring(0, matchIndex - 1);
         console.log('>>> funcitonName:', funcitonName);
 
@@ -23,11 +19,7 @@ const getStackFunctions = require('../common/getStackFunctions');
         let groupPath = '';
 
         for (let index = 0; index < stackFiles.length; index++) {
-            const stackFilePath = stackFiles[index];
-            console.log('>>> stackFilePath:', stackFilePath);
-            const stack = safeLoad(readFileSync(stackFilePath, 'utf8'));
-            console.log('>>> stack:', stack);
-            const stackFunctions = getStackFunctions(stack);
+            const stackFunctions = getStackFunctions(stackFiles[index]);
             console.log('>>> stackFunctions:', stackFunctions);
             const found = stackFunctions.find(name => name === funcitonName);
 
