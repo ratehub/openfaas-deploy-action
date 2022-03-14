@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const { safeLoad } = require('js-yaml');
 const { readFileSync } = require('fs');
 
-const getStackFiles = require('../../common/getStackFiles');
+const getStackFiles = require('../common/getStackFiles');
 
 (async () => {
     try {
