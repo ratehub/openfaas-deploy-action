@@ -31,8 +31,8 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
 
             for (let j = 0; j < stackFunctions.length; j++) {
                 const functionName = stackFunctions[j];
-                console.log(`Removing ${functionName}`);
-                // await exec.exec(`${FAAS} remove -f ${functionName} --gateway=${gateway}`);
+                console.log(`Removing function: ${functionName}`);
+                await exec.exec(`${FAAS} remove -f ${functionName} --gateway=${gateway}`);
             }
         }
 
