@@ -8,6 +8,7 @@ const {
     pushResourceFile,
 } = require('./src');
 
+const getStackFunctions = require('../common/getStackFunctions');
 
 const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
 
@@ -21,22 +22,22 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
         console.log(`Generating stack file: ${groupPath}/${subPath}`);
         const generatedStackFilePaths = await generateStackFile(groupPath, subPath, environment);
 
-        const deployStrategy = core.getInput('deploy-strategy');
-        if (deployStrategy === 'faas-cli') {
-            await installFaasCli({ isLoginRequired: true });
-            const gateway = core.getInput('openfaas-gateway');
+        await installFaasCli({ isLoginRequired: true });
+        const gateway = core.getInput('openfaas-gateway');
 
-            for (let index = 0; index < generatedStackFilePaths.length; index++) {
-                const stackFile = generatedStackFilePaths[index];
-                await exec.exec(`${FAAS} deploy -f ${stackFile} --gateway=${gateway}`);
+        for (let index = 0; index < generatedStackFilePaths.length; index++) {
+            const stackFile = generatedStackFilePaths[index];
+            const stackFunctions = getStackFunctions(stackFile);
+
+            for (let j = 0; j < stackFunctions.length; j++) {
+                const functionName = stackFunctions[j];
+                console.log(`Removing ${functionName}`);
+                // await exec.exec(`${FAAS} remove -f ${functionName} --gateway=${gateway}`);
             }
-        } else if (deployStrategy === 'crd') {
-            await installFaasCli();
-            const generatedResourceFilePaths = await generateResourceFile(generatedStackFilePaths);
-            await pushResourceFile(groupPath, subPath, environment, generatedResourceFilePaths);
-        } else {
-            core.setFailed(`Deployment strategy not supported: ${deployStrategy}`);
         }
+
+        const generatedResourceFilePaths = await generateResourceFile(generatedStackFilePaths);
+        await pushResourceFile(groupPath, subPath, environment, generatedResourceFilePaths);
 
     } catch (error) {
         core.setFailed(error.message);
