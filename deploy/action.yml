@@ -33,6 +33,9 @@ inputs:
   faas-cli-version:
     description: 'faas-cli version to install'
     default: '0.14.1'
+  deploy-strategy:
+    description: 'Deployment strategy - faas-cli or crd'
+    default: 'crd'
 
 runs:
   using: 'node16'
