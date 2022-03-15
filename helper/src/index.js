@@ -1,6 +1,6 @@
 const getDiff = require('./getDiff');
-const getStackFiles = require('./getStackFiles');
-const getStackFunctions = require('./getStackFunctions');
+const getStackFiles = require('../../common/getStackFiles');
+const getStackFunctions = require('../../common/getStackFunctions');
 const generateFunctionDetails = require('./generateFunctionDetails');
 const analyseUpdatedFiles = require('./analyseUpdatedFiles');
 
