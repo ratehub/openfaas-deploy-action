@@ -34,6 +34,7 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
         } else if (deployStrategy === 'crd') {
             // Becasue this one is first deploy using CRD we will first do faas-cli remove
             await installFaasCli({ isLoginRequired: true });
+            const gateway = core.getInput('openfaas-gateway');
 
             for (let index = 0; index < generatedStackFilePaths.length; index++) {
                 const stackFile = generatedStackFilePaths[index];
