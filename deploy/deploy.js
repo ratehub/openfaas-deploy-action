@@ -9,8 +9,10 @@ const {
 } = require('./src');
 
 const getStackFunctions = require('../common/getStackFunctions');
+const installKubectl = require('../common/installKubectl');
 
 const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
+const KUBECTL = `${process.env.GITHUB_WORKSPACE}/kubectl`;
 
 (async () => {
     try {
@@ -34,18 +36,23 @@ const FAAS = `${process.env.GITHUB_WORKSPACE}/faas-cli`;
         } else if (deployStrategy === 'crd') {
             // Becasue this one is first deploy using CRD we will first do faas-cli remove
             await installFaasCli({ isLoginRequired: true });
-            const gateway = core.getInput('openfaas-gateway');
+            await installKubectl();
 
-            for (let index = 0; index < generatedStackFilePaths.length; index++) {
-                const stackFile = generatedStackFilePaths[index];
-                const stackFunctions = getStackFunctions(stackFile);
+            // const gateway = core.getInput('openfaas-gateway');
+
+            // for (let index = 0; index < generatedStackFilePaths.length; index++) {
+            //     const stackFile = generatedStackFilePaths[index];
+            //     const stackFunctions = getStackFunctions(stackFile);
     
-                for (let j = 0; j < stackFunctions.length; j++) {
-                    const functionName = stackFunctions[j];
-                    console.log(`Removing function: ${functionName}`);
-                    await exec.exec(`${FAAS} remove -f ${functionName} --gateway=${gateway}`);
-                }
-            }
+            //     for (let j = 0; j < stackFunctions.length; j++) {
+            //         const functionName = stackFunctions[j];
+            //         console.log(`Removing function: ${functionName}`);
+
+            //         await exec.exec(`${KUBECTL} delete deployment ${functionName} -n openfaas-fn --wait`);
+            //         await exec.exec(`${KUBECTL} delete service ${functionName} -n openfaas-fn --wait`);
+            //         await exec.exec(`${FAAS} remove -f ${functionName} --gateway=${gateway}`);
+            //     }
+            // }
 
             const generatedResourceFilePaths = await generateResourceFile(generatedStackFilePaths);
             await pushResourceFile(groupPath, subPath, environment, generatedResourceFilePaths);
