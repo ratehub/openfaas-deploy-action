@@ -29,7 +29,7 @@ async function generateStackFile(groupPath, subPath, environment) {
 
         // merge global settings
         const functionsWithGlobalSettings = Object.keys(functions).reduce((acc, key) => {
-            acc[key] = mergeWith({}, functions[key], globalSettings, customizer);
+            acc[key] = mergeWith({ CREATED_AT: new Date().toISOString() }, functions[key], globalSettings, customizer);
             return acc;
         }, {});
 
