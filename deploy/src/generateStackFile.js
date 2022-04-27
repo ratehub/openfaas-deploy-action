@@ -46,7 +46,9 @@ async function generateStackFile(groupPath, subPath, environment) {
             }, {})
             : functionsWithGlobalSettings;
 
-        // append GCR project ID to image apply override tag
+        // append GCR project ID to image
+        // apply override tag
+        // add current timestamp
         Object.keys(updatedFunctions).forEach(key => {
             const image = updatedFunctions[key].image;
             // read the tag from image after `:`
@@ -57,6 +59,8 @@ async function generateStackFile(groupPath, subPath, environment) {
 
             const imageWithProjectId = `${gcrProjectId}${imageWithUpdatedTag}`;
             updatedFunctions[key].image = imageWithProjectId;
+
+            updatedFunctions[key].environment.STACK_GENERATED_AT = new Date().toISOString();
         });
 
         // generate final stack file
