@@ -59,6 +59,7 @@ async function generateStackFile(groupPath, subPath, environment) {
 
             const imageWithProjectId = `${gcrProjectId}${imageWithUpdatedTag}`;
             updatedFunctions[key].image = imageWithProjectId;
+
             updatedFunctions[key].environment.STACK_GENERATED_AT = new Date().toISOString();
         });
 
