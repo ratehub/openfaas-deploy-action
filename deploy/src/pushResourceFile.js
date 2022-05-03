@@ -14,6 +14,8 @@ async function pushResourceFile(groupPath, subPath, environment, resourceFilePat
         resourceFiles = `${resourceFiles} ${resourceFilePaths[index]}`;
     }
 
+    await exec.exec('git remote set-url origin git@github.com:ratehub/ratehub-k8s-prod.git');
+
     await exec.exec('git config --global user.name ratehub-machine');
     await exec.exec('git config --global user.email dev@ratehub.ca');
 
